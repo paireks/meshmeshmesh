@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::point::Point3D;
 
 /// Represents a mesh object in three-dimensional space.
 #[derive(Deserialize, Serialize)]
@@ -36,6 +37,18 @@ impl PartialEq for Mesh {
 impl Mesh {
     /// Returns a new Mesh
     pub fn new(coordinates: Vec<f64>, indices: Vec<i32>) -> Mesh {Mesh {coordinates, indices}}
+
+    /// Converts Mesh into list of Point3Ds
+    pub fn to_points(&self) -> Vec<Point3D> {
+        let mut points = Vec::<Point3D>::new();
+        let coordinates_length: usize = self.coordinates.len();
+        let mut i = 0;
+        while i < coordinates_length {
+            points.push(Point3D::new(self.coordinates[i], self.coordinates[i+1], self.coordinates[i+2]));
+            i = i + 3;
+        }
+        points
+    }
 }
 
 #[cfg(test)]
@@ -54,6 +67,22 @@ mod tests {
                                             10.0, 0.0, 0.0,
                                             10.0, -15.0, 0.0]);
         assert_eq!(result.indices, vec![0, 1, 2]);
+    }
+
+    #[test]
+    fn test_to_points() {
+        let input = Mesh::new(vec![0.0, 0.0, 0.0,
+                                   10.0, 0.0, 0.0,
+                                   10.0, -15.0, 0.0],
+                              vec![0, 1, 2]);
+        let actual = input.to_points();
+        let expected = vec![Point3D::new(0.0, 0.0, 0.0),
+                            Point3D::new(10.0, 0.0, 0.0),
+                            Point3D::new(10.0, -15.0, 0.0)];
+        assert_eq!(expected.len(), actual.len());
+        for i in 0..expected.len() {
+            assert_eq!(expected[i].eq(&actual[i]), true);
+        }
     }
 
     #[test]
