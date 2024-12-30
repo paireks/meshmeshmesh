@@ -8,7 +8,7 @@ pub struct Mesh {
     /// The list of coordinates for the mesh vertices.
     pub coordinates: Vec<f64>,
     /// The list of indices for the mesh triangles.
-    pub indices: Vec<u32>,
+    pub indices: Vec<usize>,
 }
 
 impl PartialEq for Mesh {
@@ -37,7 +37,7 @@ impl PartialEq for Mesh {
 
 impl Mesh {
     /// Returns a new Mesh
-    pub fn new(coordinates: Vec<f64>, indices: Vec<u32>) -> Mesh {Mesh {coordinates, indices}}
+    pub fn new(coordinates: Vec<f64>, indices: Vec<usize>) -> Mesh {Mesh {coordinates, indices}}
 
     /// Converts Mesh into list of Points
     pub fn to_points(&self) -> Vec<Point> {
@@ -80,6 +80,33 @@ impl Mesh {
         }
 
         triangles
+    }
+
+    /// Creates Mesh from list of Triangles
+    pub fn from_triangles(triangles: Vec<Triangle>) -> Mesh {
+        let number_of_triangles: usize = triangles.len();
+        let number_of_indices: usize = number_of_triangles * 3;
+        let mut indices: Vec<usize> = Vec::<usize>::new();
+        for i in 0..number_of_indices {
+            indices.push(i);
+        }
+        let mut coordinates: Vec<f64> = Vec::<f64>::new();
+        for i in 0..number_of_triangles {
+            let current_triangle = &triangles[i];
+            coordinates.push(current_triangle.first_point.x);
+            coordinates.push(current_triangle.first_point.y);
+            coordinates.push(current_triangle.first_point.z);
+
+            coordinates.push(current_triangle.second_point.x);
+            coordinates.push(current_triangle.second_point.y);
+            coordinates.push(current_triangle.second_point.z);
+
+            coordinates.push(current_triangle.third_point.x);
+            coordinates.push(current_triangle.third_point.y);
+            coordinates.push(current_triangle.third_point.z);
+        }
+
+        Mesh::new(coordinates, indices)
     }
 }
 
@@ -191,6 +218,94 @@ mod tests {
         for i in 0..expected.len() {
             assert_eq!(expected[i].eq(&actual[i]), true);
         }
+    }
+
+    #[test]
+    fn test_from_triangles_1face() {
+        let input = vec![Triangle::new(
+            Point::new(0.0, 0.0, 0.0),
+            Point::new(10.0, 0.0, 0.0),
+            Point::new(10.0, -15.0, 0.0))];
+        let actual = Mesh::from_triangles(input);
+        let expected = Mesh::new(vec![0.0, 0.0, 0.0,
+                                   10.0, 0.0, 0.0,
+                                   10.0, -15.0, 0.0],
+                              vec![0, 1, 2]);
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    fn test_from_triangles_pyramid() {
+        let input = vec![
+            Triangle::new(
+                Point::new(0.0, 0.0, 0.0),
+                Point::new(10.0, 0.0, 0.0),
+                Point::new(10.0,10.0,0.0)),
+            Triangle::new(
+                Point::new(0.0, 0.0, 0.0),
+                Point::new(10.0,10.0,0.0),
+                Point::new(0.0,10.0,0.0)),
+
+            Triangle::new(
+                Point::new(0.0, 0.0, 0.0),
+                Point::new(10.0, 0.0, 0.0),
+                Point::new(5.0,5.0,4.0)),
+            Triangle::new(
+                Point::new(10.0, 0.0, 0.0),
+                Point::new(10.0,10.0,0.0),
+                Point::new(5.0,5.0,4.0)),
+            Triangle::new(
+                Point::new(10.0,10.0,0.0),
+                Point::new(0.0,10.0,0.0),
+                Point::new(5.0,5.0,4.0)),
+            Triangle::new(
+                Point::new(0.0,10.0,0.0),
+                Point::new(0.0,0.0,0.0),
+                Point::new(5.0,5.0,4.0)),
+        ];
+
+        let actual = Mesh::from_triangles(input);
+        let expected= Mesh::new(
+            vec![
+                0.0, 0.0, 0.0,
+                10.0, 0.0, 0.0,
+                10.0,10.0,0.0,
+
+                0.0, 0.0, 0.0,
+                10.0,10.0,0.0,
+                0.0,10.0,0.0,
+
+
+                0.0, 0.0, 0.0,
+                10.0, 0.0, 0.0,
+                5.0,5.0,4.0,
+
+                10.0, 0.0, 0.0,
+                10.0,10.0,0.0,
+                5.0,5.0,4.0,
+
+                10.0,10.0,0.0,
+                0.0,10.0,0.0,
+                5.0,5.0,4.0,
+
+                0.0,10.0,0.0,
+                0.0,0.0,0.0,
+                5.0,5.0,4.0,
+            ],
+            vec![
+                // Base faces
+                0,1,2,
+                3,4,5,
+
+                // Side faces
+                6,7,8,
+                9,10,11,
+                12,13,14,
+                15,16,17
+            ]
+        );
+
+        assert_eq!(expected.eq(&actual), true);
     }
 
     #[test]
