@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use crate::point::Point;
+use crate::triangle::Triangle;
 
 /// Represents a mesh object in three-dimensional space.
 #[derive(Deserialize, Serialize)]
@@ -7,7 +8,7 @@ pub struct Mesh {
     /// The list of coordinates for the mesh vertices.
     pub coordinates: Vec<f64>,
     /// The list of indices for the mesh triangles.
-    pub indices: Vec<i32>,
+    pub indices: Vec<u32>,
 }
 
 impl PartialEq for Mesh {
@@ -36,9 +37,9 @@ impl PartialEq for Mesh {
 
 impl Mesh {
     /// Returns a new Mesh
-    pub fn new(coordinates: Vec<f64>, indices: Vec<i32>) -> Mesh {Mesh {coordinates, indices}}
+    pub fn new(coordinates: Vec<f64>, indices: Vec<u32>) -> Mesh {Mesh {coordinates, indices}}
 
-    /// Converts Mesh into list of Point3Ds
+    /// Converts Mesh into list of Points
     pub fn to_points(&self) -> Vec<Point> {
         let mut points = Vec::<Point>::new();
         let coordinates_length: usize = self.coordinates.len();
@@ -48,6 +49,37 @@ impl Mesh {
             i = i + 3;
         }
         points
+    }
+
+    /// Converts Mesh into list of Triangles
+    pub fn to_triangles(&self) -> Vec<Triangle> {
+        let mut triangles = Vec::<Triangle>::new();
+        let indices_length: usize = self.indices.len();
+        let mut i = 0;
+        while i < indices_length {
+            let offset0 = self.indices[i] * 3;
+            let index00 = usize::try_from(offset0).unwrap();
+            let index01 = usize::try_from(offset0 + 1).unwrap();
+            let index02 = usize::try_from(offset0 + 2).unwrap();
+            let point0: Point = Point::new(self.coordinates[index00], self.coordinates[index01], self.coordinates[index02]);
+
+            let offset1 = self.indices[i+1] * 3;
+            let index10 = usize::try_from(offset1).unwrap();
+            let index11 = usize::try_from(offset1 + 1).unwrap();
+            let index12 = usize::try_from(offset1 + 2).unwrap();
+            let point1: Point = Point::new(self.coordinates[index10], self.coordinates[index11], self.coordinates[index12]);
+
+            let offset2 = self.indices[i+2] * 3;
+            let index20 = usize::try_from(offset2).unwrap();
+            let index21 = usize::try_from(offset2 + 1).unwrap();
+            let index22 = usize::try_from(offset2 + 2).unwrap();
+            let point2: Point = Point::new(self.coordinates[index20], self.coordinates[index21], self.coordinates[index22]);
+
+            triangles.push(Triangle::new(point0, point1, point2));
+            i = i + 3;
+        }
+
+        triangles
     }
 }
 
@@ -79,6 +111,82 @@ mod tests {
         let expected = vec![Point::new(0.0, 0.0, 0.0),
                             Point::new(10.0, 0.0, 0.0),
                             Point::new(10.0, -15.0, 0.0)];
+        assert_eq!(expected.len(), actual.len());
+        for i in 0..expected.len() {
+            assert_eq!(expected[i].eq(&actual[i]), true);
+        }
+    }
+
+    #[test]
+    fn test_to_triangles_1face() {
+        let input = Mesh::new(vec![0.0, 0.0, 0.0,
+                                   10.0, 0.0, 0.0,
+                                   10.0, -15.0, 0.0],
+                              vec![0, 1, 2]);
+        let actual = input.to_triangles();
+        let expected = vec![Triangle::new(
+                            Point::new(0.0, 0.0, 0.0),
+                            Point::new(10.0, 0.0, 0.0),
+                            Point::new(10.0, -15.0, 0.0))];
+        assert_eq!(expected.len(), actual.len());
+        for i in 0..expected.len() {
+            assert_eq!(expected[i].eq(&actual[i]), true);
+        }
+    }
+
+    #[test]
+    fn test_to_triangles_pyramid() {
+        let input = Mesh::new(
+            vec![
+                // Base
+                0.0,0.0,0.0,
+                10.0,0.0,0.0,
+                10.0,10.0,0.0,
+                0.0,10.0,0.0,
+
+                // Top
+                5.0,5.0,4.0
+            ],
+            vec![
+                // Base faces
+                0,1,2,
+                0,2,3,
+
+                // Side faces
+                0,1,4,
+                1,2,4,
+                2,3,4,
+                3,0,4
+            ]
+        );
+        let actual = input.to_triangles();
+        let expected = vec![
+            Triangle::new(
+                Point::new(0.0, 0.0, 0.0),
+                Point::new(10.0, 0.0, 0.0),
+                Point::new(10.0,10.0,0.0)),
+            Triangle::new(
+                Point::new(0.0, 0.0, 0.0),
+                Point::new(10.0,10.0,0.0),
+                Point::new(0.0,10.0,0.0)),
+
+            Triangle::new(
+                Point::new(0.0, 0.0, 0.0),
+                Point::new(10.0, 0.0, 0.0),
+                Point::new(5.0,5.0,4.0)),
+            Triangle::new(
+                Point::new(10.0, 0.0, 0.0),
+                Point::new(10.0,10.0,0.0),
+                Point::new(5.0,5.0,4.0)),
+            Triangle::new(
+                Point::new(10.0,10.0,0.0),
+                Point::new(0.0,10.0,0.0),
+                Point::new(5.0,5.0,4.0)),
+            Triangle::new(
+                Point::new(0.0,10.0,0.0),
+                Point::new(0.0,0.0,0.0),
+                Point::new(5.0,5.0,4.0)),
+        ];
         assert_eq!(expected.len(), actual.len());
         for i in 0..expected.len() {
             assert_eq!(expected[i].eq(&actual[i]), true);
