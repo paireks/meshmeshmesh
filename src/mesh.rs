@@ -65,10 +65,46 @@ impl PartialEq for Mesh {
 }
 
 impl Mesh {
-    /// Returns a new Mesh
+    /// Creates a new [Mesh]
+    ///
+    /// # Examples
+    ///
+    /// Here is an example with simple 1-triangle Mesh
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let result = Mesh::new(vec![0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 10.0, -15.0, 0.0], vec![0, 1, 2]);
+    /// assert_eq!(result.coordinates, vec![0.0, 0.0, 0.0,
+    ///                                    10.0, 0.0, 0.0,
+    ///                                    10.0, -15.0, 0.0]);
+    /// assert_eq!(result.indices, vec![0, 1, 2]);
+    /// ```
     pub fn new(coordinates: Vec<f64>, indices: Vec<usize>) -> Mesh {Mesh {coordinates, indices}}
 
-    /// Converts Mesh into list of Points
+    /// Converts [Mesh] into list of [Point]s
+    ///
+    /// # Examples
+    ///
+    /// Here is an example with simple 1-triangle Mesh being converted to 3 Points
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    ///
+    /// let input = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                            10.0, 0.0, 0.0,
+    ///                            10.0, -15.0, 0.0],
+    ///                       vec![0, 1, 2]);
+    /// let actual = input.to_points();
+    /// let expected = vec![Point::new(0.0, 0.0, 0.0),
+    ///                     Point::new(10.0, 0.0, 0.0),
+    ///                     Point::new(10.0, -15.0, 0.0)];
+    /// assert_eq!(expected.len(), actual.len());
+    /// for i in 0..expected.len() {
+    ///     assert_eq!(expected[i].eq(&actual[i]), true);
+    /// }
+    /// ```
     pub fn to_points(&self) -> Vec<Point> {
         let mut points = Vec::<Point>::new();
         let coordinates_length: usize = self.coordinates.len();
@@ -80,7 +116,31 @@ impl Mesh {
         points
     }
 
-    /// Converts Mesh into list of Triangles
+    /// Converts [Mesh] into list of [Triangle]s
+    ///
+    /// # Examples
+    ///
+    /// Here is an example with simple 1-triangle Mesh being converted to 1 Triangle
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let input = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                            10.0, 0.0, 0.0,
+    ///                            10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    /// let actual = input.to_triangles();
+    /// let expected = vec![Triangle::new(
+    ///     Point::new(0.0, 0.0, 0.0),
+    ///     Point::new(10.0, 0.0, 0.0),
+    ///     Point::new(10.0, -15.0, 0.0))];
+    /// assert_eq!(expected.len(), actual.len());
+    /// for i in 0..expected.len() {
+    ///     assert_eq!(expected[i].eq(&actual[i]), true);
+    /// }
+    /// ```
     pub fn to_triangles(&self) -> Vec<Triangle> {
         let mut triangles = Vec::<Triangle>::new();
         let indices_length: usize = self.indices.len();
@@ -111,7 +171,28 @@ impl Mesh {
         triangles
     }
 
-    /// Creates Mesh from list of Triangles
+    /// Creates [Mesh] from list of [Triangle]s
+    ///
+    /// # Examples
+    ///
+    /// Here is an example with creating a simple 1-triangle Mesh using a Triangle
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let input = vec![Triangle::new(
+    ///     Point::new(0.0, 0.0, 0.0),
+    ///     Point::new(10.0, 0.0, 0.0),
+    ///     Point::new(10.0, -15.0, 0.0))];
+    /// let actual = Mesh::from_triangles(input);
+    /// let expected = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                               10.0, 0.0, 0.0,
+    ///                               10.0, -15.0, 0.0], vec![0, 1, 2]);
+    ///
+    /// assert_eq!(expected.eq(&actual), true);
+    /// ```
     pub fn from_triangles(triangles: Vec<Triangle>) -> Mesh {
         let number_of_triangles: usize = triangles.len();
         let number_of_indices: usize = number_of_triangles * 3;
