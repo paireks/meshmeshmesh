@@ -2,7 +2,36 @@ use serde::{Deserialize, Serialize};
 use crate::point::Point;
 use crate::triangle::Triangle;
 
-/// Represents a mesh object in three-dimensional space.
+/// Represents a Mesh object in three-dimensional space.
+///
+/// This Mesh contains triangle faces only.
+///
+/// It is described by coordinates and indices.
+///
+/// *Coordinates* is a flat list of `f64` describing the vertices (points) like this:
+///
+/// [x0, y0, z0, x1, y1, z1, ... , xN, yN, zN]
+///
+/// *Indices* is a flat list of `usize` describing the faces (triangles) like this:
+///
+/// [face0_start_index, face0_middle_index, face0_end_index, face1_start_index, face1_middle_index, face1_end_index, ... , faceN_start_index, faceN_middle_index, faceN_end_index]
+///
+/// It tells you information which points construct which face.
+///
+/// # Examples
+///
+/// Here is an example with simple 1-triangle Mesh
+///
+/// ```
+/// use meshmeshmesh::mesh::Mesh;
+///
+/// let result = Mesh::new(vec![0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 10.0, -15.0, 0.0], vec![0, 1, 2]);
+/// assert_eq!(result.coordinates, vec![0.0, 0.0, 0.0,
+///                                    10.0, 0.0, 0.0,
+///                                    10.0, -15.0, 0.0]); // We have 3 vertices there.
+/// assert_eq!(result.indices, vec![0, 1, 2]); // We create 1 face there using point0, point1 and point2.
+/// ```
+///
 #[derive(Deserialize, Serialize)]
 pub struct Mesh {
     /// The list of coordinates for the mesh vertices.
