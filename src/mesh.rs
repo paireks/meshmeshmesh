@@ -18,7 +18,7 @@ use crate::triangle::Triangle;
 ///
 /// It tells you information which points construct which face.
 ///
-/// # Examples
+/// # Example
 ///
 /// Here is an example with simple 1-triangle Mesh
 ///
@@ -67,7 +67,7 @@ impl PartialEq for Mesh {
 impl Mesh {
     /// Creates a new [Mesh]
     ///
-    /// # Examples
+    /// # Example
     ///
     /// Here is an example with simple 1-triangle Mesh
     ///
@@ -84,7 +84,7 @@ impl Mesh {
 
     /// Converts [Mesh] into list of [Point]s
     ///
-    /// # Examples
+    /// # Example
     ///
     /// Here is an example with simple 1-triangle Mesh being converted to 3 Points
     ///
@@ -118,7 +118,7 @@ impl Mesh {
 
     /// Converts [Mesh] into list of [Triangle]s
     ///
-    /// # Examples
+    /// # Example
     ///
     /// Here is an example with simple 1-triangle Mesh being converted to 1 Triangle
     ///
@@ -173,7 +173,7 @@ impl Mesh {
 
     /// Creates [Mesh] from list of [Triangle]s
     ///
-    /// # Examples
+    /// # Example
     ///
     /// Here is an example with creating a simple 1-triangle Mesh using a Triangle
     ///
