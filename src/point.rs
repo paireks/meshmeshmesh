@@ -1,6 +1,17 @@
 use serde::{Deserialize, Serialize};
 
 /// Represents a three-dimensional point with double-precision floating-point coordinates.
+///
+/// # Example
+///
+/// ```
+/// use meshmeshmesh::point::Point;
+///
+/// let result = Point::new(1.5, -2.3, 3.9);
+/// assert_eq!(result.x, 1.5);
+/// assert_eq!(result.y, -2.3);
+/// assert_eq!(result.z, 3.9);
+/// ```
 #[derive(Deserialize, Serialize)]
 pub struct Point {
     /// The x-coordinate of the point.
@@ -18,7 +29,18 @@ impl PartialEq for Point {
 }
 
 impl Point {
-    /// Returns a new Point
+    /// Returns a new [Point]
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    ///
+    /// let result = Point::new(1.5, -2.3, 3.9);
+    /// assert_eq!(result.x, 1.5);
+    /// assert_eq!(result.y, -2.3);
+    /// assert_eq!(result.z, 3.9);
+    /// ```
     pub fn new(x: f64, y: f64, z: f64) -> Point { Point { x, y, z } }
 }
 

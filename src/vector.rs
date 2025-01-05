@@ -1,6 +1,16 @@
 use serde::{Deserialize, Serialize};
 
 /// Represents a three-dimensional vector with double-precision floating-point coordinates.
+///
+/// # Example
+/// ```
+/// use meshmeshmesh::vector::Vector;
+///
+/// let result = Vector::new(1.5, -2.3, 3.9);
+/// assert_eq!(result.x, 1.5);
+/// assert_eq!(result.y, -2.3);
+/// assert_eq!(result.z, 3.9);
+/// ```
 #[derive(Deserialize, Serialize)]
 pub struct Vector {
     /// The x-coordinate of the vector.
@@ -18,7 +28,17 @@ impl PartialEq for Vector {
 }
 
 impl Vector {
-    /// Returns a new Vector
+    /// Creates a new [Vector]
+    ///
+    /// # Example
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let result = Vector::new(1.5, -2.3, 3.9);
+    /// assert_eq!(result.x, 1.5);
+    /// assert_eq!(result.y, -2.3);
+    /// assert_eq!(result.z, 3.9);
+    /// ```
     pub fn new(x: f64, y: f64, z: f64) -> Vector { Vector { x, y, z } }
 }
 

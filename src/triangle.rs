@@ -2,6 +2,24 @@ use serde::{Deserialize, Serialize};
 use crate::point::Point;
 
 /// Represents a triangle in three-dimensional space.
+///
+/// Sometimes it's easier to work with separate triangles rather than using a [Mesh].
+///
+/// # Example
+///
+/// ```
+/// use meshmeshmesh::point::Point;
+/// use meshmeshmesh::triangle::Triangle;
+///
+/// let result = Triangle::new(
+/// Point::new(0.0, 0.0, 0.0),
+/// Point::new(10.0, 0.0, 0.0),
+/// Point::new(10.0, -15.0, 0.0));
+///
+/// assert_eq!(result.first_point.eq(&Point::new(0.0, 0.0, 0.0)), true);
+/// assert_eq!(result.second_point.eq(&Point::new(10.0, 0.0, 0.0)), true);
+/// assert_eq!(result.third_point.eq(&Point::new(10.0, -15.0, 0.0)), true);
+/// ```
 #[derive(Deserialize, Serialize)]
 pub struct Triangle {
     /// First point.
@@ -19,7 +37,23 @@ impl PartialEq for Triangle {
 }
 
 impl Triangle {
-    /// Returns a new Triangle
+    /// Returns a new [Triangle]
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let result = Triangle::new(
+    /// Point::new(0.0, 0.0, 0.0),
+    /// Point::new(10.0, 0.0, 0.0),
+    /// Point::new(10.0, -15.0, 0.0));
+    ///
+    /// assert_eq!(result.first_point.eq(&Point::new(0.0, 0.0, 0.0)), true);
+    /// assert_eq!(result.second_point.eq(&Point::new(10.0, 0.0, 0.0)), true);
+    /// assert_eq!(result.third_point.eq(&Point::new(10.0, -15.0, 0.0)), true);
+    /// ```
     pub fn new(first_point: Point, second_point: Point, third_point: Point) -> Triangle { Triangle { first_point, second_point, third_point } }
 }
 
