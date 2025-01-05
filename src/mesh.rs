@@ -18,6 +18,8 @@ use crate::triangle::Triangle;
 ///
 /// It tells you information which points construct which face.
 ///
+/// The orientation of a face is described by a right hand thumb.
+///
 /// # Example
 ///
 /// Here is an example with simple 1-triangle Mesh
