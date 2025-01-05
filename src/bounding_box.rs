@@ -1,6 +1,20 @@
 use serde::{Deserialize, Serialize};
 
 /// Represents a three-dimensional bounding box (AABB: axis-aligned bounding box).
+///
+/// # Example
+///
+/// ```
+/// use meshmeshmesh::bounding_box::BoundingBox;
+///
+/// let result = BoundingBox::new(1.5, 1.65, -2.3, 0.7, 3.9, 4.1);
+/// assert_eq!(result.min_x, 1.5);
+/// assert_eq!(result.max_x, 1.65);
+/// assert_eq!(result.min_y, -2.3);
+/// assert_eq!(result.max_y, 0.7);
+/// assert_eq!(result.min_z, 3.9);
+/// assert_eq!(result.max_z, 4.1);
+/// ```
 #[derive(Deserialize, Serialize)]
 pub struct BoundingBox {
     /// Minimum x value.
@@ -26,7 +40,21 @@ impl PartialEq for BoundingBox {
 }
 
 impl BoundingBox {
-    /// Returns a new Bounding Box
+    /// Creates a new [Bounding Box](BoundingBox)
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::bounding_box::BoundingBox;
+    ///
+    /// let result = BoundingBox::new(1.5, 1.65, -2.3, 0.7, 3.9, 4.1);
+    /// assert_eq!(result.min_x, 1.5);
+    /// assert_eq!(result.max_x, 1.65);
+    /// assert_eq!(result.min_y, -2.3);
+    /// assert_eq!(result.max_y, 0.7);
+    /// assert_eq!(result.min_z, 3.9);
+    /// assert_eq!(result.max_z, 4.1);
+    /// ```
     pub fn new(min_x: f64, max_x: f64, min_y: f64, max_y: f64, min_z: f64, max_z: f64) -> BoundingBox {
         if min_x > max_x {
             panic!("Invalid BoundingBox (min x > max_x)");
