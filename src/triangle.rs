@@ -3,7 +3,7 @@ use crate::point::Point;
 
 /// Represents a triangle in three-dimensional space.
 ///
-/// Sometimes it's easier to work with separate triangles rather than using a [Mesh].
+/// Sometimes it's easier to work with separate triangles rather than using a `Mesh`.
 ///
 /// # Example
 ///
