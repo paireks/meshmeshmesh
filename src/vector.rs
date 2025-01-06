@@ -14,11 +14,11 @@ use crate::point::Point;
 /// ```
 #[derive(Deserialize, Serialize)]
 pub struct Vector {
-    /// The x-coordinate of the vector.
+    /// The x-dimension of the vector.
     pub x: f64,
-    /// The y-coordinate of the vector.
+    /// The y-dimension of the vector.
     pub y: f64,
-    /// The z-coordinate of the vector.
+    /// The z-dimension of the vector.
     pub z: f64
 }
 

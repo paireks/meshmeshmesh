@@ -1,3 +1,4 @@
+use std::ops;
 use crate::vector::Vector;
 
 impl Vector {
@@ -64,6 +65,88 @@ impl Vector {
     }
 }
 
+impl ops::Mul<f64> for Vector {
+    type Output = Vector;
+
+    /// Multiplies a [Vector] with `f64`.
+    ///
+    /// The result is a new Vector with a multiplied values.
+    ///
+    /// # Example
+    ///
+    /// Here is an example of multiplying a Vector with a 2.5 value.
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let vector = Vector::new(5.231, -0.341, 11.034);
+    /// let result = vector * 2.5;
+    /// let expected = Vector::new(5.231*2.5, -0.341*2.5, 11.034*2.5);
+    /// assert_eq!(result.eq(&expected), true);
+    /// ```
+    fn mul(self, f: f64) -> Vector {
+        Vector {
+            x: self.x * f,
+            y: self.y * f,
+            z: self.z * f,
+        }
+    }
+}
+
+impl ops::Add<Vector> for Vector {
+    type Output = Vector;
+
+    /// Adds two [Vector]s to each other.
+    ///
+    /// The result is a new Vector.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let a = Vector::new(5.231, -0.341, 11.034);
+    /// let b = Vector::new(-12.564, 5.642, 7.731);
+    /// let result = a + b;
+    /// let expected = Vector::new(5.231+(-12.564), -0.341+5.642, 11.034+7.731);
+    /// assert_eq!(result.eq(&expected), true);
+    /// ```
+    fn add(self, vector: Vector) -> Vector {
+        Vector {
+            x: self.x + vector.x,
+            y: self.y + vector.y,
+            z: self.z + vector.z,
+        }
+    }
+}
+
+impl ops::Sub<Vector> for Vector {
+    type Output = Vector;
+
+    /// Subtracts two [Vector]s.
+    ///
+    /// The result is a new Vector.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let a = Vector::new(5.231, -0.341, 11.034);
+    /// let b = Vector::new(-12.564, 5.642, 7.731);
+    /// let result = a - b;
+    /// let expected = Vector::new(5.231-(-12.564), -0.341-5.642, 11.034-7.731);
+    /// assert_eq!(result.eq(&expected), true);
+    /// ```
+    fn sub(self, vector: Vector) -> Vector {
+        Vector {
+            x: self.x - vector.x,
+            y: self.y - vector.y,
+            z: self.z - vector.z,
+        }
+    }
+}
+
 #[test]
 fn test_reverse_vector() {
     let mut vector = Vector::new(5.231, -0.341, 9.093);
@@ -96,4 +179,30 @@ fn test_get_unitized_vector() {
 fn test_get_unitized_vector_0_length_panic() {
     let vector = Vector::zero();
     let _result = vector.get_unitized();
+}
+
+#[test]
+fn test_vector_multiply_f64() {
+    let vector = Vector::new(5.231, -0.341, 11.034);
+    let result = vector * 2.5;
+    let expected = Vector::new(5.231*2.5, -0.341*2.5, 11.034*2.5);
+    assert_eq!(result.eq(&expected), true);
+}
+
+#[test]
+fn test_vector_add_vector() {
+    let a = Vector::new(5.231, -0.341, 11.034);
+    let b = Vector::new(-12.564, 5.642, 7.731);
+    let result = a + b;
+    let expected = Vector::new(5.231+(-12.564), -0.341+5.642, 11.034+7.731);
+    assert_eq!(result.eq(&expected), true);
+}
+
+#[test]
+fn test_vector_subtract_vector() {
+    let a = Vector::new(5.231, -0.341, 11.034);
+    let b = Vector::new(-12.564, 5.642, 7.731);
+    let result = a - b;
+    let expected = Vector::new(5.231-(-12.564), -0.341-5.642, 11.034-7.731);
+    assert_eq!(result.eq(&expected), true);
 }
