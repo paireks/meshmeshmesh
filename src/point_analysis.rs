@@ -18,7 +18,7 @@ impl Point {
     /// let a = Point::new(1.5, -2.3, 3.9);
     /// let b = Point::new(1.5 + 0.0005, -2.3 - 0.0005, 3.9 + 0.001);
     ///
-    /// assert_eq!(a.eq_within_tolerance(&b, tolerance), true);
+    /// assert_eq!(a.eq_with_tolerance(&b, tolerance), true);
     /// ```
     ///
     /// In this example we can see the Y-coordinate absolute difference is > tolerance, so we expect 'false'.
@@ -29,9 +29,9 @@ impl Point {
     /// let tolerance: f64 = 0.001;
     /// let a = Point::new(1.5, -2.3, 3.9);
     /// let b = Point::new(1.5 + 0.0005, -2.3 - 0.00101, 3.9 + 0.001);
-    /// assert_eq!(a.eq_within_tolerance(&b, tolerance), false);
+    /// assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
     /// ```
-    pub fn eq_within_tolerance(&self, other:&Point, tolerance: f64) -> bool {
+    pub fn eq_with_tolerance(&self, other:&Point, tolerance: f64) -> bool {
         if (self.x - other.x).abs() > tolerance {
             false
         }
@@ -56,7 +56,7 @@ mod tests {
         let tolerance: f64 = 0.001;
         let a = Point::new(1.5, -2.3, 3.9);
         let b = Point::new(1.5 + 0.0005, -2.3 - 0.0005, 3.9 + 0.001);
-        assert_eq!(a.eq_within_tolerance(&b, tolerance), true);
+        assert_eq!(a.eq_with_tolerance(&b, tolerance), true);
     }
 
     #[test]
@@ -64,7 +64,7 @@ mod tests {
         let tolerance: f64 = 0.001;
         let a = Point::new(1.5, -2.3, 3.9);
         let b = Point::new(1.5 + 0.0011, -2.3 - 0.0005, 3.9 + 0.001);
-        assert_eq!(a.eq_within_tolerance(&b, tolerance), false);
+        assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
     }
 
     #[test]
@@ -72,7 +72,7 @@ mod tests {
         let tolerance: f64 = 0.001;
         let a = Point::new(1.5, -2.3, 3.9);
         let b = Point::new(1.5 + 0.0005, -2.3 - 0.00101, 3.9 + 0.001);
-        assert_eq!(a.eq_within_tolerance(&b, tolerance), false);
+        assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
     }
 
     #[test]
@@ -80,7 +80,7 @@ mod tests {
         let tolerance: f64 = 0.001;
         let a = Point::new(1.5, -2.3, 3.9);
         let b = Point::new(1.5 + 0.0005, -2.3 - 0.0005, 3.9 + 0.0013);
-        assert_eq!(a.eq_within_tolerance(&b, tolerance), false);
+        assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
     }
 
     #[test]
@@ -88,7 +88,7 @@ mod tests {
         let tolerance: f64 = 0.001;
         let a = Point::new(1.5, -2.3, 3.9);
         let b = Point::new(1.5 + 0.0011, -2.3 - 0.00101, 3.9 + 0.0013);
-        assert_eq!(a.eq_within_tolerance(&b, tolerance), false);
+        assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
     }
 }
 
