@@ -4,6 +4,7 @@ mod mesh_analysis;
 mod mesh_factory;
 mod mesh_processing;
 pub mod point;
+mod point_analysis;
 pub mod triangle;
 pub mod vector;
 mod vector_analysis;
