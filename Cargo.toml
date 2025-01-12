@@ -2,6 +2,16 @@
 name = "meshmeshmesh"
 version = "0.1.0"
 edition = "2021"
+authors = ["Wojciech Radaczyński"]
+description = "Open-source mesh processing library."
+repository = "https://github.com/paireks/meshmeshmesh"
+license = "AGPL-3"
+readme = "README.md"
+categories = ["algorithms"]
+keywords = ["mesh", "geometry"]
+exclude = [
+    ".idea"
+]
 
 [dependencies]
 serde = { version = "1.0.205", features = ["derive"] }
