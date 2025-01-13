@@ -1,5 +1,7 @@
 use crate::mesh::Mesh;
 use std::collections::{HashMap, HashSet};
+use serde_json::to_string;
+use crate::point::Point;
 
 impl Mesh {
 
@@ -170,12 +172,6 @@ impl Mesh {
         Mesh::new(new_coordinates, self.indices.clone())
     }
 
-/*    pub fn get_with_welded_vertices(&self) -> Mesh {
-        // This field saves information about which indices should be switched and to which new value
-        let mut translate_indices_instruction: HashMap<usize, usize> = HashMap::new();;
-
-    }*/
-
     /// Allows to replace specific indices with new ones
     ///
     /// Creates the new [Mesh], but with replaced indices
@@ -256,6 +252,126 @@ impl Mesh {
         }
 
         Mesh::new(self.coordinates.clone(), new_indices)
+    }
+
+    /// Welds vertices of the given [Mesh].
+    ///
+    /// In other words, it searches for duplicate (with tolerance) vertices and removes these duplicates.
+    ///
+    /// It updates both coordinates and indices and creates a new Mesh with it.
+    ///
+    /// It can be useful for several purposes, including making Meshes more compact.
+    ///
+    /// # Example
+    ///
+    /// Here is the example with pyramid that has a lot of duplicate vertices, in fact each
+    /// triangle has its own vertices, which is convenient, but not compact. You can see there that
+    /// after a welding it detects a duplicate coordinates and remove them.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let input= Mesh::new(
+    /// vec![
+    ///     0.0, 0.0, 0.0, // 0
+    ///     10.0, 0.0, 0.0, // 1
+    ///     10.0,10.0,0.0, // 2
+    ///
+    ///     0.0, 0.0, 0.0, // duplicate of 0 -> should be removed
+    ///     10.0,10.0,0.0, // duplicate of 2 -> should be removed
+    ///     0.0,10.0,0.0, // new 3
+    ///
+    ///     0.0, 0.0, 0.0, // duplicate of 0 -> should be removed
+    ///     10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
+    ///     5.0,5.0,4.0, // new 4
+    ///
+    ///     10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
+    ///     10.0,10.0,0.0, // duplicate of 2 -> should be removed
+    ///     5.0,5.0,4.0, // duplicate of 8 -> should be removed
+    ///
+    ///     10.0,10.0,0.0, // duplicate of 2 -> should be removed
+    ///     0.0,10.0,0.0, // duplicate of 5 -> should be removed
+    ///     5.0,5.0,4.0, // duplicate of 8 -> should be removed
+    ///
+    ///     0.0,10.0,0.0, // duplicate of 5 -> should be removed
+    ///     0.0,0.0,0.0, // duplicate of 0 -> should be removed
+    ///     5.0,5.0,4.0, // duplicate of 8 -> should be removed
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     3,4,5,
+    ///
+    ///     // Side faces
+    ///     6,7,8,
+    ///     9,10,11,
+    ///     12,13,14,
+    ///     15,16,17
+    /// ]);
+    ///
+    /// let actual = input.get_with_welded_vertices(0.001);
+    /// let expected = Mesh::new(
+    /// vec![
+    ///     0.0, 0.0, 0.0, // 0
+    ///     10.0, 0.0, 0.0, // 1
+    ///     10.0,10.0,0.0, // 2
+    ///     0.0,10.0,0.0, // new 3
+    ///
+    ///     5.0,5.0,4.0, // new 4
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3,
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4,
+    ///     2,3,4,
+    ///     3,0,4
+    /// ]);
+    ///
+    /// assert_eq!(expected.eq(&actual), true);
+    /// ```
+    pub fn get_with_welded_vertices(&self, tolerance: f64) -> Mesh {
+        let vertices = self.to_points();
+        let duplicate_vertices_info = Point::scan_for_duplicates_with_tolerance_info(&vertices, tolerance);
+        let info_length = duplicate_vertices_info.len();
+
+        let mut duplicates_above_count: Vec<usize> = Vec::<usize>::new(); // First step is to create a Vec of duplicates above these vertices. It is necessary to apply proper offset later.
+        let mut current_duplicates_count = 0;
+        for i in 0..info_length {
+            duplicates_above_count.push(current_duplicates_count);
+            if duplicate_vertices_info[i].1 {
+                current_duplicates_count += 1;
+            }
+        }
+
+        if current_duplicates_count > 0 { // It means there actually were some duplicates at all, so it makes sense to weld
+            let mut indices_replacement_instructions: HashMap<usize, usize> = HashMap::<usize, usize>::new();
+            let mut vertices_replacement_instructions: HashSet<usize> = HashSet::<usize>::new();
+
+            for i in 0..info_length {
+                let offset = duplicates_above_count[duplicate_vertices_info[i].0];
+                if duplicate_vertices_info[i].1 { // If true = it is a duplicate
+                    let new_index = duplicate_vertices_info[i].0 - offset;
+                    indices_replacement_instructions.insert(i, new_index); // Specifies how to switch index
+                    vertices_replacement_instructions.insert(i); // Specifies which vertex should be removed
+                }
+                else { // If false = it's not a duplicate, but still we have to update the index, because of removal of vertices above
+                    let new_index = i - offset;
+                    indices_replacement_instructions.insert(i, new_index); // Specifies how to switch index
+                }
+            }
+
+            let mesh_with_replaced_indices = self.get_with_replaced_indices(indices_replacement_instructions);
+            let mesh_with_replaced_indices_and_removed_vertices = mesh_with_replaced_indices.get_with_removed_vertices_without_indices_update(vertices_replacement_instructions);
+
+            mesh_with_replaced_indices_and_removed_vertices
+        }
+        else { // No duplicates - no welding
+            Mesh::new(self.coordinates.clone(), self.indices.clone())
+        }
     }
 }
 
@@ -567,5 +683,194 @@ fn test_get_with_replaced_indices() {
             3,3,1, // 0 -> 3 & 4 -> 1
         ]);
     let actual = input.get_with_replaced_indices(replacement_instructions);
+    assert_eq!(expected.eq(&actual), true);
+}
+
+#[test]
+fn test_get_with_welded_vertices_correct_pyramid() {
+    let input = Mesh::new(
+        vec![
+            0.0, 0.0, 0.0, // 0
+            10.0, 0.0, 0.0, // 1
+            10.0,10.0,0.0, // 2
+            0.0,10.0,0.0, // 3
+
+            5.0,5.0,4.0, // 4
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+
+    let actual = input.get_with_welded_vertices(0.001);
+    let expected = Mesh::new(
+        vec![
+            0.0, 0.0, 0.0, // 0
+            10.0, 0.0, 0.0, // 1
+            10.0,10.0,0.0, // 2
+            0.0,10.0,0.0, // new 3
+
+            5.0,5.0,4.0, // new 4
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+
+    let input_serialized = to_string(&input).ok().unwrap();
+    println!("Input:");
+    println!("{}", input_serialized);
+    let actual_serialized = to_string(&actual).ok().unwrap();
+    println!("Output:");
+    println!("{}", actual_serialized);
+    assert_eq!(expected.eq(&actual), true);
+}
+
+#[test]
+fn test_get_with_welded_vertices_pyramid() {
+    let input= Mesh::new(
+        vec![
+            0.0, 0.0, 0.0, // 0
+            10.0, 0.0, 0.0, // 1
+            10.0,10.0,0.0, // 2
+
+            0.0, 0.0, 0.0, // duplicate of 0 -> should be removed
+            10.0,10.0,0.0, // duplicate of 2 -> should be removed
+            0.0,10.0,0.0, // new 3
+
+            0.0, 0.0, 0.0, // duplicate of 0 -> should be removed
+            10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
+            5.0,5.0,4.0, // new 4
+
+            10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
+            10.0,10.0,0.0, // duplicate of 2 -> should be removed
+            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
+
+            10.0,10.0,0.0, // duplicate of 2 -> should be removed
+            0.0,10.0,0.0, // duplicate of new 3 -> should be removed
+            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
+
+            0.0,10.0,0.0, // duplicate of new 3 -> should be removed
+            0.0,0.0,0.0, // duplicate of 0 -> should be removed
+            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            3,4,5,
+
+            // Side faces
+            6,7,8,
+            9,10,11,
+            12,13,14,
+            15,16,17
+        ]);
+
+    let actual = input.get_with_welded_vertices(0.001);
+    let expected = Mesh::new(
+        vec![
+            0.0, 0.0, 0.0, // 0
+            10.0, 0.0, 0.0, // 1
+            10.0,10.0,0.0, // 2
+            0.0,10.0,0.0, // new 3
+
+            5.0,5.0,4.0, // new 4
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+
+    let input_serialized = to_string(&input).ok().unwrap();
+    println!("Input:");
+    println!("{}", input_serialized);
+    let actual_serialized = to_string(&actual).ok().unwrap();
+    println!("Output:");
+    println!("{}", actual_serialized);
+    assert_eq!(expected.eq(&actual), true);
+}
+
+#[test]
+fn test_get_with_welded_vertices_pyramid_different_order() {
+    let input= Mesh::new(
+        vec![
+            10.0,10.0,0.0, // 0
+            10.0, 0.0, 0.0, // 1
+            0.0, 0.0, 0.0, // 2
+
+            0.0,10.0,0.0, // 3
+            10.0,10.0,0.0, // duplicate of 0 -> should be removed
+            0.0, 0.0, 0.0-0.00099, // duplicate of 2 -> should be removed
+
+            0.0,0.0,0.0, // duplicate of 2 -> should be removed
+            0.0,10.0,0.0, // duplicate of 3 -> should be removed
+            5.0,5.0,4.0, // new 4
+
+            0.0,10.0,0.0, // duplicate of 3 -> should be removed
+            10.0,10.0,0.0, // duplicate of 0 -> should be removed
+            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
+
+            10.0,10.0,0.0, // duplicate of 0 -> should be removed
+            10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
+            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
+
+            10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
+            0.0, 0.0, 0.0, // duplicate of 2 -> should be removed
+            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
+        ],
+        vec![
+            15,16,17,
+            12,13,14,
+            0,1,2,
+            3,4,5,
+            9,10,11,
+            6,7,8,
+        ]);
+
+    let actual = input.get_with_welded_vertices(0.001);
+    let expected = Mesh::new(
+        vec![
+            10.0,10.0,0.0, // 0
+            10.0, 0.0, 0.0, // 1
+            0.0, 0.0, 0.0, // 2
+            0.0,10.0,0.0, // 3
+            5.0,5.0,4.0, // 4
+        ],
+        vec![
+            1,2,4,
+            0,1,4,
+            0,1,2,
+            3,0,2,
+            3,0,4,
+            2,3,4]
+    );
+
+    let input_serialized = to_string(&input).ok().unwrap();
+    println!("Input:");
+    println!("{}", input_serialized);
+    let actual_serialized = to_string(&actual).ok().unwrap();
+    println!("Output:");
+    println!("{}", actual_serialized);
     assert_eq!(expected.eq(&actual), true);
 }
