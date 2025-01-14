@@ -373,6 +373,89 @@ impl Mesh {
             Mesh::new(self.coordinates.clone(), self.indices.clone())
         }
     }
+
+    /// Creates a new [Mesh] which has all vertices unwelded.
+    ///
+    /// It duplicates vertices for every face.
+    ///
+    /// It might be useful for some cases where each face should have its own vertices.
+    ///
+    /// However, it makes Meshes much bigger.
+    ///
+    /// # Example
+    ///
+    /// Here is an example with pyramid, which has all vertices welded, but after this operation
+    /// it's all unwelded.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     0.0, 0.0, 0.0,
+    ///     10.0, 0.0, 0.0,
+    ///     10.0,10.0,0.0,
+    ///     0.0,10.0,0.0,
+    ///
+    ///     5.0,5.0,4.0,
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3,
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4,
+    ///     2,3,4,
+    ///     3,0,4
+    /// ]);
+    ///
+    /// let actual = input.get_with_unwelded_vertices();
+    ///
+    /// let expected = Mesh::new(
+    /// vec![
+    ///     0.0, 0.0, 0.0, // first face
+    ///     10.0, 0.0, 0.0,
+    ///     10.0,10.0,0.0,
+    ///
+    ///     0.0, 0.0, 0.0, // second face
+    ///     10.0,10.0,0.0,
+    ///     0.0,10.0,0.0,
+    ///
+    ///     0.0, 0.0, 0.0, // third face
+    ///     10.0, 0.0, 0.0,
+    ///     5.0,5.0,4.0,
+    ///
+    ///     10.0, 0.0, 0.0, // fourth face
+    ///     10.0,10.0,0.0,
+    ///     5.0,5.0,4.0,
+    ///
+    ///     10.0,10.0,0.0, // fifth face
+    ///     0.0,10.0,0.0,
+    ///     5.0,5.0,4.0,
+    ///
+    ///     0.0,10.0,0.0, // sixth face
+    ///     0.0,0.0,0.0,
+    ///     5.0,5.0,4.0,
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     3,4,5,
+    ///
+    ///     // Side faces
+    ///     6,7,8,
+    ///     9,10,11,
+    ///     12,13,14,
+    ///     15,16,17
+    /// ]);
+    ///
+    /// assert_eq!(expected.eq(&actual), true);
+    /// ```
+    pub fn get_with_unwelded_vertices(&self) -> Mesh {
+        Mesh::from_triangles(self.to_triangles())
+    }
 }
 
 #[test]
@@ -872,5 +955,58 @@ fn test_get_with_welded_vertices_pyramid_different_order() {
     let actual_serialized = to_string(&actual).ok().unwrap();
     println!("Output:");
     println!("{}", actual_serialized);
+    assert_eq!(expected.eq(&actual), true);
+}
+
+#[test]
+pub fn test_get_with_unwelded_vertices() {
+    let input = Mesh::new(vec![
+        0.0, 0.0, 0.0,
+        10.0, 0.0, 0.0,
+        10.0,10.0,0.0,
+        0.0,10.0,0.0,
+        5.0,5.0,4.0,
+    ], vec![
+        // Base faces
+        0,1,2,
+        0,2,3,
+        // Side faces
+        0,1,4,
+        1,2,4,
+        2,3,4,
+        3,0,4
+    ]);
+
+    let actual = input.get_with_unwelded_vertices();
+    let expected = Mesh::new(vec![
+        0.0, 0.0, 0.0, // first face
+        10.0, 0.0, 0.0,
+        10.0,10.0,0.0,
+        0.0, 0.0, 0.0, // second face
+        10.0,10.0,0.0,
+        0.0,10.0,0.0,
+        0.0, 0.0, 0.0, // third face
+        10.0, 0.0, 0.0,
+        5.0,5.0,4.0,
+        10.0, 0.0, 0.0, // fourth face
+        10.0,10.0,0.0,
+        5.0,5.0,4.0,
+        10.0,10.0,0.0, // fifth face
+        0.0,10.0,0.0,
+        5.0,5.0,4.0,
+        0.0,10.0,0.0, // sixth face
+        0.0,0.0,0.0,
+        5.0,5.0,4.0,
+    ], vec![
+        // Base faces
+        0,1,2,
+        3,4,5,
+        // Side faces
+        6,7,8,
+        9,10,11,
+        12,13,14,
+        15,16,17
+    ]);
+
     assert_eq!(expected.eq(&actual), true);
 }
