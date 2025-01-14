@@ -46,6 +46,26 @@ impl Point {
         }
     }
 
+    /// Gets distance to another [Point].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// let a = Point::new(35.704653, 37.253023, -22.626602);
+    /// let b = Point::new(-38.634947, 13.199458, 23.94433);
+    /// let actual_ab = a.get_distance_to_point(&b);
+    /// let actual_ba = b.get_distance_to_point(&a);
+    ///
+    /// let expected = 90.960441;
+    ///
+    /// assert_eq!(((expected - actual_ab).abs() < 0.00001), true); // Both distances should be the same
+    /// assert_eq!(((expected - actual_ba).abs() < 0.00001), true);
+    /// ```
+    pub fn get_distance_to_point(&self, other:&Point) -> f64 {
+        f64::sqrt((self.x - other.x).powi(2) + (self.y - other.y).powi(2) + (self.z - other.z).powi(2))
+    }
+
     /// Scans given `vec` of [Point]s and creates a `vec` of tuples with information about duplicates.
     ///
     /// Duplicates are checked with given tolerance.
@@ -143,6 +163,32 @@ mod tests {
         let a = Point::new(1.5, -2.3, 3.9);
         let b = Point::new(1.5 + 0.0011, -2.3 - 0.00101, 3.9 + 0.0013);
         assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
+    }
+
+    #[test]
+    fn test_get_distance_to_point(){
+        let a = Point::new(35.704653, 37.253023, -22.626602);
+        let b = Point::new(-38.634947, 13.199458, 23.94433);
+        let actual_ab = a.get_distance_to_point(&b);
+        let actual_ba = b.get_distance_to_point(&a);
+
+        let expected = 90.960441;
+
+        assert_eq!(((expected - actual_ab).abs() < 0.00001), true); // Both distances should be the same
+        assert_eq!(((expected - actual_ba).abs() < 0.00001), true);
+    }
+
+    #[test]
+    fn test_get_distance_to_point_the_same(){
+        let a = Point::new(35.704653, 37.253023, -22.626602);
+        let b = Point::new(35.704653, 37.253023, -22.626602);
+        let actual_ab = a.get_distance_to_point(&b);
+        let actual_ba = b.get_distance_to_point(&a);
+
+        let expected = 0.0;
+
+        assert_eq!(((expected - actual_ab).abs() < 0.00001), true); // Both distances should be the same
+        assert_eq!(((expected - actual_ba).abs() < 0.00001), true);
     }
 
     #[test]
