@@ -74,6 +74,7 @@ impl Mesh {
 
 #[cfg(test)]
 mod tests {
+    use serde_json::to_string;
     use super::*;
 
     #[test]
@@ -107,4 +108,12 @@ mod tests {
         assert_eq!(actual.len(), 1);
         assert_eq!(actual[0].eq(&expected_mesh), true);
     }
+
+/*    #[test]
+    fn test_get_mesh_from_dotbim_and_weld() {
+        let path = "models/dotbim/Teapot.bim";
+        let actual = Mesh::get_meshes_from_dotbim(path);
+        let teapot_welded = actual[0].get_with_welded_vertices(0.0001);
+        let teapot_welded_serialized = to_string(&teapot_welded).ok().unwrap();
+    }*/
 }
