@@ -14,5 +14,6 @@ exclude = [
 ]
 
 [dependencies]
+dotbim_rust = "0.1.1"
 serde = { version = "1.0.205", features = ["derive"] }
 serde_json = "1.0"
