@@ -87,6 +87,52 @@ impl Mesh {
         self.coordinates.len() / 3
     }
 
+    /// Calculates the area for given [Mesh]
+    ///
+    /// # Example
+    ///
+    /// ```
+    ///
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let input = Mesh::new(
+    ///    vec![
+    ///        // Base
+    ///        -2.0,1.0,0.0, // first vertex
+    ///        8.0,1.0,0.0, // second vertex
+    ///        8.0,11.0,0.0, // third vertex
+    ///        -2.0,11.0,0.0, // fourth vertex
+    ///
+    ///        // Top
+    ///        3.0,6.0,4.0 // fifth vertex
+    ///    ],
+    ///    vec![
+    ///        // Base faces
+    ///        0,1,2,
+    ///        0,2,3,
+    ///
+    ///        // Side faces
+    ///        0,1,4,
+    ///        1,2,4,
+    ///        2,3,4,
+    ///        3,0,4
+    ///    ]);
+    ///
+    /// let expected = 228.062485;
+    /// let actual = input.get_area();
+    /// assert_eq!(((expected - actual).abs() < 0.00001), true);
+    ///
+    /// ```
+    pub fn get_area(&self) -> f64 {
+        let triangles = self.to_triangles();
+        let mut sum = 0.0;
+        for triangle in triangles {
+            sum += triangle.get_area();
+        }
+
+        sum
+    }
+
     /// Calculates the Bounding Box (AABB) for given [Mesh]
     ///
     /// # Example
@@ -457,6 +503,36 @@ mod tests {
         let expected = 5;
         let actual = input.get_number_of_vertices();
         assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_get_area() {
+        let input = Mesh::new(
+           vec![
+               // Base
+               -2.0,1.0,0.0, // first vertex
+               8.0,1.0,0.0, // second vertex
+               8.0,11.0,0.0, // third vertex
+               -2.0,11.0,0.0, // fourth vertex
+
+               // Top
+               3.0,6.0,4.0 // fifth vertex
+           ],
+           vec![
+               // Base faces
+               0,1,2,
+               0,2,3,
+
+               // Side faces
+               0,1,4,
+               1,2,4,
+               2,3,4,
+               3,0,4
+           ]);
+
+        let expected = 228.062485;
+        let actual = input.get_area();
+        assert_eq!(((expected - actual).abs() < 0.00001), true);
     }
 
     #[test]

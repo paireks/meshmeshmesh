@@ -19,7 +19,7 @@ impl Triangle {
     ///
     /// let expected = 3746.086182;
     ///
-    /// assert_eq!(((expected - actual).abs() < 0.00001), true); // Both distances should be the same
+    /// assert_eq!(((expected - actual).abs() < 0.00001), true);
     /// ```
     pub fn get_area(&self) -> f64 {
         let a = self.first_point.get_distance_to_point(&self.second_point);
