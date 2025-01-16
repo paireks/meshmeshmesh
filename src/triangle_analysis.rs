@@ -49,5 +49,19 @@ mod tests {
 
         assert_eq!(((expected - actual).abs() < 0.00001), true); // Both distances should be the same
     }
+
+    #[test]
+    pub fn test_get_area_zero() {
+        let input = Triangle::new(
+            Point::new(35.704653, 37.253023, -22.626602),
+            Point::new(35.704653, 37.253023, -22.626602),
+            Point::new(35.704653, 37.253023, -22.626602));
+
+        let actual = input.get_area();
+
+        let expected = 0.0;
+
+        assert_eq!(expected, actual); // Both distances should be the same
+    }
 }
 
