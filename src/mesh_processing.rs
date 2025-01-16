@@ -456,406 +456,617 @@ impl Mesh {
     pub fn get_with_unwelded_vertices(&self) -> Mesh {
         Mesh::from_triangles(self.to_triangles())
     }
+
+    /// Creates a new [Mesh], but for all indices it offsets them by given number.
+    ///
+    /// So if offset will be 3, and indices were e.g. (1, 5, 6), then it will be (4, 8, 9).
+    ///
+    /// It could be useful for some operations, such as e.g. joining of [Mesh]es.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     0.0, 0.0, 0.0,
+    ///     10.0, 0.0, 0.0,
+    ///     10.0,10.0,0.0,
+    ///     0.0,10.0,0.0,
+    ///
+    ///     5.0,5.0,4.0,
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3,
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4,
+    ///     2,3,4,
+    ///     3,0,4
+    /// ]);
+    /// let offset = 10;
+    /// let actual = input.get_with_index_offset(offset);
+    ///
+    /// let expected = Mesh::new(
+    /// vec![
+    ///     0.0, 0.0, 0.0,
+    ///     10.0, 0.0, 0.0,
+    ///     10.0,10.0,0.0,
+    ///     0.0,10.0,0.0,
+    ///
+    ///     5.0,5.0,4.0,
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     10,11,12,
+    ///     10,12,13,
+    ///
+    ///     // Side faces
+    ///     10,11,14,
+    ///     11,12,14,
+    ///     12,13,14,
+    ///     13,10,14
+    /// ]);
+    ///
+    /// assert_eq!(expected.eq(&actual), true);
+    /// ```
+    pub fn get_with_index_offset(&self, index_offset: usize) -> Mesh {
+        let mut new_indices = Vec::from_iter(self.indices.clone());
+        new_indices.iter_mut().for_each(|x| *x += index_offset);
+        Mesh::new(self.coordinates.clone(), new_indices)
+    }
 }
 
-#[test]
-fn test_get_with_all_faces_flipped() {
-    let input = Mesh::new(
-        vec![
-            // Base
-            -2.0,1.0,0.0,
-            8.0,1.0,0.0,
-            8.0,11.0,0.0,
-            -2.0,11.0,0.0,
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_get_with_all_faces_flipped() {
+        let input = Mesh::new(
+            vec![
+                // Base
+                -2.0, 1.0, 0.0,
+                8.0, 1.0, 0.0,
+                8.0, 11.0, 0.0,
+                -2.0, 11.0, 0.0,
 
-            // Top
-            3.0,6.0,4.0
-        ],
-        vec![
+                // Top
+                3.0, 6.0, 4.0
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+        let expected = Mesh::new(
+            vec![
+                // Base
+                -2.0, 1.0, 0.0,
+                8.0, 1.0, 0.0,
+                8.0, 11.0, 0.0,
+                -2.0, 11.0, 0.0,
+
+                // Top
+                3.0, 6.0, 4.0
+            ],
+            vec![
+                // Base faces flipped
+                2, 1, 0,
+                3, 2, 0,
+
+                // Side faces flipped
+                4, 1, 0,
+                4, 2, 1,
+                4, 3, 2,
+                4, 0, 3
+            ]);
+        let actual = input.get_with_all_faces_flipped();
+
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    fn test_get_with_removed_vertices_without_indices_update_first_removed() {
+        let input = Mesh::new(
+            vec![
+                // Base
+                -2.0, 1.0, 0.0,
+                8.0, 1.0, 0.0,
+                8.0, 11.0, 0.0,
+                -2.0, 11.0, 0.0,
+
+                // Top
+                3.0, 6.0, 4.0
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+
+        let replacement_instructions = HashSet::from([0]);
+
+        let expected = Mesh::new(
+            vec![
+                // Base
+                //-2.0,1.0,0.0, <- removed
+                8.0, 1.0, 0.0,
+                8.0, 11.0, 0.0,
+                -2.0, 11.0, 0.0,
+
+                // Top
+                3.0, 6.0, 4.0
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+        let actual = input.get_with_removed_vertices_without_indices_update(replacement_instructions);
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    fn test_get_with_removed_vertices_without_indices_update_last_removed() {
+        let input = Mesh::new(
+            vec![
+                // Base
+                -2.0, 1.0, 0.0,
+                8.0, 1.0, 0.0,
+                8.0, 11.0, 0.0,
+                -2.0, 11.0, 0.0,
+
+                // Top
+                3.0, 6.0, 4.0
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+
+        let replacement_instructions = HashSet::from([4]);
+
+        let expected = Mesh::new(
+            vec![
+                // Base
+                -2.0, 1.0, 0.0,
+                8.0, 1.0, 0.0,
+                8.0, 11.0, 0.0,
+                -2.0, 11.0, 0.0,
+
+                // Top
+                //3.0,6.0,4.0 <- removed
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+        let actual = input.get_with_removed_vertices_without_indices_update(replacement_instructions);
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    fn test_get_with_removed_vertices_without_indices_update_last_two_in_the_middle_removed() {
+        let input = Mesh::new(
+            vec![
+                // Base
+                -2.0, 1.0, 0.0,
+                8.0, 1.0, 0.0,
+                8.0, 11.0, 0.0,
+                -2.0, 11.0, 0.0,
+
+                // Top
+                3.0, 6.0, 4.0
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+
+        let replacement_instructions = HashSet::from([1, 3]);
+
+        let expected = Mesh::new(
+            vec![
+                // Base
+                -2.0, 1.0, 0.0,
+                //8.0,1.0,0.0, <- removed
+                8.0, 11.0, 0.0,
+                //-2.0,11.0,0.0, <- removed
+
+                // Top
+                3.0, 6.0, 4.0
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+        let actual = input.get_with_removed_vertices_without_indices_update(replacement_instructions);
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    fn test_get_with_removed_vertices_without_indices_update_all_removed() {
+        let input = Mesh::new(
+            vec![
+                // Base
+                -2.0, 1.0, 0.0,
+                8.0, 1.0, 0.0,
+                8.0, 11.0, 0.0,
+                -2.0, 11.0, 0.0,
+
+                // Top
+                3.0, 6.0, 4.0
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+
+        let replacement_instructions = HashSet::from([2, 3, 1, 0, 4]);
+
+        let expected = Mesh::new(
+            vec![
+                // All removed
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+        let actual = input.get_with_removed_vertices_without_indices_update(replacement_instructions);
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    fn test_get_with_replaced_indices() {
+        let input = Mesh::new(
+            vec![
+                // Base
+                -2.0, 1.0, 0.0,
+                8.0, 1.0, 0.0,
+                8.0, 11.0, 0.0,
+                -2.0, 11.0, 0.0,
+
+                // Top
+                3.0, 6.0, 4.0
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+
+        let mut replacement_instructions = HashMap::new();
+        replacement_instructions.insert(0, 3);
+        replacement_instructions.insert(4, 1);
+
+        let expected = Mesh::new(
+            vec![
+                // Base
+                -2.0, 1.0, 0.0,
+                8.0, 1.0, 0.0,
+                8.0, 11.0, 0.0,
+                -2.0, 11.0, 0.0,
+
+                // Top
+                3.0, 6.0, 4.0
+            ],
+            vec![
+                // Base faces
+                3, 1, 2, // 0 -> 3
+                3, 2, 3, // 0 -> 3
+
+                // Side faces
+                3, 1, 1, // 0 -> 3 & 4 -> 1
+                1, 2, 1, // 4 -> 1
+                2, 3, 1, // 4 -> 1
+                3, 3, 1, // 0 -> 3 & 4 -> 1
+            ]);
+        let actual = input.get_with_replaced_indices(replacement_instructions);
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    fn test_get_with_welded_vertices_correct_pyramid() {
+        let input = Mesh::new(
+            vec![
+                0.0, 0.0, 0.0, // 0
+                10.0, 0.0, 0.0, // 1
+                10.0, 10.0, 0.0, // 2
+                0.0, 10.0, 0.0, // 3
+
+                5.0, 5.0, 4.0, // 4
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+
+        let actual = input.get_with_welded_vertices(0.001);
+        let expected = Mesh::new(
+            vec![
+                0.0, 0.0, 0.0, // 0
+                10.0, 0.0, 0.0, // 1
+                10.0, 10.0, 0.0, // 2
+                0.0, 10.0, 0.0, // new 3
+
+                5.0, 5.0, 4.0, // new 4
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+
+        let input_serialized = to_string(&input).ok().unwrap();
+        println!("Input:");
+        println!("{}", input_serialized);
+        let actual_serialized = to_string(&actual).ok().unwrap();
+        println!("Output:");
+        println!("{}", actual_serialized);
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    fn test_get_with_welded_vertices_pyramid() {
+        let input = Mesh::new(
+            vec![
+                0.0, 0.0, 0.0, // 0
+                10.0, 0.0, 0.0, // 1
+                10.0, 10.0, 0.0, // 2
+
+                0.0, 0.0, 0.0, // duplicate of 0 -> should be removed
+                10.0, 10.0, 0.0, // duplicate of 2 -> should be removed
+                0.0, 10.0, 0.0, // new 3
+
+                0.0, 0.0, 0.0, // duplicate of 0 -> should be removed
+                10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
+                5.0, 5.0, 4.0, // new 4
+
+                10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
+                10.0, 10.0, 0.0, // duplicate of 2 -> should be removed
+                5.0, 5.0, 4.0, // duplicate of new 4 -> should be removed
+
+                10.0, 10.0, 0.0, // duplicate of 2 -> should be removed
+                0.0, 10.0, 0.0, // duplicate of new 3 -> should be removed
+                5.0, 5.0, 4.0, // duplicate of new 4 -> should be removed
+
+                0.0, 10.0, 0.0, // duplicate of new 3 -> should be removed
+                0.0, 0.0, 0.0, // duplicate of 0 -> should be removed
+                5.0, 5.0, 4.0, // duplicate of new 4 -> should be removed
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                3, 4, 5,
+
+                // Side faces
+                6, 7, 8,
+                9, 10, 11,
+                12, 13, 14,
+                15, 16, 17
+            ]);
+
+        let actual = input.get_with_welded_vertices(0.001);
+        let expected = Mesh::new(
+            vec![
+                0.0, 0.0, 0.0, // 0
+                10.0, 0.0, 0.0, // 1
+                10.0, 10.0, 0.0, // 2
+                0.0, 10.0, 0.0, // new 3
+
+                5.0, 5.0, 4.0, // new 4
+            ],
+            vec![
+                // Base faces
+                0, 1, 2,
+                0, 2, 3,
+
+                // Side faces
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            ]);
+
+        let input_serialized = to_string(&input).ok().unwrap();
+        println!("Input:");
+        println!("{}", input_serialized);
+        let actual_serialized = to_string(&actual).ok().unwrap();
+        println!("Output:");
+        println!("{}", actual_serialized);
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    fn test_get_with_welded_vertices_pyramid_different_order() {
+        let input = Mesh::new(
+            vec![
+                10.0, 10.0, 0.0, // 0
+                10.0, 0.0, 0.0, // 1
+                0.0, 0.0, 0.0, // 2
+
+                0.0, 10.0, 0.0, // 3
+                10.0, 10.0, 0.0, // duplicate of 0 -> should be removed
+                0.0, 0.0, 0.0 - 0.00099, // duplicate of 2 -> should be removed
+
+                0.0, 0.0, 0.0, // duplicate of 2 -> should be removed
+                0.0, 10.0, 0.0, // duplicate of 3 -> should be removed
+                5.0, 5.0, 4.0, // new 4
+
+                0.0, 10.0, 0.0, // duplicate of 3 -> should be removed
+                10.0, 10.0, 0.0, // duplicate of 0 -> should be removed
+                5.0, 5.0, 4.0, // duplicate of new 4 -> should be removed
+
+                10.0, 10.0, 0.0, // duplicate of 0 -> should be removed
+                10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
+                5.0, 5.0, 4.0, // duplicate of new 4 -> should be removed
+
+                10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
+                0.0, 0.0, 0.0, // duplicate of 2 -> should be removed
+                5.0, 5.0, 4.0, // duplicate of new 4 -> should be removed
+            ],
+            vec![
+                15, 16, 17,
+                12, 13, 14,
+                0, 1, 2,
+                3, 4, 5,
+                9, 10, 11,
+                6, 7, 8,
+            ]);
+
+        let actual = input.get_with_welded_vertices(0.001);
+        let expected = Mesh::new(
+            vec![
+                10.0, 10.0, 0.0, // 0
+                10.0, 0.0, 0.0, // 1
+                0.0, 0.0, 0.0, // 2
+                0.0,10.0,0.0, // 3
+                5.0,5.0,4.0, // 4
+            ],
+            vec![
+                1,2,4,
+                0,1,4,
+                0,1,2,
+                3,0,2,
+                3,0,4,
+                2,3,4]
+        );
+
+        let input_serialized = to_string(&input).ok().unwrap();
+        println!("Input:");
+        println!("{}", input_serialized);
+        let actual_serialized = to_string(&actual).ok().unwrap();
+        println!("Output:");
+        println!("{}", actual_serialized);
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    pub fn test_get_with_unwelded_vertices() {
+        let input = Mesh::new(vec![
+            0.0, 0.0, 0.0,
+            10.0, 0.0, 0.0,
+            10.0,10.0,0.0,
+            0.0,10.0,0.0,
+            5.0,5.0,4.0,
+        ], vec![
             // Base faces
             0,1,2,
             0,2,3,
-
             // Side faces
             0,1,4,
             1,2,4,
             2,3,4,
             3,0,4
         ]);
-    let expected = Mesh::new(
-        vec![
-            // Base
-            -2.0,1.0,0.0,
-            8.0,1.0,0.0,
-            8.0,11.0,0.0,
-            -2.0,11.0,0.0,
 
-            // Top
-            3.0,6.0,4.0
-        ],
-        vec![
-            // Base faces flipped
-            2,1,0,
-            3,2,0,
-
-            // Side faces flipped
-            4,1,0,
-            4,2,1,
-            4,3,2,
-            4,0,3
-        ]);
-    let actual = input.get_with_all_faces_flipped();
-
-    assert_eq!(expected.eq(&actual), true);
-}
-
-#[test]
-fn test_get_with_removed_vertices_without_indices_update_first_removed() {
-    let input = Mesh::new(
-        vec![
-            // Base
-            -2.0,1.0,0.0,
-            8.0,1.0,0.0,
-            8.0,11.0,0.0,
-            -2.0,11.0,0.0,
-
-            // Top
-            3.0,6.0,4.0
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-
-    let replacement_instructions = HashSet::from([0]);
-
-    let expected = Mesh::new(
-        vec![
-            // Base
-            //-2.0,1.0,0.0, <- removed
-            8.0,1.0,0.0,
-            8.0,11.0,0.0,
-            -2.0,11.0,0.0,
-
-            // Top
-            3.0,6.0,4.0
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-    let actual = input.get_with_removed_vertices_without_indices_update(replacement_instructions);
-    assert_eq!(expected.eq(&actual), true);
-}
-
-#[test]
-fn test_get_with_removed_vertices_without_indices_update_last_removed() {
-    let input = Mesh::new(
-        vec![
-            // Base
-            -2.0,1.0,0.0,
-            8.0,1.0,0.0,
-            8.0,11.0,0.0,
-            -2.0,11.0,0.0,
-
-            // Top
-            3.0,6.0,4.0
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-
-    let replacement_instructions = HashSet::from([4]);
-
-    let expected = Mesh::new(
-        vec![
-            // Base
-            -2.0,1.0,0.0,
-            8.0,1.0,0.0,
-            8.0,11.0,0.0,
-            -2.0,11.0,0.0,
-
-            // Top
-            //3.0,6.0,4.0 <- removed
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-    let actual = input.get_with_removed_vertices_without_indices_update(replacement_instructions);
-    assert_eq!(expected.eq(&actual), true);
-}
-
-#[test]
-fn test_get_with_removed_vertices_without_indices_update_last_two_in_the_middle_removed() {
-    let input = Mesh::new(
-        vec![
-            // Base
-            -2.0,1.0,0.0,
-            8.0,1.0,0.0,
-            8.0,11.0,0.0,
-            -2.0,11.0,0.0,
-
-            // Top
-            3.0,6.0,4.0
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-
-    let replacement_instructions = HashSet::from([1, 3]);
-
-    let expected = Mesh::new(
-        vec![
-            // Base
-            -2.0,1.0,0.0,
-            //8.0,1.0,0.0, <- removed
-            8.0,11.0,0.0,
-            //-2.0,11.0,0.0, <- removed
-
-            // Top
-            3.0,6.0,4.0
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-    let actual = input.get_with_removed_vertices_without_indices_update(replacement_instructions);
-    assert_eq!(expected.eq(&actual), true);
-}
-
-#[test]
-fn test_get_with_removed_vertices_without_indices_update_all_removed() {
-    let input = Mesh::new(
-        vec![
-            // Base
-            -2.0,1.0,0.0,
-            8.0,1.0,0.0,
-            8.0,11.0,0.0,
-            -2.0,11.0,0.0,
-
-            // Top
-            3.0,6.0,4.0
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-
-    let replacement_instructions = HashSet::from([2,3,1,0,4]);
-
-    let expected = Mesh::new(
-        vec![
-            // All removed
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-    let actual = input.get_with_removed_vertices_without_indices_update(replacement_instructions);
-    assert_eq!(expected.eq(&actual), true);
-}
-
-#[test]
-fn test_get_with_replaced_indices() {
-    let input = Mesh::new(
-        vec![
-            // Base
-            -2.0,1.0,0.0,
-            8.0,1.0,0.0,
-            8.0,11.0,0.0,
-            -2.0,11.0,0.0,
-
-            // Top
-            3.0,6.0,4.0
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-
-    let mut replacement_instructions = HashMap::new();
-    replacement_instructions.insert(0, 3);
-    replacement_instructions.insert(4, 1);
-
-    let expected = Mesh::new(
-        vec![
-            // Base
-            -2.0,1.0,0.0,
-            8.0,1.0,0.0,
-            8.0,11.0,0.0,
-            -2.0,11.0,0.0,
-
-            // Top
-            3.0,6.0,4.0
-        ],
-        vec![
-            // Base faces
-            3,1,2, // 0 -> 3
-            3,2,3, // 0 -> 3
-
-            // Side faces
-            3,1,1, // 0 -> 3 & 4 -> 1
-            1,2,1, // 4 -> 1
-            2,3,1, // 4 -> 1
-            3,3,1, // 0 -> 3 & 4 -> 1
-        ]);
-    let actual = input.get_with_replaced_indices(replacement_instructions);
-    assert_eq!(expected.eq(&actual), true);
-}
-
-#[test]
-fn test_get_with_welded_vertices_correct_pyramid() {
-    let input = Mesh::new(
-        vec![
-            0.0, 0.0, 0.0, // 0
-            10.0, 0.0, 0.0, // 1
-            10.0,10.0,0.0, // 2
-            0.0,10.0,0.0, // 3
-
-            5.0,5.0,4.0, // 4
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-
-    let actual = input.get_with_welded_vertices(0.001);
-    let expected = Mesh::new(
-        vec![
-            0.0, 0.0, 0.0, // 0
-            10.0, 0.0, 0.0, // 1
-            10.0,10.0,0.0, // 2
-            0.0,10.0,0.0, // new 3
-
-            5.0,5.0,4.0, // new 4
-        ],
-        vec![
-            // Base faces
-            0,1,2,
-            0,2,3,
-
-            // Side faces
-            0,1,4,
-            1,2,4,
-            2,3,4,
-            3,0,4
-        ]);
-
-    let input_serialized = to_string(&input).ok().unwrap();
-    println!("Input:");
-    println!("{}", input_serialized);
-    let actual_serialized = to_string(&actual).ok().unwrap();
-    println!("Output:");
-    println!("{}", actual_serialized);
-    assert_eq!(expected.eq(&actual), true);
-}
-
-#[test]
-fn test_get_with_welded_vertices_pyramid() {
-    let input= Mesh::new(
-        vec![
-            0.0, 0.0, 0.0, // 0
-            10.0, 0.0, 0.0, // 1
-            10.0,10.0,0.0, // 2
-
-            0.0, 0.0, 0.0, // duplicate of 0 -> should be removed
-            10.0,10.0,0.0, // duplicate of 2 -> should be removed
-            0.0,10.0,0.0, // new 3
-
-            0.0, 0.0, 0.0, // duplicate of 0 -> should be removed
-            10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
-            5.0,5.0,4.0, // new 4
-
-            10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
-            10.0,10.0,0.0, // duplicate of 2 -> should be removed
-            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
-
-            10.0,10.0,0.0, // duplicate of 2 -> should be removed
-            0.0,10.0,0.0, // duplicate of new 3 -> should be removed
-            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
-
-            0.0,10.0,0.0, // duplicate of new 3 -> should be removed
-            0.0,0.0,0.0, // duplicate of 0 -> should be removed
-            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
-        ],
-        vec![
+        let actual = input.get_with_unwelded_vertices();
+        let expected = Mesh::new(vec![
+            0.0, 0.0, 0.0, // first face
+            10.0, 0.0, 0.0,
+            10.0,10.0,0.0,
+            0.0, 0.0, 0.0, // second face
+            10.0,10.0,0.0,
+            0.0,10.0,0.0,
+            0.0, 0.0, 0.0, // third face
+            10.0, 0.0, 0.0,
+            5.0,5.0,4.0,
+            10.0, 0.0, 0.0, // fourth face
+            10.0,10.0,0.0,
+            5.0,5.0,4.0,
+            10.0,10.0,0.0, // fifth face
+            0.0,10.0,0.0,
+            5.0,5.0,4.0,
+            0.0,10.0,0.0, // sixth face
+            0.0,0.0,0.0,
+            5.0,5.0,4.0,
+        ], vec![
             // Base faces
             0,1,2,
             3,4,5,
-
             // Side faces
             6,7,8,
             9,10,11,
@@ -863,150 +1074,44 @@ fn test_get_with_welded_vertices_pyramid() {
             15,16,17
         ]);
 
-    let actual = input.get_with_welded_vertices(0.001);
-    let expected = Mesh::new(
-        vec![
-            0.0, 0.0, 0.0, // 0
-            10.0, 0.0, 0.0, // 1
-            10.0,10.0,0.0, // 2
-            0.0,10.0,0.0, // new 3
+        assert_eq!(expected.eq(&actual), true);
+    }
 
-            5.0,5.0,4.0, // new 4
-        ],
-        vec![
+    pub fn test_get_with_index_offset() {
+        let input = Mesh::new(vec![
+            0.0, 0.0, 0.0,
+            10.0, 0.0, 0.0,
+            10.0,10.0,0.0,
+            0.0,10.0,0.0,
+            5.0,5.0,4.0,
+        ], vec![
             // Base faces
             0,1,2,
             0,2,3,
-
             // Side faces
             0,1,4,
             1,2,4,
             2,3,4,
             3,0,4
         ]);
-
-    let input_serialized = to_string(&input).ok().unwrap();
-    println!("Input:");
-    println!("{}", input_serialized);
-    let actual_serialized = to_string(&actual).ok().unwrap();
-    println!("Output:");
-    println!("{}", actual_serialized);
-    assert_eq!(expected.eq(&actual), true);
-}
-
-#[test]
-fn test_get_with_welded_vertices_pyramid_different_order() {
-    let input= Mesh::new(
-        vec![
-            10.0,10.0,0.0, // 0
-            10.0, 0.0, 0.0, // 1
-            0.0, 0.0, 0.0, // 2
-
-            0.0,10.0,0.0, // 3
-            10.0,10.0,0.0, // duplicate of 0 -> should be removed
-            0.0, 0.0, 0.0-0.00099, // duplicate of 2 -> should be removed
-
-            0.0,0.0,0.0, // duplicate of 2 -> should be removed
-            0.0,10.0,0.0, // duplicate of 3 -> should be removed
-            5.0,5.0,4.0, // new 4
-
-            0.0,10.0,0.0, // duplicate of 3 -> should be removed
-            10.0,10.0,0.0, // duplicate of 0 -> should be removed
-            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
-
-            10.0,10.0,0.0, // duplicate of 0 -> should be removed
-            10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
-            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
-
-            10.0, 0.0, 0.0, // duplicate of 1 -> should be removed
-            0.0, 0.0, 0.0, // duplicate of 2 -> should be removed
-            5.0,5.0,4.0, // duplicate of new 4 -> should be removed
-        ],
-        vec![
-            15,16,17,
+        let offset = 10;
+        let actual = input.get_with_index_offset(offset);
+        let expected = Mesh::new(vec![
+            0.0, 0.0, 0.0,
+            10.0, 0.0, 0.0,
+            10.0,10.0,0.0,
+            0.0,10.0,0.0,
+            5.0,5.0,4.0,
+        ], vec![
+            // Base faces
+            10,11,12,
+            10,12,13,
+            // Side faces
+            10,11,14,
+            11,12,14,
             12,13,14,
-            0,1,2,
-            3,4,5,
-            9,10,11,
-            6,7,8,
+            13,10,14
         ]);
-
-    let actual = input.get_with_welded_vertices(0.001);
-    let expected = Mesh::new(
-        vec![
-            10.0,10.0,0.0, // 0
-            10.0, 0.0, 0.0, // 1
-            0.0, 0.0, 0.0, // 2
-            0.0,10.0,0.0, // 3
-            5.0,5.0,4.0, // 4
-        ],
-        vec![
-            1,2,4,
-            0,1,4,
-            0,1,2,
-            3,0,2,
-            3,0,4,
-            2,3,4]
-    );
-
-    let input_serialized = to_string(&input).ok().unwrap();
-    println!("Input:");
-    println!("{}", input_serialized);
-    let actual_serialized = to_string(&actual).ok().unwrap();
-    println!("Output:");
-    println!("{}", actual_serialized);
-    assert_eq!(expected.eq(&actual), true);
-}
-
-#[test]
-pub fn test_get_with_unwelded_vertices() {
-    let input = Mesh::new(vec![
-        0.0, 0.0, 0.0,
-        10.0, 0.0, 0.0,
-        10.0,10.0,0.0,
-        0.0,10.0,0.0,
-        5.0,5.0,4.0,
-    ], vec![
-        // Base faces
-        0,1,2,
-        0,2,3,
-        // Side faces
-        0,1,4,
-        1,2,4,
-        2,3,4,
-        3,0,4
-    ]);
-
-    let actual = input.get_with_unwelded_vertices();
-    let expected = Mesh::new(vec![
-        0.0, 0.0, 0.0, // first face
-        10.0, 0.0, 0.0,
-        10.0,10.0,0.0,
-        0.0, 0.0, 0.0, // second face
-        10.0,10.0,0.0,
-        0.0,10.0,0.0,
-        0.0, 0.0, 0.0, // third face
-        10.0, 0.0, 0.0,
-        5.0,5.0,4.0,
-        10.0, 0.0, 0.0, // fourth face
-        10.0,10.0,0.0,
-        5.0,5.0,4.0,
-        10.0,10.0,0.0, // fifth face
-        0.0,10.0,0.0,
-        5.0,5.0,4.0,
-        0.0,10.0,0.0, // sixth face
-        0.0,0.0,0.0,
-        5.0,5.0,4.0,
-    ], vec![
-        // Base faces
-        0,1,2,
-        3,4,5,
-        // Side faces
-        6,7,8,
-        9,10,11,
-        12,13,14,
-        15,16,17
-    ]);
-
-    assert_eq!(expected.eq(&actual), true);
+        assert_eq!(expected.eq(&actual), true);
+    }
 }
