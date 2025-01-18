@@ -519,6 +519,46 @@ impl Mesh {
         new_indices.iter_mut().for_each(|x| *x += index_offset);
         Mesh::new(self.coordinates.clone(), new_indices)
     }
+
+    /// Creates a new [Mesh] which is a result of joining it with another one.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let a = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    ///
+    /// let b = Mesh::new(vec![20.0, 20.0, 20.0,
+    ///                        30.0, 20.0, 20.0,
+    ///                        30.0, 5.0, 20.0],
+    /// vec![0, 1, 2]);
+    ///
+    /// let actual = a.get_by_joining_with(&b);
+    /// let expected = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                               10.0, 0.0, 0.0,
+    ///                               10.0, -15.0, 0.0,
+    ///                               20.0, 20.0, 20.0,
+    ///                               30.0, 20.0, 20.0,
+    ///                               30.0, 5.0, 20.0],
+    /// vec![0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(expected.eq(&actual), true);
+    /// ```
+    pub fn get_by_joining_with(&self, another_mesh: &Mesh) -> Mesh {
+        let max_index = self.indices.iter().max_by(|a, b| a.cmp(b)).unwrap();
+        let offset = max_index + 1;
+        let another_mesh_with_indices_offset = another_mesh.get_with_index_offset(offset);
+        let mut coordinates: Vec<f64> = self.coordinates.clone();
+        coordinates.extend(another_mesh_with_indices_offset.coordinates.clone());
+        let mut indices: Vec<usize> = self.indices.clone();
+        indices.extend(another_mesh_with_indices_offset.indices.clone());
+
+        Mesh::new(coordinates, indices)
+    }
 }
 
 #[cfg(test)]
@@ -1077,6 +1117,7 @@ mod tests {
         assert_eq!(expected.eq(&actual), true);
     }
 
+    #[test]
     pub fn test_get_with_index_offset() {
         let input = Mesh::new(vec![
             0.0, 0.0, 0.0,
@@ -1112,6 +1153,78 @@ mod tests {
             12,13,14,
             13,10,14
         ]);
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    pub fn test_get_by_joining_with_another(){
+        let a = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+        vec![0, 1, 2]);
+
+        let b = Mesh::new(vec![20.0, 20.0, 20.0,
+                               30.0, 20.0, 20.0,
+                               30.0, 5.0, 20.0],
+        vec![0, 1, 2]);
+
+        let actual = a.get_by_joining_with(&b);
+        let expected = Mesh::new(vec![0.0, 0.0, 0.0,
+                                      10.0, 0.0, 0.0,
+                                      10.0, -15.0, 0.0,
+                                      20.0, 20.0, 20.0,
+                                      30.0, 20.0, 20.0,
+                                      30.0, 5.0, 20.0],
+        vec![0, 1, 2, 3, 4, 5]);
+
+        assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    pub fn test_get_by_joining_with_another_with_welded(){
+        let a = Mesh::new(vec![
+            0.0, 0.0, 0.0,
+            10.0, 0.0, 0.0,
+            10.0,10.0,0.0,
+            0.0,10.0,0.0,
+            5.0,5.0,4.0,
+        ], vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+
+        let b = Mesh::new(vec![20.0, 20.0, 20.0,
+                               30.0, 20.0, 20.0,
+                               30.0, 5.0, 20.0],
+                          vec![0, 1, 2]);
+
+        let actual = a.get_by_joining_with(&b);
+        let expected = Mesh::new(vec![0.0, 0.0, 0.0,
+                                                       10.0, 0.0, 0.0,
+                                                       10.0,10.0,0.0,
+                                                       0.0,10.0,0.0,
+                                                       5.0,5.0,4.0,
+                                                       20.0, 20.0, 20.0,
+                                                       30.0, 20.0, 20.0,
+                                                       30.0, 5.0, 20.0],
+                                           vec![
+                                                        // Base faces
+                                                        0,1,2,
+                                                        0,2,3,
+                                                        // Side faces
+                                                        0,1,4,
+                                                        1,2,4,
+                                                        2,3,4,
+                                                        3,0,4,
+                                                        // Joined
+                                                        5,6,7]);
+
         assert_eq!(expected.eq(&actual), true);
     }
 }
