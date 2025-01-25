@@ -147,62 +147,66 @@ impl ops::Sub<Vector> for Vector {
     }
 }
 
-#[test]
-fn test_reverse_vector() {
-    let mut vector = Vector::new(5.231, -0.341, 9.093);
-    vector.reverse();
-    assert_eq!(vector.x, -5.231);
-    assert_eq!(vector.y, 0.341);
-    assert_eq!(vector.z, -9.093);
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_reverse_vector() {
+        let mut vector = Vector::new(5.231, -0.341, 9.093);
+        vector.reverse();
+        assert_eq!(vector.x, -5.231);
+        assert_eq!(vector.y, 0.341);
+        assert_eq!(vector.z, -9.093);
+    }
 
-#[test]
-fn test_get_reversed_vector() {
-    let vector = Vector::new(5.231, -0.341, 9.093);
-    let result = vector.get_reversed();
-    assert_eq!(result.x, -5.231);
-    assert_eq!(result.y, 0.341);
-    assert_eq!(result.z, -9.093);
-}
+    #[test]
+    fn test_get_reversed_vector() {
+        let vector = Vector::new(5.231, -0.341, 9.093);
+        let result = vector.get_reversed();
+        assert_eq!(result.x, -5.231);
+        assert_eq!(result.y, 0.341);
+        assert_eq!(result.z, -9.093);
+    }
 
-#[test]
-fn test_get_unitized_vector() {
-    let vector = Vector::new(5.231, -0.341, 11.034);
-    let result = vector.get_unitized();
-    assert_eq!(result.x, 5.231 / 12.215923951957134);
-    assert_eq!(result.y, -0.341 / 12.215923951957134);
-    assert_eq!(result.z, 11.034 / 12.215923951957134);
-}
+    #[test]
+    fn test_get_unitized_vector() {
+        let vector = Vector::new(5.231, -0.341, 11.034);
+        let result = vector.get_unitized();
+        assert_eq!(result.x, 5.231 / 12.215923951957134);
+        assert_eq!(result.y, -0.341 / 12.215923951957134);
+        assert_eq!(result.z, 11.034 / 12.215923951957134);
+    }
 
-#[test]
-#[should_panic(expected = "Cannot get unitized Vector if its length is 0.0")]
-fn test_get_unitized_vector_0_length_panic() {
-    let vector = Vector::zero();
-    let _result = vector.get_unitized();
-}
+    #[test]
+    #[should_panic(expected = "Cannot get unitized Vector if its length is 0.0")]
+    fn test_get_unitized_vector_0_length_panic() {
+        let vector = Vector::zero();
+        let _result = vector.get_unitized();
+    }
 
-#[test]
-fn test_vector_multiply_f64() {
-    let vector = Vector::new(5.231, -0.341, 11.034);
-    let result = vector * 2.5;
-    let expected = Vector::new(5.231*2.5, -0.341*2.5, 11.034*2.5);
-    assert_eq!(result.eq(&expected), true);
-}
+    #[test]
+    fn test_vector_multiply_f64() {
+        let vector = Vector::new(5.231, -0.341, 11.034);
+        let result = vector * 2.5;
+        let expected = Vector::new(5.231 * 2.5, -0.341 * 2.5, 11.034 * 2.5);
+        assert_eq!(result.eq(&expected), true);
+    }
 
-#[test]
-fn test_vector_add_vector() {
-    let a = Vector::new(5.231, -0.341, 11.034);
-    let b = Vector::new(-12.564, 5.642, 7.731);
-    let result = a + b;
-    let expected = Vector::new(5.231+(-12.564), -0.341+5.642, 11.034+7.731);
-    assert_eq!(result.eq(&expected), true);
-}
+    #[test]
+    fn test_vector_add_vector() {
+        let a = Vector::new(5.231, -0.341, 11.034);
+        let b = Vector::new(-12.564, 5.642, 7.731);
+        let result = a + b;
+        let expected = Vector::new(5.231 + (-12.564), -0.341 + 5.642, 11.034 + 7.731);
+        assert_eq!(result.eq(&expected), true);
+    }
 
-#[test]
-fn test_vector_subtract_vector() {
-    let a = Vector::new(5.231, -0.341, 11.034);
-    let b = Vector::new(-12.564, 5.642, 7.731);
-    let result = a - b;
-    let expected = Vector::new(5.231-(-12.564), -0.341-5.642, 11.034-7.731);
-    assert_eq!(result.eq(&expected), true);
+    #[test]
+    fn test_vector_subtract_vector() {
+        let a = Vector::new(5.231, -0.341, 11.034);
+        let b = Vector::new(-12.564, 5.642, 7.731);
+        let result = a - b;
+        let expected = Vector::new(5.231-(-12.564), -0.341-5.642, 11.034-7.731);
+        assert_eq!(result.eq(&expected), true);
+    }
 }
