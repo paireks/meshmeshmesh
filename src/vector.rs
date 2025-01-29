@@ -109,12 +109,12 @@ impl Vector {
     ///
     /// let start = Point::new(0.541, 4.051, -8.031);
     /// let end = Point::new(-3.093, 11.391, 15.0341);
-    /// let result = Vector::from_2_points(start, end);
+    /// let result = Vector::from_2_points(&start, &end);
     /// assert_eq!(result.x, -3.093-0.541);
     /// assert_eq!(result.y, 11.391-4.051);
     /// assert_eq!(result.z, 15.0341--8.031);
     /// ```
-    pub fn from_2_points(start: Point, end: Point) -> Vector {
+    pub fn from_2_points(start: &Point, end: &Point) -> Vector {
         Vector::new(end.x - start.x, end.y - start.y, end.z - start.z)
     }
 }
@@ -227,7 +227,7 @@ mod tests {
     fn test_from_2_points() {
         let start = Point::new(0.541, 4.051, -8.031);
         let end = Point::new(-3.093, 11.391, 15.0341);
-        let result = Vector::from_2_points(start, end);
+        let result = Vector::from_2_points(&start, &end);
         assert_eq!(result.x, -3.093-0.541);
         assert_eq!(result.y, 11.391-4.051);
         assert_eq!(result.z, 15.0341--8.031);
