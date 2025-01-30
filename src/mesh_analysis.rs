@@ -1,5 +1,6 @@
 use crate::bounding_box::BoundingBox;
 use crate::mesh::Mesh;
+use crate::vector::Vector;
 
 impl Mesh {
 
@@ -404,7 +405,7 @@ impl Mesh {
     ///
     /// # Example
     ///
-    /// Here is an example of getting all ending indices only
+    /// Here is an example of getting all ending indices only.
     ///
     /// ```
     /// use meshmeshmesh::mesh::Mesh;
@@ -438,6 +439,73 @@ impl Mesh {
     /// ```
     pub fn get_end_indices(&self) -> Vec<usize> {
         self.indices.iter().skip(2).step_by(3).copied().collect()
+    }
+
+    /// Gets list of [Vector]s that represent [Mesh] normals for faces.
+    ///
+    /// For each [Mesh] face there is 1 corresponding normal [Vector].
+    ///
+    /// These [Vector]s should be unitized.
+    ///
+    /// # Example
+    ///
+    /// Here is an example with pyramid for which all normals are calculated.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2, //0
+    ///     0,2,3, //1
+    ///
+    ///     // Side faces
+    ///     0,1,4, //2
+    ///     1,2,4, //3
+    ///     2,3,4, //4
+    ///     3,0,4  //5
+    /// ]);
+    ///
+    ///
+    /// let expected = vec![
+    /// // Base faces normals
+    /// Vector::new(0.0,0.0,1.0), //0
+    /// Vector::new(0.0,0.0,1.0), //1
+    ///
+    /// // Side faces normals
+    /// Vector::new(0.0,-0.624695,0.780869), //2
+    /// Vector::new(0.624695,0.0,0.780869),  //3
+    /// Vector::new(0.0,0.624695,0.780869),  //4
+    /// Vector::new(-0.624695,0.0,0.780869), //5
+    /// ];
+    ///
+    ///
+    /// let actual = input.get_face_normal_vectors_unitized();
+    ///
+    /// assert_eq!(expected.len(), actual.len());
+    /// for i in 0..expected.len() {
+    ///     assert_eq!(((expected[i].x - actual[i].x).abs() < 0.00001), true);
+    ///     assert_eq!(((expected[i].y - actual[i].y).abs() < 0.00001), true);
+    ///     assert_eq!(((expected[i].z - actual[i].z).abs() < 0.00001), true);
+    /// }
+    ///
+    /// ```
+    pub fn get_face_normal_vectors_unitized(&self) -> Vec<Vector> {
+        let triangles = self.to_triangles();
+
+        triangles.iter().map(|triangle| triangle.get_normal_vector_unitized()).collect()
     }
 }
 
@@ -637,5 +705,54 @@ mod tests {
         let expected_end = vec![2, 3, 4, 4, 4, 4];
         let actual_end = input.get_end_indices();
         assert_eq!(expected_end, actual_end);
+    }
+
+    #[test]
+    fn test_get_face_normal_vectors_unitized() {
+        let input = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2, //0
+            0,2,3, //1
+
+            // Side faces
+            0,1,4, //2
+            1,2,4, //3
+            2,3,4, //4
+            3,0,4  //5
+        ]);
+
+
+        let expected = vec![
+        // Base faces normals
+        Vector::new(0.0,0.0,1.0), //0
+        Vector::new(0.0,0.0,1.0), //1
+
+        // Side faces normals
+        Vector::new(0.0,-0.624695,0.780869), //2
+        Vector::new(0.624695,0.0,0.780869),  //3
+        Vector::new(0.0,0.624695,0.780869),  //4
+        Vector::new(-0.624695,0.0,0.780869), //5
+        ];
+
+
+        let actual = input.get_face_normal_vectors_unitized();
+
+        assert_eq!(expected.len(), actual.len());
+        for i in 0..expected.len() {
+            assert_eq!(((expected[i].x - actual[i].x).abs() < 0.00001), true);
+            assert_eq!(((expected[i].y - actual[i].y).abs() < 0.00001), true);
+            assert_eq!(((expected[i].z - actual[i].z).abs() < 0.00001), true);
+        }
     }
 }
