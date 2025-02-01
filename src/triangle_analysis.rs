@@ -1,4 +1,5 @@
 use crate::point::Point;
+use crate::ray::Ray;
 use crate::triangle::Triangle;
 use crate::vector::Vector;
 
@@ -83,6 +84,37 @@ impl Triangle {
         let second_vector = self.get_second_side_as_vector();
 
         first_vector.get_cross_product(&second_vector).get_unitized()
+    }
+
+    /// Gets the normal [Ray] of the [Triangle].
+    ///
+    /// This [Ray] has an `origin` which is a centroid and `direction` which is a unitized normal.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::ray::Ray;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let input = Triangle::new(
+    /// Point::new(35.704653, 37.253023, -22.626602),
+    /// Point::new(-38.634947, 13.199458, 23.94433),
+    /// Point::new(-21.698671, -49.7235, -32.888206));
+    ///
+    /// let actual = input.get_normal_ray();
+    ///
+    /// let expected_origin = Point::new((35.704653 + -38.634947 + -21.698671)/3.0, (37.253023 + 13.199458 + -49.7235)/3.0, (-22.626602 + 23.94433 + -32.888206)/3.0);
+    /// let expected_direction = Vector::new(0.573586,-0.458635,0.678714);
+    /// let expected = Ray::new(expected_origin, expected_direction);
+    ///
+    /// assert_eq!(expected.eq_with_tolerance(&actual, 0.00001), true);
+    /// ```
+    pub fn get_normal_ray(&self) -> Ray {
+        let origin = self.get_centroid();
+        let direction = self.get_normal_vector_unitized();
+        Ray::new(origin, direction)
     }
 
     /// Gets the first side (AB) of the [Triangle] (ABC) and returns it as an AB [Vector].
@@ -220,6 +252,22 @@ mod tests {
         let actual = input.get_normal_vector_unitized();
 
         let expected = Vector::new(0.573586,-0.458635,0.678714);
+
+        assert_eq!(expected.eq_with_tolerance(&actual, 0.00001), true);
+    }
+
+    #[test]
+    pub fn test_get_normal_ray() {
+        let input = Triangle::new(
+        Point::new(35.704653, 37.253023, -22.626602),
+        Point::new(-38.634947, 13.199458, 23.94433),
+        Point::new(-21.698671, -49.7235, -32.888206));
+
+        let actual = input.get_normal_ray();
+
+        let expected_origin = Point::new((35.704653 + -38.634947 + -21.698671)/3.0, (37.253023 + 13.199458 + -49.7235)/3.0, (-22.626602 + 23.94433 + -32.888206)/3.0);
+        let expected_direction = Vector::new(0.573586,-0.458635,0.678714);
+        let expected = Ray::new(expected_origin, expected_direction);
 
         assert_eq!(expected.eq_with_tolerance(&actual, 0.00001), true);
     }

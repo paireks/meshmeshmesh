@@ -12,3 +12,4 @@ mod triangle_analysis;
 pub mod vector;
 mod vector_analysis;
 mod vector_transformations;
+mod ray_analysis;
