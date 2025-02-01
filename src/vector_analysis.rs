@@ -28,6 +28,49 @@ impl Vector {
         self.get_length() == 0.0
     }
 
+    /// Compares given [Vector] to other one, but with a `f64` tolerance.
+    ///
+    /// If any value absolute difference is > tolerance, then it should return `false`.
+    ///
+    /// # Examples
+    ///
+    /// In this example we can see the differences of coordinates are not > tolerance, so we expect `true`.
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let tolerance: f64 = 0.001;
+    /// let a = Vector::new(1.5, -2.3, 3.9);
+    /// let b = Vector::new(1.5 + 0.0005, -2.3 - 0.0005, 3.9 + 0.001);
+    ///
+    /// assert_eq!(a.eq_with_tolerance(&b, tolerance), true);
+    /// ```
+    ///
+    /// In this example we can see the Y-coordinate absolute difference is > tolerance, so we expect 'false'.
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let tolerance: f64 = 0.001;
+    /// let a = Vector::new(1.5, -2.3, 3.9);
+    /// let b = Vector::new(1.5 + 0.0005, -2.3 - 0.00101, 3.9 + 0.001);
+    /// assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
+    /// ```
+    pub fn eq_with_tolerance(&self, other:&Vector, tolerance: f64) -> bool {
+        if (self.x - other.x).abs() > tolerance {
+            false
+        }
+        else if (self.y - other.y).abs() > tolerance {
+            false
+        }
+        else if (self.z - other.z).abs() > tolerance {
+            false
+        }
+        else {
+            true
+        }
+    }
+
     /// Returns length of a [Vector]
     ///
     /// # Example
@@ -108,6 +151,46 @@ mod tests {
     fn test_zero_vector_false() {
         let result = Vector::new(0.541, 4.051, -8.031);
         assert_eq!(result.is_zero_length(), false)
+    }
+
+    #[test]
+    fn test_eq_within_tolerance_true(){
+        let tolerance: f64 = 0.001;
+        let a = Vector::new(1.5, -2.3, 3.9);
+        let b = Vector::new(1.5 + 0.0005, -2.3 - 0.0005, 3.9 + 0.001);
+        assert_eq!(a.eq_with_tolerance(&b, tolerance), true);
+    }
+
+    #[test]
+    fn test_eq_within_tolerance_different_x_false(){
+        let tolerance: f64 = 0.001;
+        let a = Vector::new(1.5, -2.3, 3.9);
+        let b = Vector::new(1.5 + 0.0011, -2.3 - 0.0005, 3.9 + 0.001);
+        assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
+    }
+
+    #[test]
+    fn test_eq_within_tolerance_different_y_false(){
+        let tolerance: f64 = 0.001;
+        let a = Vector::new(1.5, -2.3, 3.9);
+        let b = Vector::new(1.5 + 0.0005, -2.3 - 0.00101, 3.9 + 0.001);
+        assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
+    }
+
+    #[test]
+    fn test_eq_within_tolerance_different_z_false(){
+        let tolerance: f64 = 0.001;
+        let a = Vector::new(1.5, -2.3, 3.9);
+        let b = Vector::new(1.5 + 0.0005, -2.3 - 0.0005, 3.9 + 0.0013);
+        assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
+    }
+
+    #[test]
+    fn test_eq_within_tolerance_different_xyz_false(){
+        let tolerance: f64 = 0.001;
+        let a = Vector::new(1.5, -2.3, 3.9);
+        let b = Vector::new(1.5 + 0.0011, -2.3 - 0.00101, 3.9 + 0.0013);
+        assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
     }
 
     #[test]

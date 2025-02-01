@@ -74,7 +74,6 @@ impl Mesh {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::to_string;
     use super::*;
 
     #[test]
