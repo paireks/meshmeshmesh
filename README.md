@@ -1,6 +1,6 @@
 # meshmeshmesh ![Crates.io Version](https://img.shields.io/crates/v/meshmeshmesh)
 
-![meshmeshmesh](/img/meshmeshmesh180.bmp)
+![meshmeshmesh](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/meshmeshmesh180.bmp)
 
 ## Introduction
 
