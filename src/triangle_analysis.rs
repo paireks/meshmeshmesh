@@ -244,10 +244,10 @@ mod tests {
 
     #[test]
     pub fn test_get_normal_vector_unitized() {
-        let input = Triangle::new(
-        Point::new(35.704653, 37.253023, -22.626602),
-        Point::new(-38.634947, 13.199458, 23.94433),
-        Point::new(-21.698671, -49.7235, -32.888206));
+            let input = Triangle::new(
+            Point::new(35.704653, 37.253023, -22.626602),
+            Point::new(-38.634947, 13.199458, 23.94433),
+            Point::new(-21.698671, -49.7235, -32.888206));
 
         let actual = input.get_normal_vector_unitized();
 

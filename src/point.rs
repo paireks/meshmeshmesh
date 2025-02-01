@@ -11,6 +11,7 @@
 /// assert_eq!(result.y, -2.3);
 /// assert_eq!(result.z, 3.9);
 /// ```
+#[derive(Debug, Clone, Copy)]
 pub struct Point {
     /// The x-coordinate of the point.
     pub x: f64,
