@@ -76,9 +76,7 @@ impl Triangle {
     ///
     /// let expected = Vector::new(0.573586,-0.458635,0.678714);
     ///
-    /// assert_eq!(((expected.x - actual.x).abs() < 0.00001), true);
-    /// assert_eq!(((expected.y - actual.y).abs() < 0.00001), true);
-    /// assert_eq!(((expected.z - actual.z).abs() < 0.00001), true);
+    /// assert_eq!(expected.eq_with_tolerance(&actual, 0.00001), true);
     /// ```
     pub fn get_normal_vector_unitized(&self) -> Vector {
         let first_vector = self.get_first_side_as_vector();
@@ -223,9 +221,7 @@ mod tests {
 
         let expected = Vector::new(0.573586,-0.458635,0.678714);
 
-        assert_eq!(((expected.x - actual.x).abs() < 0.00001), true);
-        assert_eq!(((expected.y - actual.y).abs() < 0.00001), true);
-        assert_eq!(((expected.z - actual.z).abs() < 0.00001), true);
+        assert_eq!(expected.eq_with_tolerance(&actual, 0.00001), true);
     }
 
     #[test]

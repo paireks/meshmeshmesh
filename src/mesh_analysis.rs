@@ -496,9 +496,7 @@ impl Mesh {
     ///
     /// assert_eq!(expected.len(), actual.len());
     /// for i in 0..expected.len() {
-    ///     assert_eq!(((expected[i].x - actual[i].x).abs() < 0.00001), true);
-    ///     assert_eq!(((expected[i].y - actual[i].y).abs() < 0.00001), true);
-    ///     assert_eq!(((expected[i].z - actual[i].z).abs() < 0.00001), true);
+    ///     assert_eq!(expected[i].eq_with_tolerance(&actual[i], 0.0001), true);
     /// }
     ///
     /// ```
@@ -750,9 +748,7 @@ mod tests {
 
         assert_eq!(expected.len(), actual.len());
         for i in 0..expected.len() {
-            assert_eq!(((expected[i].x - actual[i].x).abs() < 0.00001), true);
-            assert_eq!(((expected[i].y - actual[i].y).abs() < 0.00001), true);
-            assert_eq!(((expected[i].z - actual[i].z).abs() < 0.00001), true);
+            assert_eq!(expected[i].eq_with_tolerance(&actual[i], 0.0001), true);
         }
     }
 }
