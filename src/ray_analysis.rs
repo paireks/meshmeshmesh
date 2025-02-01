@@ -1,5 +1,4 @@
 use crate::ray::Ray;
-use crate::vector::Vector;
 
 impl Ray {
 
@@ -52,6 +51,7 @@ impl Ray {
 #[cfg(test)]
 mod tests {
     use crate::point::Point;
+    use crate::vector::Vector;
     use super::*;
 
     #[test]
