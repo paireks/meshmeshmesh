@@ -1,4 +1,4 @@
-# meshmeshmesh ![Crates.io Version](https://img.shields.io/crates/v/meshmeshmesh)
+# meshmeshmesh ![Crates.io Version](https://img.shields.io/crates/v/meshmeshmesh)(https://crates.io/crates/meshmeshmesh)
 
 ![meshmeshmesh](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/meshmeshmesh180.bmp)
 
