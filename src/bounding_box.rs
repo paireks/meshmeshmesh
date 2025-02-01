@@ -1,4 +1,3 @@
-use serde::{Deserialize, Serialize};
 
 /// Represents a three-dimensional bounding box (AABB: axis-aligned bounding box).
 ///
@@ -15,7 +14,6 @@ use serde::{Deserialize, Serialize};
 /// assert_eq!(result.min_z, 3.9);
 /// assert_eq!(result.max_z, 4.1);
 /// ```
-#[derive(Deserialize, Serialize)]
 pub struct BoundingBox {
     /// Minimum x value.
     pub min_x: f64,
@@ -72,8 +70,6 @@ impl BoundingBox {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::from_str;
-    use serde_json::to_string;
     use super::*;
 
     #[test]
@@ -154,24 +150,5 @@ mod tests {
         let b = BoundingBox::new(1.5, 1.651, -2.3, 0.71, 3.9, 4.12);
         assert_eq!(a.eq(&b), false);
         assert_eq!(b.eq(&a), false);
-    }
-
-    #[test]
-    fn test_to_json() {
-        let input = BoundingBox::new(1.5, 1.65, -2.3, -2.3, 3.9, 4.1);
-        let input_serialized = to_string(&input);
-        assert_eq!(input_serialized.is_ok(), true);
-        let input_serialized_string = input_serialized.ok().unwrap();
-        assert_eq!(input_serialized_string, "{\"min_x\":1.5,\"max_x\":1.65,\"min_y\":-2.3,\"max_y\":-2.3,\"min_z\":3.9,\"max_z\":4.1}");
-    }
-
-    #[test]
-    fn test_from_json() {
-        let json = "{\"min_x\":1.5,\"max_x\":1.65,\"min_y\":-2.3,\"max_y\":-2.3,\"min_z\":3.9,\"max_z\":4.1}";
-        let actual_result = from_str::<BoundingBox>(json);
-        assert_eq!(actual_result.is_ok(), true);
-        let actual = actual_result.ok().unwrap();
-        let expected = BoundingBox::new(1.5, 1.65, -2.3, -2.3, 3.9, 4.1);
-        assert_eq!(expected.eq(&actual), true);
     }
 }

@@ -1,4 +1,3 @@
-use serde::{Deserialize, Serialize};
 use crate::point::Point;
 use crate::triangle::Triangle;
 
@@ -34,7 +33,6 @@ use crate::triangle::Triangle;
 /// assert_eq!(result.indices, vec![0, 1, 2]); // We create 1 face there using point0, point1 and point2.
 /// ```
 ///
-#[derive(Deserialize, Serialize)]
 pub struct Mesh {
     /// The list of coordinates for the mesh vertices.
     pub coordinates: Vec<f64>,
@@ -224,8 +222,6 @@ impl Mesh {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::from_str;
-    use serde_json::to_string;
     use super::*;
 
     #[test]
@@ -489,30 +485,5 @@ mod tests {
                           vec![0, 1, 2]);
         assert_eq!(a.eq(&b), false);
         assert_eq!(b.eq(&a), false);
-    }
-
-    #[test]
-    fn test_to_json() {
-        let input = Mesh::new(vec![0.0, 0.0, 0.0,
-                                   10.0, 0.0, 0.0,
-                                   10.0, -15.0, 0.0],
-                              vec![0, 1, 2]);
-        let input_serialized = to_string(&input);
-        assert_eq!(input_serialized.is_ok(), true);
-        let input_serialized_string = input_serialized.ok().unwrap();
-        assert_eq!(input_serialized_string, "{\"coordinates\":[0.0,0.0,0.0,10.0,0.0,0.0,10.0,-15.0,0.0],\"indices\":[0,1,2]}");
-    }
-
-    #[test]
-    fn test_from_json() {
-        let json = "{\"coordinates\":[0.0,0.0,0.0,10.0,0.0,0.0,10.0,-15.0,0.0],\"indices\":[0,1,2]}";
-        let actual_result = from_str::<Mesh>(json);
-        assert_eq!(actual_result.is_ok(), true);
-        let actual = actual_result.ok().unwrap();
-        let expected = Mesh::new(vec![0.0, 0.0, 0.0,
-                                      10.0, 0.0, 0.0,
-                                      10.0, -15.0, 0.0],
-                                 vec![0, 1, 2]);
-        assert_eq!(expected.eq(&actual), true);
     }
 }

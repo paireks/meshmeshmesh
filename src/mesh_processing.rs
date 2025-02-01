@@ -1,6 +1,5 @@
 use crate::mesh::Mesh;
 use std::collections::{HashMap, HashSet};
-use serde_json::to_string;
 use crate::point::Point;
 
 impl Mesh {
@@ -920,12 +919,6 @@ mod tests {
                 3, 0, 4
             ]);
 
-        let input_serialized = to_string(&input).ok().unwrap();
-        println!("Input:");
-        println!("{}", input_serialized);
-        let actual_serialized = to_string(&actual).ok().unwrap();
-        println!("Output:");
-        println!("{}", actual_serialized);
         assert_eq!(expected.eq(&actual), true);
     }
 
@@ -991,12 +984,6 @@ mod tests {
                 3, 0, 4
             ]);
 
-        let input_serialized = to_string(&input).ok().unwrap();
-        println!("Input:");
-        println!("{}", input_serialized);
-        let actual_serialized = to_string(&actual).ok().unwrap();
-        println!("Output:");
-        println!("{}", actual_serialized);
         assert_eq!(expected.eq(&actual), true);
     }
 
@@ -1055,12 +1042,6 @@ mod tests {
                 2,3,4]
         );
 
-        let input_serialized = to_string(&input).ok().unwrap();
-        println!("Input:");
-        println!("{}", input_serialized);
-        let actual_serialized = to_string(&actual).ok().unwrap();
-        println!("Output:");
-        println!("{}", actual_serialized);
         assert_eq!(expected.eq(&actual), true);
     }
 

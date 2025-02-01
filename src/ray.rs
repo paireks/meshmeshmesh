@@ -1,9 +1,7 @@
-use serde::{Deserialize, Serialize};
 use crate::point::Point;
 use crate::vector::Vector;
 
 /// Represents a Ray object in three-dimensional space.
-#[derive(Deserialize, Serialize)]
 pub struct Ray {
     /// The origin [Point] from which we shoot the [Vector].
     pub origin: Point,
@@ -48,7 +46,6 @@ impl Ray {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::{from_str, to_string};
     use super::*;
     #[test]
     fn test_new() {
@@ -88,24 +85,5 @@ mod tests {
         let b = Ray::new(Point::new(0.0, 1.1, -2.5), Vector::new(1.0, 0.0, 5.0));
         assert_eq!(a.eq(&b), false);
         assert_eq!(b.eq(&a), false);
-    }
-
-    #[test]
-    fn test_to_json() {
-        let input = Ray::new(Point::new(0.0, 1.0, -2.5), Vector::new(1.0, 0.0, 0.0));
-        let input_serialized = to_string(&input);
-        assert_eq!(input_serialized.is_ok(), true);
-        let input_serialized_string = input_serialized.ok().unwrap();
-        assert_eq!(input_serialized_string, "{\"origin\":{\"x\":0.0,\"y\":1.0,\"z\":-2.5},\"direction\":{\"x\":1.0,\"y\":0.0,\"z\":0.0}}");
-    }
-
-    #[test]
-    fn test_from_json() {
-        let json = "{\"origin\":{\"x\":0.0,\"y\":1.0,\"z\":-2.5},\"direction\":{\"x\":1.0,\"y\":0.0,\"z\":0.0}}";
-        let actual_result = from_str::<Ray>(json);
-        assert_eq!(actual_result.is_ok(), true);
-        let actual = actual_result.ok().unwrap();
-        let expected = Ray::new(Point::new(0.0, 1.0, -2.5), Vector::new(1.0, 0.0, 0.0));
-        assert_eq!(expected.eq(&actual), true);
     }
 }
