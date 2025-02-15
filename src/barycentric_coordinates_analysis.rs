@@ -50,7 +50,7 @@ impl BarycentricCoordinates {
     /// assert_eq!(a.eq_with_tolerance(&b, tolerance), true);
     /// ```
     ///
-    /// In this example we can see the Y-coordinate absolute difference is > tolerance, so we expect 'false'.
+    /// In this example we can see the v-coordinate absolute difference is > tolerance, so we expect `false`.
     ///
     /// ```
     /// use meshmeshmesh::barycentric_coordinates::BarycentricCoordinates;
