@@ -154,7 +154,7 @@ mod tests {
     }
 
     #[test]
-    fn test_eq_within_tolerance_true(){
+    fn test_eq_with_tolerance_true(){
         let tolerance: f64 = 0.001;
         let a = Vector::new(1.5, -2.3, 3.9);
         let b = Vector::new(1.5 + 0.0005, -2.3 - 0.0005, 3.9 + 0.001);
@@ -162,7 +162,7 @@ mod tests {
     }
 
     #[test]
-    fn test_eq_within_tolerance_different_x_false(){
+    fn test_eq_with_tolerance_different_x_false(){
         let tolerance: f64 = 0.001;
         let a = Vector::new(1.5, -2.3, 3.9);
         let b = Vector::new(1.5 + 0.0011, -2.3 - 0.0005, 3.9 + 0.001);
@@ -170,7 +170,7 @@ mod tests {
     }
 
     #[test]
-    fn test_eq_within_tolerance_different_y_false(){
+    fn test_eq_with_tolerance_different_y_false(){
         let tolerance: f64 = 0.001;
         let a = Vector::new(1.5, -2.3, 3.9);
         let b = Vector::new(1.5 + 0.0005, -2.3 - 0.00101, 3.9 + 0.001);
@@ -178,7 +178,7 @@ mod tests {
     }
 
     #[test]
-    fn test_eq_within_tolerance_different_z_false(){
+    fn test_eq_with_tolerance_different_z_false(){
         let tolerance: f64 = 0.001;
         let a = Vector::new(1.5, -2.3, 3.9);
         let b = Vector::new(1.5 + 0.0005, -2.3 - 0.0005, 3.9 + 0.0013);
@@ -186,7 +186,7 @@ mod tests {
     }
 
     #[test]
-    fn test_eq_within_tolerance_different_xyz_false(){
+    fn test_eq_with_tolerance_different_xyz_false(){
         let tolerance: f64 = 0.001;
         let a = Vector::new(1.5, -2.3, 3.9);
         let b = Vector::new(1.5 + 0.0011, -2.3 - 0.00101, 3.9 + 0.0013);

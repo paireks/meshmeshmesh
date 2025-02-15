@@ -11,7 +11,7 @@ impl BarycentricCoordinates {
     /// use meshmeshmesh::barycentric_coordinates::BarycentricCoordinates;
     /// let input = BarycentricCoordinates::new(0.5, 0.3, 0.4);
     /// 
-    /// let actual = input.are_normalized_within_tolerance(0.01);
+    /// let actual = input.are_normalized_with_tolerance(0.01);
     /// 
     /// assert_eq!(actual, false);
     /// ```
@@ -22,11 +22,11 @@ impl BarycentricCoordinates {
     /// use meshmeshmesh::barycentric_coordinates::BarycentricCoordinates;
     /// let input = BarycentricCoordinates::new(0.5, 0.3, 0.2);
     ///
-    /// let actual = input.are_normalized_within_tolerance(0.01);
+    /// let actual = input.are_normalized_with_tolerance(0.01);
     ///
     /// assert_eq!(actual, true);
     /// ```
-    pub fn are_normalized_within_tolerance(&self, tolerance: f64) -> bool {
+    pub fn are_normalized_with_tolerance(&self, tolerance: f64) -> bool {
         
         let sum = self.u + self.v + self.w;
         (sum-1.0).abs() < tolerance
@@ -81,43 +81,43 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_are_normalized_within_tolerance_false_too_big(){
+    fn test_are_normalized_with_tolerance_false_too_big(){
         let input = BarycentricCoordinates::new(0.5, 0.3, 0.4);
         
-        let actual = input.are_normalized_within_tolerance(0.01);
+        let actual = input.are_normalized_with_tolerance(0.01);
         
         assert_eq!(actual, false);
     }
 
     #[test]
-    fn test_are_normalized_within_tolerance_false_too_small(){
+    fn test_are_normalized_with_tolerance_false_too_small(){
         let input = BarycentricCoordinates::new(0.49, 0.3, 0.2);
 
-        let actual = input.are_normalized_within_tolerance(0.01);
+        let actual = input.are_normalized_with_tolerance(0.01);
 
         assert_eq!(actual, false);
     }
 
     #[test]
-    fn test_are_normalized_within_tolerance_true(){
+    fn test_are_normalized_with_tolerance_true(){
         let input = BarycentricCoordinates::new(0.5, 0.3, 0.2);
         
-        let actual = input.are_normalized_within_tolerance(0.01);
+        let actual = input.are_normalized_with_tolerance(0.01);
         
         assert_eq!(actual, true);
     }
 
     #[test]
-    fn test_are_normalized_within_tolerance_true_close(){
+    fn test_are_normalized_with_tolerance_true_close(){
         let input = BarycentricCoordinates::new(0.5001, 0.299, 0.1999);
 
-        let actual = input.are_normalized_within_tolerance(0.01);
+        let actual = input.are_normalized_with_tolerance(0.01);
 
         assert_eq!(actual, true);
     }
 
     #[test]
-    fn test_eq_within_tolerance_true(){
+    fn test_eq_with_tolerance_true(){
         let tolerance: f64 = 0.001;
         let a = BarycentricCoordinates::new(0.5, 0.2, 0.3);
         let b = BarycentricCoordinates::new(0.5 + 0.0005, 0.2 - 0.0005, 0.3 + 0.0009999);
@@ -125,7 +125,7 @@ mod tests {
     }
 
     #[test]
-    fn test_eq_within_tolerance_different_x_false(){
+    fn test_eq_with_tolerance_different_x_false(){
         let tolerance: f64 = 0.001;
         let a = BarycentricCoordinates::new(0.5, 0.2, 0.3);
         let b = BarycentricCoordinates::new(0.5 + 0.0011, 0.2 - 0.0005, 0.3 + 0.0009999);
@@ -133,7 +133,7 @@ mod tests {
     }
 
     #[test]
-    fn test_eq_within_tolerance_different_y_false(){
+    fn test_eq_with_tolerance_different_y_false(){
         let tolerance: f64 = 0.001;
         let a = BarycentricCoordinates::new(0.5, 0.2, 0.3);
         let b = BarycentricCoordinates::new(0.5 + 0.0005, 0.2 - 0.00101, 0.3 + 0.0009999);
@@ -141,7 +141,7 @@ mod tests {
     }
 
     #[test]
-    fn test_eq_within_tolerance_different_z_false(){
+    fn test_eq_with_tolerance_different_z_false(){
         let tolerance: f64 = 0.001;
         let a = BarycentricCoordinates::new(0.5, 0.2, 0.3);
         let b = BarycentricCoordinates::new(0.5 + 0.0005, 0.2 - 0.0005, 0.3 + 0.0013);
@@ -149,7 +149,7 @@ mod tests {
     }
 
     #[test]
-    fn test_eq_within_tolerance_different_xyz_false(){
+    fn test_eq_with_tolerance_different_xyz_false(){
         let tolerance: f64 = 0.001;
         let a = BarycentricCoordinates::new(0.5, 0.2, 0.3);
         let b = BarycentricCoordinates::new(0.5 + 0.0011, 0.2 - 0.00101, 0.3 + 0.0013);
