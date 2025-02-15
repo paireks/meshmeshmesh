@@ -62,7 +62,7 @@ impl BarycentricCoordinates {
     ///
     /// let actual = BarycentricCoordinates::new_from_point_and_triangle(input_point, input_triangle);
     /// let expected = BarycentricCoordinates::new(0.5, 0.3, 0.2);
-    /// 
+    ///
     /// assert_eq!(actual.eq_with_tolerance(&expected, 0.001), true);
     /// ```
     ///
@@ -92,19 +92,64 @@ mod tests {
         assert_eq!(result.v, 0.3);
         assert_eq!(result.w, 0.2);
     }
-    
+
     #[test]
     fn test_new_from_point_and_triangle() {
         let input_triangle = Triangle::new(
         Point::new(35.704653, 37.253023, -22.626602),
         Point::new(-38.634947, 13.199458, 23.94433),
         Point::new(-21.698671, -49.7235, -32.888206));
-        
+
         let input_point = Point::new(1.922108, 12.641649, -10.707643);
-        
+
         let actual = BarycentricCoordinates::new_from_point_and_triangle(input_point, input_triangle);
         let expected = BarycentricCoordinates::new(0.5, 0.3, 0.2);
-        
+
+        assert_eq!(actual.eq_with_tolerance(&expected, 0.001), true);
+    }
+
+    #[test]
+    fn test_new_from_point_and_triangle_first_point() {
+        let input_triangle = Triangle::new(
+            Point::new(35.704653, 37.253023, -22.626602),
+            Point::new(-38.634947, 13.199458, 23.94433),
+            Point::new(-21.698671, -49.7235, -32.888206));
+
+        let input_point = Point::new(35.704653, 37.253023, -22.626602);
+
+        let actual = BarycentricCoordinates::new_from_point_and_triangle(input_point, input_triangle);
+        let expected = BarycentricCoordinates::new(1.0, 0.0, 0.0);
+
+        assert_eq!(actual.eq_with_tolerance(&expected, 0.001), true);
+    }
+
+    #[test]
+    fn test_new_from_point_and_triangle_second_point() {
+        let input_triangle = Triangle::new(
+            Point::new(35.704653, 37.253023, -22.626602),
+            Point::new(-38.634947, 13.199458, 23.94433),
+            Point::new(-21.698671, -49.7235, -32.888206));
+
+        let input_point = Point::new(-38.634947, 13.199458, 23.94433);
+
+        let actual = BarycentricCoordinates::new_from_point_and_triangle(input_point, input_triangle);
+        let expected = BarycentricCoordinates::new(0.0, 1.0, 0.0);
+
+        assert_eq!(actual.eq_with_tolerance(&expected, 0.001), true);
+    }
+
+    #[test]
+    fn test_new_from_point_and_triangle_third_point() {
+        let input_triangle = Triangle::new(
+            Point::new(35.704653, 37.253023, -22.626602),
+            Point::new(-38.634947, 13.199458, 23.94433),
+            Point::new(-21.698671, -49.7235, -32.888206));
+
+        let input_point = Point::new(-21.698671, -49.7235, -32.888206);
+
+        let actual = BarycentricCoordinates::new_from_point_and_triangle(input_point, input_triangle);
+        let expected = BarycentricCoordinates::new(0.0, 0.0, 1.0);
+
         assert_eq!(actual.eq_with_tolerance(&expected, 0.001), true);
     }
 
