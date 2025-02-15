@@ -1,3 +1,4 @@
+pub mod barycentric_coordinates;
 pub mod bounding_box;
 pub mod mesh;
 mod mesh_analysis;
