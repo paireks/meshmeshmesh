@@ -12,7 +12,7 @@ impl Vector {
     ///
     /// let result = Vector::zero();
     ///
-    /// assert_eq!(result.is_zero_length(), true)
+    /// assert_eq!(result.is_absolute_zero_length(), true)
     /// ```
     ///
     /// And here is an example of checking a Vector that is not a zero-length Vector
@@ -22,10 +22,46 @@ impl Vector {
     ///
     /// let result = Vector::new(0.541, 4.051, -8.031);
     ///
-    /// assert_eq!(result.is_zero_length(), false)
+    /// assert_eq!(result.is_absolute_zero_length(), false)
     /// ```
-    pub fn is_zero_length(&self) -> bool {
+    pub fn is_absolute_zero_length(&self) -> bool {
         self.get_length() == 0.0
+    }
+
+    /// Checks if this [Vector] is perpendicular to another given Vector.
+    ///
+    /// It uses `epsilon` for the check.
+    ///
+    /// # Examples
+    ///
+    /// In this example below [Vector] is not perpendicular, so it returns `false`.
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let a = Vector::new(0.541, 4.051, -8.031);
+    /// let b = Vector::new(-6.286129, 4.842292, 2.426153);
+    ///
+    /// assert_eq!(a.is_perpendicular_to_vector_with_epsilon(&b), false);
+    /// ```
+    ///
+    /// In this example below [Vector] is perpendicular, so it returns `true`.
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let a = Vector::new(0.541, 4.051, -8.031);
+    /// let b = Vector::new(3.41404745335766,0.570944068725662,0.517979590919456);
+    ///
+    /// assert_eq!(a.is_perpendicular_to_vector_with_epsilon(&b), true);
+    /// ```
+    pub fn is_perpendicular_to_vector_with_epsilon(&self, vector: &Vector) -> bool{
+        let a_unitized = self.get_unitized(); // They are both unitized before the dot product calculation to try to minimize impact of the Vectors' length
+        let b_unitized = vector.get_unitized();
+
+        let dot_product = a_unitized.get_dot_product(&b_unitized);
+
+        dot_product > -f64::EPSILON && dot_product < f64::EPSILON
     }
 
     /// Compares given [Vector] to other one, but with a `f64` tolerance.
@@ -142,15 +178,31 @@ impl Vector {
 mod tests {
     use super::*;
     #[test]
-    fn test_zero_vector_true() {
+    fn test_is_absolute_zero_length_true() {
         let result = Vector::zero();
-        assert_eq!(result.is_zero_length(), true)
+        assert_eq!(result.is_absolute_zero_length(), true)
     }
 
     #[test]
-    fn test_zero_vector_false() {
+    fn test_is_absolute_zero_length_false() {
         let result = Vector::new(0.541, 4.051, -8.031);
-        assert_eq!(result.is_zero_length(), false)
+        assert_eq!(result.is_absolute_zero_length(), false)
+    }
+
+    #[test]
+    fn test_is_perpendicular_to_vector_false() {
+        let a = Vector::new(0.541, 4.051, -8.031);
+        let b = Vector::new(-6.286129, 4.842292, 2.426153);
+
+        assert_eq!(a.is_perpendicular_to_vector_with_epsilon(&b), false);
+    }
+
+    #[test]
+    fn test_is_perpendicular_to_vector_true() {
+        let a = Vector::new(0.541, 4.051, -8.031);
+        let b = Vector::new(3.41404745335766,0.570944068725662,0.517979590919456);
+
+        assert_eq!(a.is_perpendicular_to_vector_with_epsilon(&b), true);
     }
 
     #[test]
