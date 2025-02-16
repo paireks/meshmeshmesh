@@ -49,6 +49,52 @@ impl Triangle {
         self.get_normal_vector_unitized().is_perpendicular_to_vector_with_epsilon(vector)
     }
 
+    /// Check is the [Triangle] is parallel to given [Ray].
+    ///
+    /// It uses `epsilon` for the check.
+    ///
+    /// # Examples
+    ///
+    /// In this example there is a [Triangle] that is not parallel, so `false` is returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::ray::Ray;
+    /// use meshmeshmesh::vector::Vector;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let input_triangle = Triangle::new(
+    /// Point::new(35.704653, 37.253023, -22.626602),
+    /// Point::new(-38.634947, 13.199458, 23.94433),
+    /// Point::new(-21.698671, -49.7235, -32.888206));
+    ///
+    /// let input_ray = Ray::new(Point::new(1.000, -2.000, 3.000), Vector::new(3.456, 0.9831, -9.761));
+    ///
+    /// assert_eq!(input_triangle.is_parallel_to_ray_with_epsilon(&input_ray), false);
+    /// ```
+    ///
+    /// In this example there is a [Triangle] that is parallel, so `true` is returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::ray::Ray;
+    /// use meshmeshmesh::vector::Vector;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let input_triangle = Triangle::new(
+    /// Point::new(35.704653, 37.253023, -22.626602),
+    /// Point::new(-38.634947, 13.199458, 23.94433),
+    /// Point::new(-21.698671, -49.7235, -32.888206));
+    ///
+    /// let input_ray = Ray::new(Point::new(1.000, -2.000, 3.000), Vector::new(-45.637938,19.4346965,51.701734));
+    ///
+    /// assert_eq!(input_triangle.is_parallel_to_ray_with_epsilon(&input_ray), true);
+    /// ```
+    pub fn is_parallel_to_ray_with_epsilon(&self, ray: &Ray) -> bool{
+
+        self.is_parallel_to_vector_with_epsilon(&ray.direction)
+    }
+
     /// Calculates area of given [Triangle] using Heron's formula.
     ///
     /// # Example
@@ -244,16 +290,16 @@ impl Triangle {
 mod tests {
     use crate::point::Point;
     use super::*;
-    
+
     #[test]
     pub fn test_is_parallel_to_vector_with_epsilon_false() {
         let input_triangle = Triangle::new(
         Point::new(35.704653, 37.253023, -22.626602),
         Point::new(-38.634947, 13.199458, 23.94433),
         Point::new(-21.698671, -49.7235, -32.888206));
-        
+
         let input_vector = Vector::new(3.456, 0.9831, -9.761);
-        
+
         assert_eq!(input_triangle.is_parallel_to_vector_with_epsilon(&input_vector), false);
     }
 
@@ -263,12 +309,36 @@ mod tests {
         Point::new(35.704653, 37.253023, -22.626602),
         Point::new(-38.634947, 13.199458, 23.94433),
         Point::new(-21.698671, -49.7235, -32.888206));
-        
+
         let input_vector = Vector::new(-45.637938,19.4346965,51.701734);
-        
+
         assert_eq!(input_triangle.is_parallel_to_vector_with_epsilon(&input_vector), true);
     }
-    
+
+    #[test]
+    pub fn test_is_parallel_to_ray_with_epsilon_false() {
+        let input_triangle = Triangle::new(
+        Point::new(35.704653, 37.253023, -22.626602),
+        Point::new(-38.634947, 13.199458, 23.94433),
+        Point::new(-21.698671, -49.7235, -32.888206));
+
+        let input_ray = Ray::new(Point::new(1.000, -2.000, 3.000), Vector::new(3.456, 0.9831, -9.761));
+
+        assert_eq!(input_triangle.is_parallel_to_ray_with_epsilon(&input_ray), false);
+    }
+
+    #[test]
+    pub fn test_is_parallel_to_ray_with_epsilon_true() {
+        let input_triangle = Triangle::new(
+        Point::new(35.704653, 37.253023, -22.626602),
+        Point::new(-38.634947, 13.199458, 23.94433),
+        Point::new(-21.698671, -49.7235, -32.888206));
+
+        let input_ray = Ray::new(Point::new(1.000, -2.000, 3.000), Vector::new(-45.637938,19.4346965,51.701734));
+
+        assert_eq!(input_triangle.is_parallel_to_ray_with_epsilon(&input_ray), true);
+    }
+
     #[test]
     pub fn test_get_area() {
         let input = Triangle::new(
