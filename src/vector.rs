@@ -11,6 +11,7 @@ use crate::point::Point;
 /// assert_eq!(result.y, -2.3);
 /// assert_eq!(result.z, 3.9);
 /// ```
+#[derive(Debug, Clone, Copy)]
 pub struct Vector {
     /// The x-dimension of the vector.
     pub x: f64,
