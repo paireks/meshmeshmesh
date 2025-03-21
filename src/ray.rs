@@ -6,7 +6,7 @@ pub struct Ray {
     /// The origin [Point] from which we shoot the [Vector].
     pub origin: Point,
 
-    /// The direction [Vector] of the [Ray].
+    /// The direction [Vector] of the [Ray]. Should be an unitized Vector.
     pub direction: Vector,
 }
 
@@ -28,6 +28,8 @@ impl PartialEq for Ray {
 
 impl Ray {
     /// Creates a new [Ray].
+    /// 
+    /// New created [Ray] will have a `direction` unitized automatically.
     ///
     /// # Example
     ///
@@ -41,7 +43,9 @@ impl Ray {
     /// assert_eq!(result.origin.eq(&Point::new(0.0, 1.0, -2.5)), true);
     /// assert_eq!(result.direction.eq(&Vector::new(1.0, 0.0, 0.0)), true);
     /// ```
-    pub fn new(origin: Point, direction: Vector) -> Ray {Ray {origin, direction}}
+    pub fn new(origin: Point, direction: Vector) -> Ray {
+        Ray {origin, direction: direction.get_unitized()}
+    }
 }
 
 #[cfg(test)]
