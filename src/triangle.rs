@@ -19,6 +19,7 @@ use crate::point::Point;
 /// assert_eq!(result.second_point.eq(&Point::new(10.0, 0.0, 0.0)), true);
 /// assert_eq!(result.third_point.eq(&Point::new(10.0, -15.0, 0.0)), true);
 /// ```
+#[derive(Debug, Clone, Copy)]
 pub struct Triangle {
     /// First point.
     pub first_point: Point,

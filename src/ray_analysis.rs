@@ -218,4 +218,16 @@ mod tests {
 
         assert_eq!(actual_option.is_none(), true);
     }
+
+    #[test]
+    pub fn test_get_intersection_with_triangle_hit_flipped() {
+        let triangle = Triangle::new(Point::new(18.106339, 26.580607, 7.381013), Point::new(27.733604, 26.580607, 28.757986), Point::new(24.296286, -0.019341, 19.121015));
+        let ray = Ray::new(Point::new(1.0, 2.0, 3.0), Vector::new(0.660831,0.569323,0.489054));
+        let triangle_flipped = triangle.get_flipped();
+
+        let expected = Point::new(23.94358, 21.766485, 19.979597);
+        let actual = ray.get_intersection_with_triangle(&triangle_flipped).unwrap();
+
+        assert_eq!(expected.eq_with_tolerance(&actual, 0.001), true);
+    }
 }
