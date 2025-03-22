@@ -1,3 +1,4 @@
+use crate::mesh::Mesh;
 use crate::point::Point;
 use crate::ray::Ray;
 use crate::triangle::Triangle;
@@ -144,6 +145,106 @@ impl Ray {
 
         None
     }
+
+    /// Calculates [Ray]'s intersections with the [Mesh].
+    ///
+    /// It iterates all the [Triangle]s and for each it tries to get an intersection.
+    ///
+    /// # Examples
+    ///
+    /// There is an example below with a Ray hitting the Mesh, returning 2 intersection Points.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::ray::Ray;
+    /// use meshmeshmesh::vector::Vector;
+    /// let mesh = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3,
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4,
+    ///     2,3,4,
+    ///     3,0,4
+    /// ]);
+    ///
+    /// let ray = Ray::new(Point::new(-4.912183, 2.730841, 0.76832), Vector::new(0.853281,0.510629,0.105683));
+    ///
+    /// let actual = ray.get_intersections_with_mesh(&mesh);
+    ///
+    /// let expected = vec![Point::new(4.790800375717201,8.537397923404011,1.9700816612767906), Point::new(-0.3302282935488474,5.472820429754613,1.3358173651609224)];
+    ///
+    /// assert_eq!(actual.len(), 2);
+    /// assert_eq!(actual[0].eq_with_tolerance(&expected[0], 0.001), true);
+    /// assert_eq!(actual[1].eq_with_tolerance(&expected[1], 0.001), true);
+    ///
+    /// ```
+    ///
+    /// The example below shows the case where Ray misses the Mesh, so there is an empty `vector` returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::ray::Ray;
+    /// use meshmeshmesh::vector::Vector;
+    /// let mesh = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3,
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4,
+    ///     2,3,4,
+    ///     3,0,4
+    /// ]);
+    ///
+    /// let ray = Ray::new(Point::new(-4.912183, 7.757342, 0.76832), Vector::new(0.853281,0.510629,0.105683));
+    ///
+    /// let actual = ray.get_intersections_with_mesh(&mesh);
+    ///
+    /// assert_eq!(actual.is_empty(), true);
+    ///
+    /// ```
+    pub fn get_intersections_with_mesh(&self, mesh:&Mesh) -> Vec<Point> {
+        let triangles_to_check = mesh.to_triangles();
+
+        let mut intersection_points: Vec<Point> = Vec::new();
+
+        for triangle in triangles_to_check {
+            let result = self.get_intersection_with_triangle(&triangle);
+            if result.is_some() {
+                intersection_points.push(result.unwrap())
+            }
+        }
+
+        intersection_points
+    }
 }
 
 #[cfg(test)]
@@ -229,5 +330,81 @@ mod tests {
         let actual = ray.get_intersection_with_triangle(&triangle_flipped).unwrap();
 
         assert_eq!(expected.eq_with_tolerance(&actual, 0.001), true);
+    }
+
+    #[test]
+    pub fn test_get_intersections_with_mesh_2_intersections() {
+        let mesh = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+
+        let ray = Ray::new(Point::new(-4.912183, 2.730841, 0.76832), Vector::new(0.853281,0.510629,0.105683));
+
+        let actual = ray.get_intersections_with_mesh(&mesh);
+
+        let expected = vec![Point::new(4.790800375717201,8.537397923404011,1.9700816612767906), Point::new(-0.3302282935488474,5.472820429754613,1.3358173651609224)];
+
+        for act in &actual {
+            println!("{0},{1},{2}", act.x, act.y, act.z)
+        }
+
+        assert_eq!(actual.len(), 2);
+        assert_eq!(actual[0].eq_with_tolerance(&expected[0], 0.001), true);
+        assert_eq!(actual[1].eq_with_tolerance(&expected[1], 0.001), true);
+    }
+
+    #[test]
+    pub fn test_get_intersections_with_mesh_0_intersections() {
+        let mesh = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+
+        let ray = Ray::new(Point::new(-4.912183, 7.757342, 0.76832), Vector::new(0.853281,0.510629,0.105683));
+
+        let actual = ray.get_intersections_with_mesh(&mesh);
+
+        for act in &actual {
+            println!("{0},{1},{2}", act.x, act.y, act.z)
+        }
+
+        assert_eq!(actual.is_empty(), true);
     }
 }
