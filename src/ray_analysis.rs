@@ -50,6 +50,102 @@ impl Ray {
 
         true
     }
+    
+    /// Checks if this [Ray] hits given [Mesh].
+    /// 
+    /// If it hits: then `true` is returned, if not: `false`.
+    /// 
+    /// Orientations of [Triangle]s are not taken into an account.
+    /// 
+    /// # Examples
+    /// 
+    /// First example shows detecting of hit, so `true` is expected.
+    /// 
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::ray::Ray;
+    /// use meshmeshmesh::vector::Vector;
+    /// let mesh = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3,
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4,
+    ///     2,3,4,
+    ///     3,0,4
+    /// ]);
+    ///
+    /// let ray = Ray::new(Point::new(-4.912183, 2.730841, 0.76832), Vector::new(0.853281,0.510629,0.105683));
+    ///
+    /// let actual = ray.does_intersect_with_mesh(&mesh);
+    ///
+    /// assert_eq!(actual, true);
+    ///
+    /// ```
+    /// 
+    /// Second example shows not hitting the Mesh, so `false` is expected.
+    /// 
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::ray::Ray;
+    /// use meshmeshmesh::vector::Vector;
+    /// let mesh = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3,
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4,
+    ///     2,3,4,
+    ///     3,0,4
+    /// ]);
+    ///
+    /// let ray = Ray::new(Point::new(-4.912183, 7.757342, 0.76832), Vector::new(0.853281,0.510629,0.105683));
+    ///
+    /// let actual = ray.does_intersect_with_mesh(&mesh);
+    ///
+    /// assert_eq!(actual, false);
+    ///
+    /// ```
+    pub fn does_intersect_with_mesh(&self, mesh:&Mesh) -> bool {
+        let triangles_to_check = mesh.to_triangles();
+
+        for triangle in triangles_to_check {
+            let result = self.get_intersection_with_triangle(&triangle);
+            if result.is_some() {
+                return true;
+            }
+        }
+
+        false
+    }
 
     /// Creates a [Point] which is located on [Ray] with the given `distance` from the Ray's `origin`.
     ///
@@ -287,6 +383,70 @@ mod tests {
         let b = Ray::new(Point::new(0.0, 1.0 + 0.0011, -2.5), Vector::new(1.0, 0.0, 0.0 + 0.0011));
 
         assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
+    }
+    
+    #[test]
+    pub fn test_does_intersect_with_mesh_true() {
+        let mesh = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+        
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+        
+        let ray = Ray::new(Point::new(-4.912183, 2.730841, 0.76832), Vector::new(0.853281,0.510629,0.105683));
+        
+        let actual = ray.does_intersect_with_mesh(&mesh);
+        
+        assert_eq!(actual, true);
+    }
+
+    #[test]
+    pub fn test_does_intersect_with_mesh_false() {
+        let mesh = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+        
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+        
+        let ray = Ray::new(Point::new(-4.912183, 7.757342, 0.76832), Vector::new(0.853281,0.510629,0.105683));
+        
+        let actual = ray.does_intersect_with_mesh(&mesh);
+        
+        assert_eq!(actual, false);
     }
 
     #[test]
