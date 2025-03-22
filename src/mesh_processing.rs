@@ -64,11 +64,11 @@ impl Mesh {
     ///     2,3,4,
     ///     4,0,3 // flipped (5)
     /// ]);
-    /// let actual = input.get_with_faces_flipped(&HashSet::from([0, 3, 5]));
+    /// let actual = input.get_with_faces_flipped(HashSet::from([0, 3, 5]));
     ///
     /// assert_eq!(expected.eq(&actual), true);
     /// ```
-    pub fn get_with_faces_flipped(&self, indices_of_faces_to_remove:&HashSet<usize>) -> Mesh {
+    pub fn get_with_faces_flipped(&self, indices_of_faces_to_remove:HashSet<usize>) -> Mesh {
         let mut new_indices: Vec<usize> = Vec::<usize>::new();
         let start_indices = self.get_start_indices();
         let middle_indices = self.get_middle_indices();
@@ -697,7 +697,7 @@ mod tests {
             2,3,4,
             4,0,3 // flipped (5)
         ]);
-        let actual = input.get_with_faces_flipped(&HashSet::from([0, 3, 5]));
+        let actual = input.get_with_faces_flipped(HashSet::from([0, 3, 5]));
         
         assert_eq!(expected.eq(&actual), true);
     }
