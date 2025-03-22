@@ -167,6 +167,70 @@ impl Mesh {
 
         Mesh::new(self.coordinates.clone(), new_indices)
     }
+    
+    /// Tries to flip the faces of the [Mesh] using offset. 
+    /// 
+    /// It offsets origin of normal for every face and checks if it's inside the Mesh.
+    /// If yes -> then it flips.
+    /// 
+    /// # Example
+    ///
+    /// ```
+    /// use std::collections::HashSet;
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces flipped
+    ///     0,1,2, // flipped
+    ///     3,2,0,
+    ///
+    ///     // Side faces flipped
+    ///     0,1,4,
+    ///     4,2,1, // flipped
+    ///     2,3,4,
+    ///     4,0,3 // flipped
+    /// ]);
+    /// let actual = input.get_with_faces_flipped_outside_using_offset(0.001);
+    /// let expected = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces flipped
+    ///     2,1,0, // fixed
+    ///     3,2,0,
+    ///
+    ///     // Side faces flipped
+    ///     0,1,4,
+    ///     1,2,4, // fixed
+    ///     2,3,4,
+    ///     3,0,4 // fixed
+    /// ]);
+    ///
+    /// assert_eq!(expected.eq(&actual), true);
+    /// ```
+    pub fn get_with_faces_flipped_outside_using_offset(&self, offset:f64) -> Mesh {
+        let faces_to_flip = self.get_ids_of_faces_flipped_inside_using_offset(offset);
+        self.get_with_faces_flipped(faces_to_flip)
+    }
 
     /// Removes specified vertices of a [Mesh], but it doesn't update its indices.
     ///
@@ -750,6 +814,57 @@ mod tests {
             ]);
         let actual = input.get_with_all_faces_flipped();
 
+        assert_eq!(expected.eq(&actual), true);
+    }
+    
+    #[test]
+    fn test_get_with_faces_flipped_outside_using_offset() {
+        let input = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces flipped
+            0,1,2, // flipped
+            3,2,0,
+        
+            // Side faces flipped
+            0,1,4,
+            4,2,1, // flipped
+            2,3,4,
+            4,0,3 // flipped
+        ]);
+        let actual = input.get_with_faces_flipped_outside_using_offset(0.001);
+        let expected = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces flipped
+            2,1,0, // fixed
+            3,2,0,
+        
+            // Side faces flipped
+            0,1,4,
+            1,2,4, // fixed
+            2,3,4,
+            3,0,4 // fixed
+        ]);
+        
         assert_eq!(expected.eq(&actual), true);
     }
 
