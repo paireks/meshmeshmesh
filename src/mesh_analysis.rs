@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use crate::bounding_box::BoundingBox;
 use crate::mesh::Mesh;
 use crate::vector::Vector;
@@ -188,6 +189,67 @@ impl Mesh {
         let max_z = z_coordinates.iter().copied().reduce(f64::max).unwrap();
 
         BoundingBox::new(min_x, max_x, min_y, max_y, min_z, max_z)
+    }
+
+    /// Gets ids of faces of the [Mesh] that probably have normals pointing inside the Mesh.
+    ///
+    /// It offsets an origin of the normal (using given value for `offset` argument) and checks
+    /// if it's inside or outside the Mesh using XYZ check.
+    ///
+    /// # Example
+    ///
+    /// Here is an example with pyramid Mesh which has 3 faces flipped inside (with ids: 0, 3, and 5).
+    ///
+    /// ```
+    /// use std::collections::HashSet;
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces flipped
+    ///     0,1,2, // flipped (0)
+    ///     3,2,0,
+    ///
+    ///     // Side faces flipped
+    ///     0,1,4,
+    ///     4,2,1, // flipped (3)
+    ///     2,3,4,
+    ///     4,0,3 // flipped (5)
+    /// ]);
+    /// let actual = input.get_ids_of_faces_flipped_inside_using_offset(0.001);
+    /// let expected = HashSet::from([0, 3, 5]);
+    /// 
+    /// for act in &actual {
+    ///     println!("{0}", act);
+    /// }
+    ///
+    /// assert_eq!(expected.eq(&actual), true);
+    /// ```
+    pub fn get_ids_of_faces_flipped_inside_using_offset(&self, offset:f64) -> HashSet<usize> {
+        let triangles_to_check = self.to_triangles();
+        let triangles_length = triangles_to_check.len();
+
+        let mut ids_of_faces_flipped: HashSet<usize> = HashSet::new();
+        for i in 0..triangles_length {
+            let current_face = triangles_to_check[i];
+            let normal = current_face.get_normal_ray();
+            let point_to_check = normal.get_point_at(offset);
+            if point_to_check.is_inside_mesh_using_xyz(self) {
+                ids_of_faces_flipped.insert(i);
+            }
+        }
+
+        ids_of_faces_flipped
     }
 
     /// Gets only x coordinates of [Mesh]
@@ -628,6 +690,40 @@ mod tests {
         let expected = BoundingBox::new(-2.0, 8.0, 1.0, 11.0, 0.0, 4.0);
         let actual = input.get_bounding_box();
 
+        assert_eq!(expected.eq(&actual), true);
+    }
+    
+    #[test]
+    fn test_get_ids_of_faces_flipped_inside_using_offset() {
+        let input = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces flipped
+            0,1,2, // flipped (0)
+            3,2,0,
+        
+            // Side faces flipped
+            0,1,4,
+            4,2,1, // flipped (3)
+            2,3,4,
+            4,0,3 // flipped (5)
+        ]);
+        let actual = input.get_ids_of_faces_flipped_inside_using_offset(0.001);
+        let expected = HashSet::from([0, 3, 5]);
+        
+        for act in &actual {
+            println!("{0}", act);
+        }
+        
         assert_eq!(expected.eq(&actual), true);
     }
 
