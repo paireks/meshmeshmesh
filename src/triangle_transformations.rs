@@ -19,9 +19,9 @@ impl Triangle {
     /// Point::new(-21.698671, -49.7235, -32.888206)); // C
     ///
     /// let expected = Triangle::new(
-    /// Point::new(35.704653, 37.253023, -22.626602), // A
     /// Point::new(-21.698671, -49.7235, -32.888206), // C
-    /// Point::new(-38.634947, 13.199458, 23.94433)); // B
+    /// Point::new(-38.634947, 13.199458, 23.94433), // B
+    /// Point::new(35.704653, 37.253023, -22.626602)); // A
     /// 
     /// let actual = input.get_flipped();
     /// let expected_normal = input.get_normal_vector_unitized().get_reversed();
@@ -31,7 +31,7 @@ impl Triangle {
     /// assert_eq!(expected_normal.eq_with_tolerance(&actual_normal, 0.001), true);
     /// ```
     pub fn get_flipped(&self) -> Triangle {
-        Triangle::new(self.first_point, self.third_point, self.second_point)
+        Triangle::new(self.third_point, self.second_point, self.first_point)
     }
     
     /// Divides the [Triangle] into 3 new ones. It uses given [Point] to divide it.
@@ -96,9 +96,9 @@ mod tests {
         Point::new(-21.698671, -49.7235, -32.888206)); // C
         
         let expected = Triangle::new(
-        Point::new(35.704653, 37.253023, -22.626602), // A
         Point::new(-21.698671, -49.7235, -32.888206), // C
-        Point::new(-38.634947, 13.199458, 23.94433)); // B
+        Point::new(-38.634947, 13.199458, 23.94433), // B
+        Point::new(35.704653, 37.253023, -22.626602)); // A
         
         let actual = input.get_flipped();
         let expected_normal = input.get_normal_vector_unitized().get_reversed();
