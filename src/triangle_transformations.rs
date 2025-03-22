@@ -5,7 +5,7 @@ impl Triangle {
     
     /// Creates a new [Triangle], but flipped one.
     /// 
-    /// In other words: the normal [Vector] of the new created one is reversed.
+    /// In other words: the normal Vector of the new created one is reversed.
     /// 
     /// # Example
     /// 
