@@ -1,4 +1,7 @@
+use crate::mesh::Mesh;
 use crate::point::Point;
+use crate::ray::Ray;
+use crate::vector::Vector;
 
 impl Point {
     /// Compares given [Point] to other one, but with a `f64` tolerance.
@@ -44,6 +47,127 @@ impl Point {
         else {
             true
         }
+    }
+    
+    /// Checks is the [Point] is inside the given [Mesh].
+    /// 
+    /// The method used for check is shooting the [Ray]s in 6 directions:
+    /// 1. X
+    /// 2. -X
+    /// 3. Y
+    /// 4. -Y
+    /// 5. Z
+    /// 6. -Z
+    /// 
+    /// If all of these Rays hits the Mesh - then it counts this Point as being inside the Mesh.
+    /// 
+    /// # Examples
+    /// 
+    /// Here in this example [Point] is inside the pyramid [Mesh], so `true` is returned.
+    /// 
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// let mesh = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3,
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4,
+    ///     2,3,4,
+    ///     3,0,4
+    /// ]);
+    ///
+    /// let point = Point::new(2.632568, 4.836652, 0.767105);
+    /// 
+    /// let actual = point.is_inside_mesh_using_xyz(&mesh);
+    /// 
+    /// assert_eq!(actual, true);
+    /// 
+    /// ```
+    /// 
+    /// Here in another example [Point] is outside the pyramid [Mesh], so `false` is returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// let mesh = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3,
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4,
+    ///     2,3,4,
+    ///     3,0,4
+    /// ]);
+    ///
+    /// let point = Point::new(8.975928, 4.836652, 0.767105);
+    ///
+    /// let actual = point.is_inside_mesh_using_xyz(&mesh);
+    ///
+    /// assert_eq!(actual, false);
+    ///
+    /// ```
+    pub fn is_inside_mesh_using_xyz(&self, mesh:&Mesh) -> bool {
+        let origin = self.clone();
+        
+        let mut ray = Ray::new(origin, Vector::new(1.0, 0.0, 0.0));
+        if !ray.does_intersect_with_mesh(mesh) { // 1. X
+            return false;
+        }
+        
+        ray.direction = Vector::new(-1.0, 0.0, 0.0);
+        if !ray.does_intersect_with_mesh(mesh) { // 2. -X
+            return false;
+        }
+
+        ray.direction = Vector::new(0.0, 1.0, 0.0);
+        if !ray.does_intersect_with_mesh(mesh) { // 3. Y
+            return false;
+        }
+
+        ray.direction = Vector::new(0.0, -1.0, 0.0);
+        if !ray.does_intersect_with_mesh(mesh) { // 4. -Y
+            return false;
+        }
+
+        ray.direction = Vector::new(0.0, 0.0, 1.0);
+        if !ray.does_intersect_with_mesh(mesh) { // 5. Z
+            return false;
+        }
+
+        ray.direction = Vector::new(0.0, 0.0, -1.0);
+        if !ray.does_intersect_with_mesh(mesh) { // 6. -Z
+            return false;
+        }
+        
+        true
     }
 
     /// Gets distance to another [Point].
@@ -163,6 +287,70 @@ mod tests {
         let a = Point::new(1.5, -2.3, 3.9);
         let b = Point::new(1.5 + 0.0011, -2.3 - 0.00101, 3.9 + 0.0013);
         assert_eq!(a.eq_with_tolerance(&b, tolerance), false);
+    }
+
+    #[test]
+    fn test_is_inside_mesh_using_xyz_true() {
+        let mesh = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+        
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+        
+        let point = Point::new(2.632568, 4.836652, 0.767105);
+        
+        let actual = point.is_inside_mesh_using_xyz(&mesh);
+        
+        assert_eq!(actual, true);
+    }
+
+    #[test]
+    fn test_is_inside_mesh_using_xyz_false() {
+        let mesh = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+        
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+        
+        let point = Point::new(8.975928, 4.836652, 0.767105);
+        
+        let actual = point.is_inside_mesh_using_xyz(&mesh);
+        
+        assert_eq!(actual, false);
     }
 
     #[test]
