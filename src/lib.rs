@@ -15,3 +15,4 @@ mod vector_analysis;
 mod vector_transformations;
 mod ray_analysis;
 mod barycentric_coordinates_analysis;
+pub mod face_neighbours;
