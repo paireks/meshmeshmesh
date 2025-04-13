@@ -12,6 +12,7 @@ mod point_analysis;
 mod point_transformations;
 pub mod ray;
 mod ray_analysis;
+pub mod three_edges;
 pub mod triangle;
 mod triangle_analysis;
 mod triangle_transformations;
