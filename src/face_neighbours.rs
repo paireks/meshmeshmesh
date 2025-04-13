@@ -53,4 +53,44 @@ mod tests {
         assert!(result.second.is_none());
         assert!(result.third.eq(&Some(1)));
     }
+
+    #[test]
+    fn test_partialeq_true() {
+        let a = FaceNeighbours::new(Some(0), None, Some(1));
+        let b  = FaceNeighbours::new(Some(0), None, Some(1));
+        assert_eq!(a.eq(&b), true);
+        assert_eq!(b.eq(&a), true);
+    }
+
+    #[test]
+    fn test_partialeq_first_different_false() {
+        let a = FaceNeighbours::new(Some(0), None, Some(1));
+        let b  = FaceNeighbours::new(Some(2), None, Some(1));
+        assert_eq!(a.eq(&b), false);
+        assert_eq!(b.eq(&a), false);
+    }
+
+    #[test]
+    fn test_partialeq_second_different_false() {
+        let a = FaceNeighbours::new(Some(0), None, Some(1));
+        let b  = FaceNeighbours::new(Some(0), Some(3), Some(1));
+        assert_eq!(a.eq(&b), false);
+        assert_eq!(b.eq(&a), false);
+    }
+
+    #[test]
+    fn test_partialeq_third_different_false() {
+        let a = FaceNeighbours::new(Some(0), None, Some(1));
+        let b  = FaceNeighbours::new(Some(0), None, Some(5));
+        assert_eq!(a.eq(&b), false);
+        assert_eq!(b.eq(&a), false);
+    }
+
+    #[test]
+    fn test_partialeq_all_different_false() {
+        let a = FaceNeighbours::new(Some(0), None, Some(1));
+        let b  = FaceNeighbours::new(Some(2), Some(3), Some(0));
+        assert_eq!(a.eq(&b), false);
+        assert_eq!(b.eq(&a), false);
+    }
 }
