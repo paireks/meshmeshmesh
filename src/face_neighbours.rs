@@ -1,3 +1,4 @@
+use crate::mesh::Mesh;
 
 /// Gets [Mesh]'s face neighbours.
 ///
@@ -39,6 +40,62 @@ impl FaceNeighbours {
     /// assert!(result.third.eq(&Some(1)));
     /// ```
     pub fn new(first: Option<usize>, second: Option<usize>, third: Option<usize>) -> FaceNeighbours { FaceNeighbours { first, second, third } }
+    
+/*    /// Creates a [FaceNeighbours] from [Mesh].
+    /// 
+    /// It tries to figure out which faces in given [Mesh] are neighbours.
+    /// 
+    /// To check which one are neighbours it looks for same indexes of same vertices.
+    /// 
+    /// That's why it's good to do welding of vertices before to have better results.
+    /// 
+    /// The order of the output `vec` should be aligned to the order of faces inside given Mesh.
+    /// 
+    /// It can panic once the input Mesh's face have more than one neighbour for 1 edge.
+    /// 
+    /// # Example
+    /// 
+    /// In this example below we have simple 4 face planar [Mesh].
+    /// 
+    /// We will calculate this way what are the neighbours for each face.
+    /// 
+    /// ```
+    /// use meshmeshmesh::face_neighbours::FaceNeighbours;
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let mesh = Mesh::new(
+    ///     vec![0.0, 0.0, 0.0,
+    ///          2.5, 5.0, 0.0,
+    ///          5.0, 0.0, 0.0,
+    ///          7.5, 5.0, 0.0,
+    ///          10.0, 0.0, 0.0,
+    ///          10.0, 5.0, 0.0,
+    ///          ],
+    ///     vec![0, 2, 1, // first face
+    ///          1, 2, 3, // second face
+    ///          2, 4, 3, // third face
+    ///          1, 3, 5, // fourth face
+    ///          ]
+    /// );
+    ///
+    /// let actual = FaceNeighbours::from_mesh(&mesh);
+    /// 
+    /// let expected = vec![
+    ///     FaceNeighbours::new(None, Some(1), None),
+    ///     FaceNeighbours::new(Some(0), Some(2), Some(3)),
+    ///     FaceNeighbours::new(None, None, Some(1)),
+    ///     FaceNeighbours::new(Some(1), None, None),
+    /// ];
+    ///
+    /// assert_eq!(expected.len(), actual.len());
+    /// for i in 0..expected.len() {
+    ///     assert_eq!(expected[i].eq(&actual[i]), true);
+    /// }
+    ///
+    /// ```
+    pub fn from_mesh(mesh: &Mesh) -> Vec<FaceNeighbours> {
+        
+    }*/
 }
 
 #[cfg(test)]
