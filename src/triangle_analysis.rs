@@ -284,11 +284,11 @@ impl Triangle {
     pub fn get_third_side_as_vector(&self) -> Vector {
         Vector::from_2_points(&self.third_point, &self.first_point)
     }
-    
+
     /// Gets the middle of the first side of the [Triangle].
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use meshmeshmesh::point::Point;
     /// use meshmeshmesh::triangle::Triangle;
@@ -297,10 +297,10 @@ impl Triangle {
     /// Point::new(0.0, 0.0, 1.0),
     /// Point::new(10.0, 0.0, 1.0),
     /// Point::new(10.0, -15.0, 1.0));
-    /// 
+    ///
     /// let actual = input.get_first_side_middle();
     /// let expected = Point::new(5.0, 0.0, 1.0);
-    /// 
+    ///
     /// assert!(expected.eq(&actual))
     /// ```
     pub fn get_first_side_middle(&self) -> Point {
@@ -349,6 +349,75 @@ impl Triangle {
     /// ```
     pub fn get_third_side_middle(&self) -> Point {
         self.third_point.get_middle_to(&self.first_point)
+    }
+
+    /// Gets [Vector] from the middle of the first side to the centroid of this [Triangle].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Triangle::new(
+    /// Point::new(35.704653, 37.253023, -22.626602),
+    /// Point::new(-38.634947, 13.199458, 23.94433),
+    /// Point::new(-21.698671, -49.7235, -32.888206));
+    ///
+    /// let actual = input.get_vector_from_first_side_middle_to_centroid();
+    /// let expected = Vector::new(-6.744508,-24.983247,-11.182357);
+    ///
+    /// assert!(expected.eq_with_tolerance(&actual, 0.001))
+    /// ```
+    pub fn get_vector_from_first_side_middle_to_centroid(&self) -> Vector {
+        Vector::from_2_points(&self.get_first_side_middle(), &self.get_centroid())
+    }
+
+    /// Gets [Vector] from the middle of the second side to the centroid of this [Triangle].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Triangle::new(
+    /// Point::new(35.704653, 37.253023, -22.626602),
+    /// Point::new(-38.634947, 13.199458, 23.94433),
+    /// Point::new(-21.698671, -49.7235, -32.888206));
+    ///
+    /// let actual = input.get_vector_from_second_side_middle_to_centroid();
+    /// let expected = Vector::new(21.957154,18.505015,-6.051555);
+    ///
+    /// assert!(expected.eq_with_tolerance(&actual, 0.001))
+    /// ```
+    pub fn get_vector_from_second_side_middle_to_centroid(&self) -> Vector {
+        Vector::from_2_points(&self.get_second_side_middle(), &self.get_centroid())
+    }
+
+    /// Gets [Vector] from the middle of the third side to the centroid of this [Triangle].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Triangle::new(
+    /// Point::new(35.704653, 37.253023, -22.626602),
+    /// Point::new(-38.634947, 13.199458, 23.94433),
+    /// Point::new(-21.698671, -49.7235, -32.888206));
+    ///
+    /// let actual = input.get_vector_from_third_side_middle_to_centroid();
+    /// let expected = Vector::new(-15.212646,6.478232,17.233911);
+    ///
+    /// assert!(expected.eq_with_tolerance(&actual, 0.001))
+    /// ```
+    pub fn get_vector_from_third_side_middle_to_centroid(&self) -> Vector {
+        Vector::from_2_points(&self.get_third_side_middle(), &self.get_centroid())
     }
 }
 
@@ -518,44 +587,83 @@ mod tests {
 
         assert_eq!(expected.eq(&actual), true);
     }
-    
+
     #[test]
-    pub fn get_first_side_middle() {
+    pub fn test_get_first_side_middle() {
         let input = Triangle::new(
         Point::new(0.0, 0.0, 1.0),
         Point::new(10.0, 0.0, 1.0),
         Point::new(10.0, -15.0, 1.0));
-        
+
         let actual = input.get_first_side_middle();
         let expected = Point::new(5.0, 0.0, 1.0);
-        
+
         assert!(expected.eq(&actual))
     }
 
     #[test]
-    pub fn get_second_side_middle() {
+    pub fn test_get_second_side_middle() {
         let input = Triangle::new(
         Point::new(0.0, 0.0, 1.0),
         Point::new(10.0, 0.0, 1.0),
         Point::new(10.0, -15.0, 1.0));
-        
+
         let actual = input.get_second_side_middle();
         let expected = Point::new(10.0, -7.5, 1.0);
-        
+
         assert!(expected.eq(&actual))
     }
 
     #[test]
-    pub fn get_third_side_middle() {
+    pub fn test_get_third_side_middle() {
         let input = Triangle::new(
         Point::new(0.0, 0.0, 1.0),
         Point::new(10.0, 0.0, 1.0),
         Point::new(10.0, -15.0, 1.0));
-        
+
         let actual = input.get_third_side_middle();
         let expected = Point::new(5.0, -7.5, 1.0);
-        
+
         assert!(expected.eq(&actual))
+    }
+    
+    #[test]
+    pub fn test_get_vector_from_first_side_middle_to_centroid() {
+        let input = Triangle::new(
+        Point::new(35.704653, 37.253023, -22.626602),
+        Point::new(-38.634947, 13.199458, 23.94433),
+        Point::new(-21.698671, -49.7235, -32.888206));
+        
+        let actual = input.get_vector_from_first_side_middle_to_centroid();
+        let expected = Vector::new(-6.744508,-24.983247,-11.182357);
+        
+        assert!(expected.eq_with_tolerance(&actual, 0.001))
+    }
+
+    #[test]
+    pub fn test_get_vector_from_second_side_middle_to_centroid() {
+        let input = Triangle::new(
+        Point::new(35.704653, 37.253023, -22.626602),
+        Point::new(-38.634947, 13.199458, 23.94433),
+        Point::new(-21.698671, -49.7235, -32.888206));
+        
+        let actual = input.get_vector_from_second_side_middle_to_centroid();
+        let expected = Vector::new(21.957154,18.505015,-6.051555);
+        
+        assert!(expected.eq_with_tolerance(&actual, 0.001))
+    }
+
+    #[test]
+    pub fn test_get_vector_from_third_side_middle_to_centroid() {
+        let input = Triangle::new(
+        Point::new(35.704653, 37.253023, -22.626602),
+        Point::new(-38.634947, 13.199458, 23.94433),
+        Point::new(-21.698671, -49.7235, -32.888206));
+        
+        let actual = input.get_vector_from_third_side_middle_to_centroid();
+        let expected = Vector::new(-15.212646,6.478232,17.233911);
+        
+        assert!(expected.eq_with_tolerance(&actual, 0.001))
     }
 }
 
