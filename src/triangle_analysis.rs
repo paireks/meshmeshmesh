@@ -284,6 +284,72 @@ impl Triangle {
     pub fn get_third_side_as_vector(&self) -> Vector {
         Vector::from_2_points(&self.third_point, &self.first_point)
     }
+    
+    /// Gets the middle of the first side of the [Triangle].
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let input = Triangle::new(
+    /// Point::new(0.0, 0.0, 1.0),
+    /// Point::new(10.0, 0.0, 1.0),
+    /// Point::new(10.0, -15.0, 1.0));
+    /// 
+    /// let actual = input.get_first_side_middle();
+    /// let expected = Point::new(5.0, 0.0, 1.0);
+    /// 
+    /// assert!(expected.eq(&actual))
+    /// ```
+    pub fn get_first_side_middle(&self) -> Point {
+        self.first_point.get_middle_to(&self.second_point)
+    }
+
+    /// Gets the middle of the second side of the [Triangle].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let input = Triangle::new(
+    /// Point::new(0.0, 0.0, 1.0),
+    /// Point::new(10.0, 0.0, 1.0),
+    /// Point::new(10.0, -15.0, 1.0));
+    ///
+    /// let actual = input.get_second_side_middle();
+    /// let expected = Point::new(10.0, -7.5, 1.0);
+    ///
+    /// assert!(expected.eq(&actual))
+    /// ```
+    pub fn get_second_side_middle(&self) -> Point {
+        self.second_point.get_middle_to(&self.third_point)
+    }
+
+    /// Gets the middle of the third side of the [Triangle].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let input = Triangle::new(
+    /// Point::new(0.0, 0.0, 1.0),
+    /// Point::new(10.0, 0.0, 1.0),
+    /// Point::new(10.0, -15.0, 1.0));
+    ///
+    /// let actual = input.get_third_side_middle();
+    /// let expected = Point::new(5.0, -7.5, 1.0);
+    ///
+    /// assert!(expected.eq(&actual))
+    /// ```
+    pub fn get_third_side_middle(&self) -> Point {
+        self.third_point.get_middle_to(&self.first_point)
+    }
 }
 
 #[cfg(test)]
@@ -451,6 +517,45 @@ mod tests {
         let expected = Vector::from_2_points(&Point::new(-21.698671, -49.7235, -32.888206), &Point::new(35.704653, 37.253023, -22.626602));
 
         assert_eq!(expected.eq(&actual), true);
+    }
+    
+    #[test]
+    pub fn get_first_side_middle() {
+        let input = Triangle::new(
+        Point::new(0.0, 0.0, 1.0),
+        Point::new(10.0, 0.0, 1.0),
+        Point::new(10.0, -15.0, 1.0));
+        
+        let actual = input.get_first_side_middle();
+        let expected = Point::new(5.0, 0.0, 1.0);
+        
+        assert!(expected.eq(&actual))
+    }
+
+    #[test]
+    pub fn get_second_side_middle() {
+        let input = Triangle::new(
+        Point::new(0.0, 0.0, 1.0),
+        Point::new(10.0, 0.0, 1.0),
+        Point::new(10.0, -15.0, 1.0));
+        
+        let actual = input.get_second_side_middle();
+        let expected = Point::new(10.0, -7.5, 1.0);
+        
+        assert!(expected.eq(&actual))
+    }
+
+    #[test]
+    pub fn get_third_side_middle() {
+        let input = Triangle::new(
+        Point::new(0.0, 0.0, 1.0),
+        Point::new(10.0, 0.0, 1.0),
+        Point::new(10.0, -15.0, 1.0));
+        
+        let actual = input.get_third_side_middle();
+        let expected = Point::new(5.0, -7.5, 1.0);
+        
+        assert!(expected.eq(&actual))
     }
 }
 

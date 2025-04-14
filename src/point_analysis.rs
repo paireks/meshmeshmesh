@@ -189,6 +189,24 @@ impl Point {
     pub fn get_distance_to_point(&self, other:&Point) -> f64 {
         f64::sqrt((self.x - other.x).powi(2) + (self.y - other.y).powi(2) + (self.z - other.z).powi(2))
     }
+    
+    /// Gets the [Point] in between this one and other, specifically in the middle between these 2.
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// let a = Point::new(10.0, 0.0, 1.2);
+    /// let b = Point::new(11.0, -10.10, 3.6);
+    /// 
+    /// let actual = a.get_middle_to(&b);
+    /// let expected = Point::new(10.5, -5.05, 2.4);
+    /// 
+    /// assert!(actual.eq(&expected))
+    /// ```
+    pub fn get_middle_to(&self, other:&Point) -> Point {
+        Point::new((self.x + other.x) / 2.0, (self.y + other.y) / 2.0, (self.z + other.z) / 2.0)
+    }
 
     /// Scans given `vec` of [Point]s and creates a `vec` of tuples with information about duplicates.
     ///
