@@ -42,7 +42,7 @@ impl FaceNeighbours {
     /// ```
     pub fn new(first: Option<usize>, second: Option<usize>, third: Option<usize>) -> FaceNeighbours { FaceNeighbours { first, second, third } }
 
-/*    /// Creates a [FaceNeighbours] from [Mesh].
+    /// Creates a [FaceNeighbours] from [Mesh].
     ///
     /// It tries to figure out which faces in given [Mesh] are neighbours.
     ///
@@ -93,8 +93,8 @@ impl FaceNeighbours {
     ///
     /// ```
     pub fn from_mesh(mesh: &Mesh) -> Vec<FaceNeighbours> {
-
-    }*/
+        Self::from_three_edge_groups(&mesh.to_three_edge_groups())
+    }
 
     /// Creates a [FaceNeighbours] from `vec` of [ThreeEdgeGroup]s.
     ///
@@ -223,6 +223,38 @@ mod tests {
         let b  = FaceNeighbours::new(Some(2), Some(3), Some(0));
         assert_eq!(a.eq(&b), false);
         assert_eq!(b.eq(&a), false);
+    }
+    
+    #[test]
+    fn test_from_mesh() {
+        let mesh = Mesh::new(
+            vec![0.0, 0.0, 0.0,
+                 2.5, 5.0, 0.0,
+                 5.0, 0.0, 0.0,
+                 7.5, 5.0, 0.0,
+                 10.0, 0.0, 0.0,
+                 10.0, 5.0, 0.0,
+                 ],
+            vec![0, 2, 1, // first face
+                 1, 2, 3, // second face
+                 2, 4, 3, // third face
+                 1, 3, 5, // fourth face
+                 ]
+        );
+        
+        let actual = FaceNeighbours::from_mesh(&mesh);
+        
+        let expected = vec![
+            FaceNeighbours::new(None, Some(1), None),
+            FaceNeighbours::new(Some(0), Some(2), Some(3)),
+            FaceNeighbours::new(None, None, Some(1)),
+            FaceNeighbours::new(Some(1), None, None),
+        ];
+        
+        assert_eq!(expected.len(), actual.len());
+        for i in 0..expected.len() {
+            assert_eq!(expected[i].eq(&actual[i]), true);
+        }
     }
     
     #[test]
