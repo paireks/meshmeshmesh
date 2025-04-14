@@ -106,7 +106,12 @@ impl FaceNeighbours {
     ///
     /// The order of the output `vec` should be aligned to the order of faces.
     ///
-    /// # Example
+    /// It can panic once it will find that specific [Edge] has more than one neighbour.
+    ///
+    /// It is because of the simplified convention, that [FaceNeighbours] can only have a single
+    /// neighbour for each edge.
+    ///
+    /// # Examples
     ///
     /// In this example below we have simple 4 face planar [Mesh].
     ///
@@ -140,27 +145,63 @@ impl FaceNeighbours {
     /// }
     ///
     /// ```
+    ///
+    /// In the example below it will panic, because the input [Mesh] has an edge that shares
+    /// 3 different faces instead of 2.
+    ///
+    /// ```should_panic
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::face_neighbours::FaceNeighbours;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::three_edge_group::ThreeEdgeGroup;
+    ///
+    /// let input = vec![
+    ///     ThreeEdgeGroup::new(Edge::new(0, 2), Edge::new(2, 1), Edge::new(1, 0)), // first face
+    ///     ThreeEdgeGroup::new(Edge::new(1, 2), Edge::new(2, 3), Edge::new(3, 1)), // second face
+    ///     ThreeEdgeGroup::new(Edge::new(2, 4), Edge::new(4, 3), Edge::new(3, 2)), // third face
+    ///     ThreeEdgeGroup::new(Edge::new(1, 3), Edge::new(3, 5), Edge::new(5, 1)), // fourth face
+    ///     ThreeEdgeGroup::new(Edge::new(6, 2), Edge::new(2, 3), Edge::new(3, 6)), // fifth face -> you can see the edge (2, 3) is shared here as well
+    /// ];
+    ///
+    /// let _actual = FaceNeighbours::from_three_edge_groups(&input);
+    ///
+    /// ```
     pub fn from_three_edge_groups(three_edge_groups: &Vec<ThreeEdgeGroup>) -> Vec<FaceNeighbours> {
 
         let number_of_faces = three_edge_groups.len();
         let mut face_neighbours: Vec<FaceNeighbours> = vec![FaceNeighbours::new(None, None, None); number_of_faces];
-        
+
         for i in 0..number_of_faces {
             let current_face = three_edge_groups[i];
             for j in 0..number_of_faces {
                 if i != j {
                     let current_neighbour_candidate = three_edge_groups[j];
                     let neighbour_edge_option = current_face.which_edge_is_neighbour_to(&current_neighbour_candidate);
-                    if neighbour_edge_option.is_some() { 
+                    if neighbour_edge_option.is_some() {
                         let neighbour_edge_id = neighbour_edge_option.unwrap();
                         if neighbour_edge_id == 0 {
-                            face_neighbours[i].first = Some(j);
+                            if face_neighbours[i].first.is_none() {
+                                face_neighbours[i].first = Some(j);
+                            }
+                            else {
+                                panic!("There is more than 1 neighbour for the first edge of the face id: {i}")
+                            }
                         }
                         else if neighbour_edge_id == 1 {
-                            face_neighbours[i].second = Some(j);
+                            if face_neighbours[i].second.is_none() {
+                                face_neighbours[i].second = Some(j);
+                            }
+                            else {
+                                panic!("There is more than 1 neighbour for the second edge of the face id: {i}")
+                            }
                         }
                         else {
-                            face_neighbours[i].third = Some(j);
+                            if face_neighbours[i].third.is_none() {
+                                face_neighbours[i].third = Some(j);
+                            }
+                            else {
+                                panic!("There is more than 1 neighbour for the third edge of the face id: {i}")
+                            }
                         }
                     }
                 }
@@ -224,7 +265,7 @@ mod tests {
         assert_eq!(a.eq(&b), false);
         assert_eq!(b.eq(&a), false);
     }
-    
+
     #[test]
     fn test_from_mesh() {
         let mesh = Mesh::new(
@@ -241,22 +282,22 @@ mod tests {
                  1, 3, 5, // fourth face
                  ]
         );
-        
+
         let actual = FaceNeighbours::from_mesh(&mesh);
-        
+
         let expected = vec![
             FaceNeighbours::new(None, Some(1), None),
             FaceNeighbours::new(Some(0), Some(2), Some(3)),
             FaceNeighbours::new(None, None, Some(1)),
             FaceNeighbours::new(Some(1), None, None),
         ];
-        
+
         assert_eq!(expected.len(), actual.len());
         for i in 0..expected.len() {
             assert_eq!(expected[i].eq(&actual[i]), true);
         }
     }
-    
+
     #[test]
     fn test_from_three_edge_groups() {
         let input = vec![
@@ -265,19 +306,33 @@ mod tests {
             ThreeEdgeGroup::new(Edge::new(2, 4), Edge::new(4, 3), Edge::new(3, 2)), // third face
             ThreeEdgeGroup::new(Edge::new(1, 3), Edge::new(3, 5), Edge::new(5, 1)), // fourth face
         ];
-        
+
         let actual = FaceNeighbours::from_three_edge_groups(&input);
-        
+
         let expected = vec![
             FaceNeighbours::new(None, Some(1), None),
             FaceNeighbours::new(Some(0), Some(2), Some(3)),
             FaceNeighbours::new(None, None, Some(1)),
             FaceNeighbours::new(Some(1), None, None),
         ];
-        
+
         assert_eq!(expected.len(), actual.len());
         for i in 0..expected.len() {
             assert_eq!(expected[i].eq(&actual[i]), true);
         }
+    }
+
+    #[test]
+    #[should_panic(expected = "There is more than 1 neighbour for the second edge of the face id: 1")]
+    fn test_from_three_edge_groups_first_edge_panic() {
+        let input = vec![
+            ThreeEdgeGroup::new(Edge::new(0, 2), Edge::new(2, 1), Edge::new(1, 0)), // first face
+            ThreeEdgeGroup::new(Edge::new(1, 2), Edge::new(2, 3), Edge::new(3, 1)), // second face
+            ThreeEdgeGroup::new(Edge::new(2, 4), Edge::new(4, 3), Edge::new(3, 2)), // third face
+            ThreeEdgeGroup::new(Edge::new(1, 3), Edge::new(3, 5), Edge::new(5, 1)), // fourth face
+            ThreeEdgeGroup::new(Edge::new(6, 2), Edge::new(2, 3), Edge::new(3, 6)), // fifth face -> you can see the edge (2, 3) is shared here as well
+        ];
+        
+        let _actual = FaceNeighbours::from_three_edge_groups(&input);
     }
 }

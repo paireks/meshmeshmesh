@@ -4,6 +4,7 @@ pub mod bounding_box;
 pub mod edge;
 mod edge_analysis;
 pub mod face_neighbours;
+mod face_neighbours_analysis;
 pub mod mesh;
 mod mesh_analysis;
 mod mesh_processing;
