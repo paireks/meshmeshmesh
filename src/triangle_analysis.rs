@@ -1,3 +1,4 @@
+use crate::face_neighbours::FaceNeighbours;
 use crate::point::Point;
 use crate::ray::Ray;
 use crate::triangle::Triangle;
@@ -419,6 +420,71 @@ impl Triangle {
     pub fn get_vector_from_third_side_middle_to_centroid(&self) -> Vector {
         Vector::from_2_points(&self.get_third_side_middle(), &self.get_centroid())
     }
+
+/*    pub fn get_vector_from_side_middle_to_centroid(&self, side_id: usize) -> Vector {
+        if side_id == 0 {
+            self.get_vector_from_first_side_middle_to_centroid()
+        }
+        else if side_id == 1 {
+            self.get_vector_from_second_side_middle_to_centroid()
+        }
+        else if side_id == 2 {
+            self.get_vector_from_third_side_middle_to_centroid()
+        }
+        else {
+            panic!("The input side_id should be 0, 1 or 2")
+        }
+    }
+
+    pub fn get_angle_between_two_faces_with_known_neighbours(first_face: &Triangle, first_edge_id: usize, second_face: &Triangle, second_edge_id: usize) -> f64 {
+
+        let first_vector = first_face.get_vector_from_side_middle_to_centroid(first_edge_id);
+        let second_vector = second_face.get_vector_from_side_middle_to_centroid(second_edge_id);
+
+        first_vector.get_angle(&second_vector)
+    }
+
+    pub fn get_all_angles_between(all_faces: &Vec<Triangle>, all_face_neighbours: &Vec<FaceNeighbours>) -> Vec<[Option<f64>; 3]> {
+        let faces_length = all_faces.len();
+        if faces_length != all_face_neighbours.len() { 
+            panic!("The input of the get_all_angles_between (for both Faces and FaceNeighbours) should be the same length.")
+        }
+        let mut angles = vec![[None, None, None]; faces_length];
+
+        for i in 0..faces_length {
+            let current_triangle = all_faces[i];
+            let current_neighbours = all_face_neighbours[i];
+
+            if current_neighbours.first.is_some() {
+                let neighbour_id = current_neighbours.first.unwrap();
+                let neighbour_triangle = all_faces[neighbour_id];
+                let neighbour_neighbours = all_face_neighbours[neighbour_id];
+                let which_edge_id = neighbour_neighbours.get_which_edge_by_face_neighbour_id(i).unwrap();
+
+                angles[i][0] = Some(Self::get_angle_between_two_faces_with_known_neighbours(&current_triangle, 0, &neighbour_triangle, which_edge_id));
+            }
+            
+            if current_neighbours.second.is_some() {
+                let neighbour_id = current_neighbours.second.unwrap();
+                let neighbour_triangle = all_faces[neighbour_id];
+                let neighbour_neighbours = all_face_neighbours[neighbour_id];
+                let which_edge_id = neighbour_neighbours.get_which_edge_by_face_neighbour_id(i).unwrap();
+
+                angles[i][1] = Some(Self::get_angle_between_two_faces_with_known_neighbours(&current_triangle, 1, &neighbour_triangle, which_edge_id));
+            }
+
+            if current_neighbours.third.is_some() {
+                let neighbour_id = current_neighbours.third.unwrap();
+                let neighbour_triangle = all_faces[neighbour_id];
+                let neighbour_neighbours = all_face_neighbours[neighbour_id];
+                let which_edge_id = neighbour_neighbours.get_which_edge_by_face_neighbour_id(i).unwrap();
+
+                angles[i][2] = Some(Self::get_angle_between_two_faces_with_known_neighbours(&current_triangle, 2, &neighbour_triangle, which_edge_id));
+            }
+        }
+
+        angles
+    }*/
 }
 
 #[cfg(test)]
