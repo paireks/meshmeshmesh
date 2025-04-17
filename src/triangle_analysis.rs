@@ -421,30 +421,40 @@ impl Triangle {
         Vector::from_2_points(&self.get_third_side_middle(), &self.get_centroid())
     }
 
-/*    pub fn get_vector_from_side_middle_to_centroid(&self, side_id: usize) -> Vector {
-        if side_id == 0 {
-            self.get_vector_from_first_side_middle_to_centroid()
-        }
-        else if side_id == 1 {
-            self.get_vector_from_second_side_middle_to_centroid()
-        }
-        else if side_id == 2 {
-            self.get_vector_from_third_side_middle_to_centroid()
-        }
-        else {
-            panic!("The input side_id should be 0, 1 or 2")
-        }
-    }
+    /// Calculates an angle between [Triangle]s' normals.
+    ///
+    /// Self [Triangle] is the first one (a), and another one is the second one (b).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let a = Triangle::new(
+    /// Point::new(35.704653, 37.253023, -22.626602),
+    /// Point::new(-38.634947, 13.199458, 23.94433),
+    /// Point::new(-21.698671, -49.7235, -32.888206));
+    /// let b = Triangle::new(
+    /// Point::new(51.3242, 19.2342, 28.461254),
+    /// Point::new(-21.698671, -49.7235, -32.888206),
+    /// Point::new(-38.634947, 13.199458, 23.94433));
+    ///
+    /// let actual = a.get_normals_angle(&b);
+    ///
+    /// assert!((actual - 2.524541).abs() < 0.00001);
+    /// ```
+    pub fn get_normals_angle(&self, another: &Triangle) -> f64 {
 
-    pub fn get_angle_between_two_faces_with_known_neighbours(first_face: &Triangle, first_edge_id: usize, second_face: &Triangle, second_edge_id: usize) -> f64 {
-
-        let first_vector = first_face.get_vector_from_side_middle_to_centroid(first_edge_id);
-        let second_vector = second_face.get_vector_from_side_middle_to_centroid(second_edge_id);
+        let first_vector = self.get_normal_vector_unitized();
+        let second_vector = another.get_normal_vector_unitized();
 
         first_vector.get_angle(&second_vector)
     }
 
-    pub fn get_all_angles_between(all_faces: &Vec<Triangle>, all_face_neighbours: &Vec<FaceNeighbours>) -> Vec<[Option<f64>; 3]> {
+    
+/*    pub fn get_all_normal_angles_between(all_faces: &Vec<Triangle>, all_face_neighbours: &Vec<FaceNeighbours>) -> Vec<[Option<f64>; 3]> {
         let faces_length = all_faces.len();
         if faces_length != all_face_neighbours.len() { 
             panic!("The input of the get_all_angles_between (for both Faces and FaceNeighbours) should be the same length.")
@@ -456,30 +466,18 @@ impl Triangle {
             let current_neighbours = all_face_neighbours[i];
 
             if current_neighbours.first.is_some() {
-                let neighbour_id = current_neighbours.first.unwrap();
-                let neighbour_triangle = all_faces[neighbour_id];
-                let neighbour_neighbours = all_face_neighbours[neighbour_id];
-                let which_edge_id = neighbour_neighbours.get_which_edge_by_face_neighbour_id(i).unwrap();
-
-                angles[i][0] = Some(Self::get_angle_between_two_faces_with_known_neighbours(&current_triangle, 0, &neighbour_triangle, which_edge_id));
+                let neighbour_triangle = all_faces[current_neighbours.first.unwrap()];
+                angles[i][0] = Some(current_triangle.get_normals_angle(&neighbour_triangle));
             }
             
             if current_neighbours.second.is_some() {
-                let neighbour_id = current_neighbours.second.unwrap();
-                let neighbour_triangle = all_faces[neighbour_id];
-                let neighbour_neighbours = all_face_neighbours[neighbour_id];
-                let which_edge_id = neighbour_neighbours.get_which_edge_by_face_neighbour_id(i).unwrap();
-
-                angles[i][1] = Some(Self::get_angle_between_two_faces_with_known_neighbours(&current_triangle, 1, &neighbour_triangle, which_edge_id));
+                let neighbour_triangle = all_faces[current_neighbours.second.unwrap()];
+                angles[i][1] = Some(current_triangle.get_normals_angle(&neighbour_triangle));
             }
 
             if current_neighbours.third.is_some() {
-                let neighbour_id = current_neighbours.third.unwrap();
-                let neighbour_triangle = all_faces[neighbour_id];
-                let neighbour_neighbours = all_face_neighbours[neighbour_id];
-                let which_edge_id = neighbour_neighbours.get_which_edge_by_face_neighbour_id(i).unwrap();
-
-                angles[i][2] = Some(Self::get_angle_between_two_faces_with_known_neighbours(&current_triangle, 2, &neighbour_triangle, which_edge_id));
+                let neighbour_triangle = all_faces[current_neighbours.third.unwrap()];
+                angles[i][2] = Some(current_triangle.get_normals_angle(&neighbour_triangle));
             }
         }
 
@@ -730,6 +728,38 @@ mod tests {
         let expected = Vector::new(-15.212646,6.478232,17.233911);
         
         assert!(expected.eq_with_tolerance(&actual, 0.001))
+    }
+    
+    #[test]
+    pub fn test_get_normals_angle() {
+        let a = Triangle::new(
+        Point::new(35.704653, 37.253023, -22.626602),
+        Point::new(-38.634947, 13.199458, 23.94433),
+        Point::new(-21.698671, -49.7235, -32.888206));
+        let b = Triangle::new(
+        Point::new(51.3242, 19.2342, 28.461254),
+        Point::new(-21.698671, -49.7235, -32.888206),
+        Point::new(-38.634947, 13.199458, 23.94433));
+        
+        let actual = a.get_normals_angle(&b);
+        
+        assert!((actual - 2.524541).abs() < 0.00001);
+    }
+
+    #[test]
+    pub fn test_get_normals_angle_planar() {
+        let a = Triangle::new(
+            Point::new(0.0,0.0,0.0),
+            Point::new(10.0,0.0,0.0),
+            Point::new(10.0,5.0,0.0));
+        let b = Triangle::new(
+            Point::new(0.0,0.0,0.0),
+            Point::new(10.0,5.0,0.0),
+            Point::new(0.0,5.0,0.0));
+
+        let actual = a.get_normals_angle(&b);
+
+        assert!(actual < 0.00001);
     }
 }
 
