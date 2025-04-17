@@ -44,6 +44,41 @@ impl FaceNeighbours {
             None
         }
     }
+
+    /// Checks if all edges have its own neighbour.
+    ///
+    /// If yes = it returns `true`.
+    ///
+    /// If no = it returns `false`.
+    ///
+    /// # Examples
+    ///
+    /// In this example below there is 1 `None` for second edge, so `false` is returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::face_neighbours::FaceNeighbours;
+    /// 
+    /// let face_neighbours = FaceNeighbours::new(Some(5), None, Some(7));
+    /// let actual = face_neighbours.has_all_neighbours();
+    ///
+    /// assert!(!actual)
+    ///
+    /// ```
+    ///
+    /// In this example below all edges have `Some` neighbour, so `true` is returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::face_neighbours::FaceNeighbours;
+    ///
+    /// let face_neighbours = FaceNeighbours::new(Some(5), Some(3), Some(7));
+    /// let actual = face_neighbours.has_all_neighbours();
+    ///
+    /// assert!(actual)
+    ///
+    /// ```
+    pub fn has_all_neighbours(&self) -> bool {
+        self.first.is_some() && self.second.is_some() && self.third.is_some()
+    }
 }
 
 #[cfg(test)]
@@ -79,5 +114,45 @@ mod tests {
         let actual = face_neighbours.get_which_edge_by_face_neighbour_id(8);
         
         assert!(actual.is_none())
+    }
+    
+    #[test]
+    fn test_has_all_neighbours_1_none() {
+        let face_neighbours = FaceNeighbours::new(None, Some(5), Some(7));
+        let actual = face_neighbours.has_all_neighbours();
+
+        assert!(!actual)
+    }
+
+    #[test]
+    fn test_has_all_neighbours_2_none() {
+        let face_neighbours = FaceNeighbours::new(Some(5), None, Some(7));
+        let actual = face_neighbours.has_all_neighbours();
+        
+        assert!(!actual)
+    }
+
+    #[test]
+    fn test_has_all_neighbours_3_none() {
+        let face_neighbours = FaceNeighbours::new(Some(5), Some(7), None);
+        let actual = face_neighbours.has_all_neighbours();
+
+        assert!(!actual)
+    }
+
+    #[test]
+    fn test_has_all_neighbours_all_none() {
+        let face_neighbours = FaceNeighbours::new(None, None, None);
+        let actual = face_neighbours.has_all_neighbours();
+
+        assert!(!actual)
+    }
+
+    #[test]
+    fn test_has_all_neighbours_no_none() {
+        let face_neighbours = FaceNeighbours::new(Some(5), Some(3), Some(7));
+        let actual = face_neighbours.has_all_neighbours();
+        
+        assert!(actual)
     }
 }
