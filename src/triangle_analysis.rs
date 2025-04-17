@@ -453,8 +453,63 @@ impl Triangle {
         first_vector.get_angle(&second_vector)
     }
 
-    
-/*    pub fn get_all_normal_angles_between(all_faces: &Vec<Triangle>, all_face_neighbours: &Vec<FaceNeighbours>) -> Vec<[Option<f64>; 3]> {
+    /// Calculates angles between [Triangle]s' normals, but only for neighbouring [Triangle]s.
+    ///
+    /// You need to provide which one are neighbours by providing `all_face_neighbours` input.
+    ///
+    /// Both inputs (`all_faces` and `all_faces_neighbours`) should match.
+    ///
+    /// It returns a `vec` of `Option<f64>` with the length of 3 - for each edge there is 1 angle.
+    ///
+    /// This output `vec` should match `all_faces` input.
+    ///
+    /// If there was no neighbour for that edge: `None` should be there.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::face_neighbours::FaceNeighbours;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let mesh = Mesh::new(
+    ///     vec![0.0, 0.0, -0.5,
+    ///          2.5, 5.0, 0.5,
+    ///          5.0, 0.0, 0.3,
+    ///          7.5, 5.0, -0.4,
+    ///          10.0, 0.0, 0.1,
+    ///          5.0, 10.0, 0.9,
+    ///          ],
+    ///     vec![0, 2, 1, // first face
+    ///          1, 2, 3, // second face
+    ///          2, 4, 3, // third face
+    ///          1, 3, 5, // fourth face
+    ///          ]
+    /// );
+    ///
+    /// let all_faces = mesh.to_triangles();
+    /// let all_face_neighbours = FaceNeighbours::from_mesh(&mesh);
+    ///
+    /// let _expected_all_face_neighbours = vec![
+    ///     FaceNeighbours::new(None, Some(1), None), // first face
+    ///     FaceNeighbours::new(Some(0), Some(2), Some(3)), // second face
+    ///     FaceNeighbours::new(None, None, Some(1)), // third face
+    ///     FaceNeighbours::new(Some(1), None, None), // fourth face
+    /// ];
+    ///
+    /// let actual = Triangle::get_normal_angles_between_neighbours(&all_faces, &all_face_neighbours);
+    ///
+    /// let expected = vec![
+    ///     [None, Some(0.37540037779770735), None], // first face
+    ///     [Some(0.37540037779770735), Some(0.15445199884596061), Some(0.21494519445616783)], // second face
+    ///     [None, None, Some(0.15445199884596061)], // third face
+    ///     [Some(0.21494519445616783), None, None], // fourth face
+    /// ];
+    ///
+    /// assert_eq!(expected, actual);
+    /// 
+    /// ```
+    pub fn get_normal_angles_between_neighbours(all_faces: &Vec<Triangle>, all_face_neighbours: &Vec<FaceNeighbours>) -> Vec<[Option<f64>; 3]> {
         let faces_length = all_faces.len();
         if faces_length != all_face_neighbours.len() { 
             panic!("The input of the get_all_angles_between (for both Faces and FaceNeighbours) should be the same length.")
@@ -482,11 +537,12 @@ impl Triangle {
         }
 
         angles
-    }*/
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::mesh::Mesh;
     use crate::point::Point;
     use super::*;
 
@@ -729,7 +785,7 @@ mod tests {
         
         assert!(expected.eq_with_tolerance(&actual, 0.001))
     }
-    
+
     #[test]
     pub fn test_get_normals_angle() {
         let a = Triangle::new(
@@ -740,9 +796,9 @@ mod tests {
         Point::new(51.3242, 19.2342, 28.461254),
         Point::new(-21.698671, -49.7235, -32.888206),
         Point::new(-38.634947, 13.199458, 23.94433));
-        
+
         let actual = a.get_normals_angle(&b);
-        
+
         assert!((actual - 2.524541).abs() < 0.00001);
     }
 
@@ -760,6 +816,45 @@ mod tests {
         let actual = a.get_normals_angle(&b);
 
         assert!(actual < 0.00001);
+    }
+    
+    #[test]
+    pub fn test_get_normal_angles_between_neighbours() {
+        let mesh = Mesh::new(
+            vec![0.0, 0.0, -0.5,
+                 2.5, 5.0, 0.5,
+                 5.0, 0.0, 0.3,
+                 7.5, 5.0, -0.4,
+                 10.0, 0.0, 0.1,
+                 5.0, 10.0, 0.9,
+                 ],
+            vec![0, 2, 1, // first face
+                 1, 2, 3, // second face
+                 2, 4, 3, // third face
+                 1, 3, 5, // fourth face
+                 ]
+        );
+        
+        let all_faces = mesh.to_triangles();
+        let all_face_neighbours = FaceNeighbours::from_mesh(&mesh);
+        
+        let _expected_all_face_neighbours = vec![
+            FaceNeighbours::new(None, Some(1), None), // first face
+            FaceNeighbours::new(Some(0), Some(2), Some(3)), // second face
+            FaceNeighbours::new(None, None, Some(1)), // third face
+            FaceNeighbours::new(Some(1), None, None), // fourth face
+        ];
+        
+        let actual = Triangle::get_normal_angles_between_neighbours(&all_faces, &all_face_neighbours);
+        
+        let expected = vec![
+            [None, Some(0.37540037779770735), None], // first face
+            [Some(0.37540037779770735), Some(0.15445199884596061), Some(0.21494519445616783)], // second face
+            [None, None, Some(0.15445199884596061)], // third face
+            [Some(0.21494519445616783), None, None], // fourth face
+        ];
+        
+        assert_eq!(expected, actual);
     }
 }
 
