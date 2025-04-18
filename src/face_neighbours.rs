@@ -106,7 +106,7 @@ impl FaceNeighbours {
     ///
     /// The order of the output `vec` should be aligned to the order of faces.
     ///
-    /// It can panic once it will find that specific [Edge] has more than one neighbour.
+    /// It can panic once it will find that specific Edge has more than one neighbour.
     ///
     /// It is because of the simplified convention, that [FaceNeighbours] can only have a single
     /// neighbour for each edge.

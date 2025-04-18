@@ -1,7 +1,7 @@
 use crate::three_edge_group::ThreeEdgeGroup;
 
 impl ThreeEdgeGroup {
-    /// It tries to find which [Edge] is a neighbour (0 = first, 1 = second, 2 = third).
+    /// It tries to find which Edge is a neighbour (0 = first, 1 = second, 2 = third).
     /// 
     /// If there is no neighbour - it returns `None`.
     /// 

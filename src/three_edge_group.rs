@@ -1,6 +1,6 @@
 use crate::edge::Edge;
 
-/// Represents a group of 3 edges of the single face of the [Mesh].
+/// Represents a group of 3 edges of the single face of the Mesh.
 ///
 /// Sometimes for some operations it is easier to work on grouped edges rather than on the
 /// flattened list of all ids.
