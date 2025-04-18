@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 use crate::bounding_box::BoundingBox;
+use crate::edge::Edge;
+use crate::face_neighbours::FaceNeighbours;
 use crate::mesh::Mesh;
 use crate::vector::Vector;
 
@@ -567,6 +569,111 @@ impl Mesh {
 
         triangles.iter().map(|triangle| triangle.get_normal_vector_unitized()).collect()
     }
+
+    /// Gets edges with only 1 face-neighbour.
+    ///
+    /// Normally in manifold [Mesh]es each edge should have 2 face-neighbours. That's why it's
+    /// sometimes useful to detect edges with only 1 face-neighbour.
+    ///
+    /// # Examples
+    ///
+    /// In the example below there is a planar [Mesh] with some edges connected only on 1 side,
+    /// that's why these [Edge]s should be returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    ///     vec![0.0, 0.0, 0.0,
+    ///          2.5, 5.0, 0.0,
+    ///          5.0, 0.0, 0.0,
+    ///          7.5, 5.0, 0.0,
+    ///          10.0, 0.0, 0.0,
+    ///          5.0, 10.0, 0.0,
+    ///          ],
+    ///     vec![0, 2, 1, // first face
+    ///          1, 2, 3, // second face
+    ///          2, 4, 3, // third face
+    ///          1, 3, 5, // fourth face
+    ///          ]
+    /// );
+    ///
+    /// let actual = input.get_edges_with_missing_neighbour();
+    /// let expected = vec![
+    ///     Edge::new(0, 2), // first face, first edge
+    ///     Edge::new(1, 0), // first face, third edge
+    ///     Edge::new(2, 4), // third face, first edge
+    ///     Edge::new(4, 3), // third face, second edge
+    ///     Edge::new(3, 5), // fourth face, second edge
+    ///     Edge::new(5, 1), // fourth face, third edge
+    /// ];
+    /// assert_eq!(actual, expected);
+    ///
+    /// ```
+    ///
+    /// In the example below there is a pyramid [Mesh] with a manifold edges, that's why
+    /// empty `vec` of [Edge]s should be returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2, //0
+    ///     0,2,3, //1
+    ///
+    ///     // Side faces
+    ///     0,1,4, //2
+    ///     1,2,4, //3
+    ///     2,3,4, //4
+    ///     3,0,4  //5
+    /// ]);
+    ///
+    /// let actual = input.get_edges_with_missing_neighbour();
+    /// assert_eq!(actual.len(), 0);
+    ///
+    /// ```
+    pub fn get_edges_with_missing_neighbour(&self) -> Vec<Edge> {
+        
+        let face_neighbours = FaceNeighbours::from_mesh(self);
+        let grouped_edges = self.to_three_edge_groups();
+        let faces_number = face_neighbours.len();
+        
+        let mut edges_with_missing_neighbour: Vec<Edge> = Vec::new();
+
+        for i in 0..faces_number {
+            let current_face_neighbours = face_neighbours[i];
+            let current_grouped_edges = grouped_edges[i];
+            
+            if current_face_neighbours.first.is_none() { 
+                edges_with_missing_neighbour.push(current_grouped_edges.first)
+            }
+
+            if current_face_neighbours.second.is_none() {
+                edges_with_missing_neighbour.push(current_grouped_edges.second)
+            }
+
+            if current_face_neighbours.third.is_none() {
+                edges_with_missing_neighbour.push(current_grouped_edges.third)
+            }
+        }
+
+        edges_with_missing_neighbour
+    }
 }
 
 #[cfg(test)]
@@ -846,5 +953,64 @@ mod tests {
         for i in 0..expected.len() {
             assert_eq!(expected[i].eq_with_tolerance(&actual[i], 0.0001), true);
         }
+    }
+
+    #[test]
+    fn test_get_edges_with_missing_neighbour() {
+        let input = Mesh::new(
+            vec![0.0, 0.0, 0.0,
+                 2.5, 5.0, 0.0,
+                 5.0, 0.0, 0.0,
+                 7.5, 5.0, 0.0,
+                 10.0, 0.0, 0.0,
+                 5.0, 10.0, 0.0,
+                 ],
+            vec![0, 2, 1, // first face
+                 1, 2, 3, // second face
+                 2, 4, 3, // third face
+                 1, 3, 5, // fourth face
+                 ]
+        );
+        
+        let actual = input.get_edges_with_missing_neighbour();
+        let expected = vec![
+            Edge::new(0, 2), // first face, first edge
+            Edge::new(1, 0), // first face, third edge
+            Edge::new(2, 4), // third face, first edge
+            Edge::new(4, 3), // third face, second edge
+            Edge::new(3, 5), // fourth face, second edge
+            Edge::new(5, 1), // fourth face, third edge
+        ];
+        assert_eq!(actual, expected);
+        
+    }
+
+    #[test]
+    fn test_get_edges_with_missing_neighbour_manifold() {
+        let input = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2, //0
+            0,2,3, //1
+        
+            // Side faces
+            0,1,4, //2
+            1,2,4, //3
+            2,3,4, //4
+            3,0,4  //5
+        ]);
+        
+        let actual = input.get_edges_with_missing_neighbour();
+        assert_eq!(actual.len(), 0);
     }
 }

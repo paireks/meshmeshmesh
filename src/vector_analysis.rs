@@ -123,6 +123,26 @@ impl Vector {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
+    /// Calculates an angle between [Vector]s.
+    ///
+    /// Self [Vector] is the first one (a), and another one is the second one (b).
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let first_vector = Vector::new(3.0, -3.0, 1.0);
+    /// let second_vector = Vector::new(4.0, 9.0, 2.0);
+    ///
+    /// let actual = first_vector.get_angle(&second_vector);
+    ///
+    /// assert!((actual - 1.8720947029995874).abs() < 0.00001);
+    /// ```
+    pub fn get_angle(&self, second_vector: &Vector) -> f64 {
+        f64::acos(self.get_dot_product(second_vector) / (self.get_length() * second_vector.get_length()))
+    }
+
     /// Calculates a cross product.
     ///
     /// Self [Vector] is the first one (a), and another one is the second one (b).
@@ -257,6 +277,36 @@ mod tests {
         let vector = Vector::zero();
         let result = vector.get_length();
         assert_eq!(result, 0.000);
+    }
+    
+    #[test]
+    fn test_get_angle() {
+        let first_vector = Vector::new(3.0, -3.0, 1.0);
+        let second_vector = Vector::new(4.0, 9.0, 2.0);
+        
+        let actual = first_vector.get_angle(&second_vector);
+        
+        assert!((actual - 1.8720947029995874).abs() < 0.00001);
+    }
+
+    #[test]
+    fn test_get_angle_same() {
+        let first_vector = Vector::new(3.0, -3.0, 1.0);
+        let second_vector = Vector::new(3.0, -3.0, 1.0);
+
+        let actual = first_vector.get_angle(&second_vector);
+
+        assert!(actual < 0.00001);
+    }
+
+    #[test]
+    fn test_get_angle_reversed() {
+        let first_vector = Vector::new(3.0, -3.0, 1.0);
+        let second_vector = Vector::new(-3.0, 3.0, -1.0);
+
+        let actual = first_vector.get_angle(&second_vector);
+
+        assert!((actual - std::f64::consts::PI).abs() < 0.00001);
     }
 
     #[test]
