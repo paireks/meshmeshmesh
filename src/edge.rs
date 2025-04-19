@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 
 /// Represents an edge of the Mesh.
 /// 
@@ -14,6 +15,18 @@ pub struct Edge {
 impl PartialEq for Edge {
     fn eq(&self, other: &Self) -> bool {
         self.start.eq(&other.start) && self.end.eq(&other.end)
+    }
+}
+
+impl Ord for Edge {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.start.cmp(&other.start).then(self.end.cmp(&other.end))
+    }
+}
+
+impl PartialOrd for Edge {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 

@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 use crate::bounding_box::BoundingBox;
 use crate::edge::Edge;
-use crate::face_neighbours::FaceNeighbours;
 use crate::mesh::Mesh;
+use crate::three_edge_group::ThreeEdgeGroup;
 use crate::vector::Vector;
 
 impl Mesh {
@@ -600,8 +600,8 @@ impl Mesh {
     ///          ]
     /// );
     ///
-    /// let actual = input.get_edges_with_missing_neighbour();
-    /// let expected = vec![
+    /// let mut actual = input.get_edges_with_missing_neighbour();
+    /// let mut expected = vec![
     ///     Edge::new(0, 2), // first face, first edge
     ///     Edge::new(1, 0), // first face, third edge
     ///     Edge::new(2, 4), // third face, first edge
@@ -609,6 +609,8 @@ impl Mesh {
     ///     Edge::new(3, 5), // fourth face, second edge
     ///     Edge::new(5, 1), // fourth face, third edge
     /// ];
+    /// actual.sort();
+    /// expected.sort();
     /// assert_eq!(actual, expected);
     ///
     /// ```
@@ -648,30 +650,19 @@ impl Mesh {
     ///
     /// ```
     pub fn get_edges_with_missing_neighbour(&self) -> Vec<Edge> {
-        
-        let face_neighbours = FaceNeighbours::from_mesh(self);
-        let grouped_edges = self.to_three_edge_groups();
-        let faces_number = face_neighbours.len();
-        
+
+        let three_edge_groups = self.to_three_edge_groups();
+        let edge_hashmap = ThreeEdgeGroup::get_edge_with_face_ids_hashmap_with_reversed_edges_merged(&three_edge_groups);
         let mut edges_with_missing_neighbour: Vec<Edge> = Vec::new();
-
-        for i in 0..faces_number {
-            let current_face_neighbours = face_neighbours[i];
-            let current_grouped_edges = grouped_edges[i];
-            
-            if current_face_neighbours.first.is_none() { 
-                edges_with_missing_neighbour.push(current_grouped_edges.first)
-            }
-
-            if current_face_neighbours.second.is_none() {
-                edges_with_missing_neighbour.push(current_grouped_edges.second)
-            }
-
-            if current_face_neighbours.third.is_none() {
-                edges_with_missing_neighbour.push(current_grouped_edges.third)
+        
+        for (key, value) in edge_hashmap.into_iter() {
+            let current_edge = key;
+            let number_of_neighbour_faces = value.len();
+            if number_of_neighbour_faces == 1 {
+                edges_with_missing_neighbour.push(current_edge);
             }
         }
-
+        
         edges_with_missing_neighbour
     }
 }
@@ -972,8 +963,8 @@ mod tests {
                  ]
         );
         
-        let actual = input.get_edges_with_missing_neighbour();
-        let expected = vec![
+        let mut actual = input.get_edges_with_missing_neighbour();
+        let mut expected = vec![
             Edge::new(0, 2), // first face, first edge
             Edge::new(1, 0), // first face, third edge
             Edge::new(2, 4), // third face, first edge
@@ -981,6 +972,8 @@ mod tests {
             Edge::new(3, 5), // fourth face, second edge
             Edge::new(5, 1), // fourth face, third edge
         ];
+        actual.sort();
+        expected.sort();
         assert_eq!(actual, expected);
         
     }
