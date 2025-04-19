@@ -3,6 +3,7 @@ mod barycentric_coordinates_analysis;
 pub mod bounding_box;
 pub mod edge;
 mod edge_analysis;
+mod edge_transformations;
 pub mod face_neighbours;
 mod face_neighbours_analysis;
 pub mod mesh;

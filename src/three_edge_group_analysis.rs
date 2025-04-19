@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use crate::edge::Edge;
 use crate::three_edge_group::ThreeEdgeGroup;
 
 impl ThreeEdgeGroup {
@@ -49,6 +51,64 @@ impl ThreeEdgeGroup {
             None
         }
     }
+
+    /// It creates the [Edge] hashmap as keys, while values are `vec`s of indices of faces.
+    ///
+    /// This way you can see which edges are connected to which faces.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::collections::HashMap;
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::three_edge_group::ThreeEdgeGroup;
+    ///
+    /// let input = vec![
+    ///     ThreeEdgeGroup::new(Edge::new(0, 2), Edge::new(2, 1), Edge::new(1, 0)), // first face
+    ///     ThreeEdgeGroup::new(Edge::new(1, 2), Edge::new(2, 3), Edge::new(3, 1)), // second face
+    ///     ThreeEdgeGroup::new(Edge::new(2, 4), Edge::new(4, 3), Edge::new(3, 2)), // third face
+    ///     ThreeEdgeGroup::new(Edge::new(1, 3), Edge::new(3, 5), Edge::new(5, 1)), // fourth face
+    ///     ThreeEdgeGroup::new(Edge::new(1, 3), Edge::new(3, 6), Edge::new(6, 1)), // fifth face
+    ///     ThreeEdgeGroup::new(Edge::new(5, 3), Edge::new(3, 6), Edge::new(6, 5)), // sixth face
+    /// ];
+    /// 
+    /// let actual = ThreeEdgeGroup::get_edge_with_face_ids_hashmap(&input);
+    ///
+    /// let expected = HashMap::from([
+    ///     (Edge::new(0, 2), vec![0]),
+    ///     (Edge::new(2, 1), vec![0]),
+    ///     (Edge::new(1, 0), vec![0]),
+    ///     (Edge::new(1, 2), vec![1]),
+    ///     (Edge::new(2, 3), vec![1]),
+    ///     (Edge::new(3, 1), vec![1]),
+    ///     (Edge::new(2, 4), vec![2]),
+    ///     (Edge::new(4, 3), vec![2]),
+    ///     (Edge::new(3, 2), vec![2]),
+    ///     (Edge::new(1, 3), vec![3, 4]),
+    ///     (Edge::new(3, 5), vec![3]),
+    ///     (Edge::new(5, 1), vec![3]),
+    ///     (Edge::new(3, 6), vec![4, 5]),
+    ///     (Edge::new(6, 1), vec![4]),
+    ///     (Edge::new(5, 3), vec![5]),
+    ///     (Edge::new(6, 5), vec![5]),
+    /// ]);
+    ///
+    /// assert_eq!(actual, expected);
+    /// 
+    /// ```
+    pub fn get_edge_with_face_ids_hashmap(three_edge_groups: &Vec<ThreeEdgeGroup>) -> HashMap<Edge, Vec<usize>> {
+        let number_of_faces = three_edge_groups.len();
+        let mut edge_hashmap: HashMap<Edge, Vec<usize>> = HashMap::new();
+
+        for i in 0..number_of_faces {
+            let current_group = three_edge_groups[i];
+            edge_hashmap.entry(current_group.first).or_insert_with(Vec::new).push(i);
+            edge_hashmap.entry(current_group.second).or_insert_with(Vec::new).push(i);
+            edge_hashmap.entry(current_group.third).or_insert_with(Vec::new).push(i);
+        }
+
+        edge_hashmap
+    }
 }
 
 #[cfg(test)]
@@ -93,5 +153,41 @@ mod tests {
         
         let actual = input.which_edge_is_neighbour_to(&potential_neighbour);
         assert!(actual.is_none());
+    }
+    
+    #[test]
+    fn test_get_edge_with_face_ids_hashmap() {
+        let input = vec![
+            ThreeEdgeGroup::new(Edge::new(0, 2), Edge::new(2, 1), Edge::new(1, 0)), // first face
+            ThreeEdgeGroup::new(Edge::new(1, 2), Edge::new(2, 3), Edge::new(3, 1)), // second face
+            ThreeEdgeGroup::new(Edge::new(2, 4), Edge::new(4, 3), Edge::new(3, 2)), // third face
+            ThreeEdgeGroup::new(Edge::new(1, 3), Edge::new(3, 5), Edge::new(5, 1)), // fourth face
+            ThreeEdgeGroup::new(Edge::new(1, 3), Edge::new(3, 6), Edge::new(6, 1)), // fifth face
+            ThreeEdgeGroup::new(Edge::new(5, 3), Edge::new(3, 6), Edge::new(6, 5)), // sixth face
+        ];
+        
+        let actual = ThreeEdgeGroup::get_edge_with_face_ids_hashmap(&input);
+        
+        let expected = HashMap::from([
+            (Edge::new(0, 2), vec![0]),
+            (Edge::new(2, 1), vec![0]),
+            (Edge::new(1, 0), vec![0]),
+            (Edge::new(1, 2), vec![1]),
+            (Edge::new(2, 3), vec![1]),
+            (Edge::new(3, 1), vec![1]),
+            (Edge::new(2, 4), vec![2]),
+            (Edge::new(4, 3), vec![2]),
+            (Edge::new(3, 2), vec![2]),
+            (Edge::new(1, 3), vec![3, 4]),
+            (Edge::new(3, 5), vec![3]),
+            (Edge::new(5, 1), vec![3]),
+            (Edge::new(3, 6), vec![4, 5]),
+            (Edge::new(6, 1), vec![4]),
+            (Edge::new(5, 3), vec![5]),
+            (Edge::new(6, 5), vec![5]),
+        ]);
+        
+        assert_eq!(actual, expected);
+        
     }
 }

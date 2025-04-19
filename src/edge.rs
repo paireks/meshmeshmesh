@@ -3,7 +3,7 @@
 /// 
 /// Sometimes for some operations it is easier to work on grouped edges rather than on the
 /// flattened list of all ids.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, Hash)]
 pub struct Edge {
     /// Index of vertex that represents start of the Mesh edge.
     pub start: usize,
