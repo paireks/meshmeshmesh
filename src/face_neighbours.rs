@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use crate::edge::Edge;
 use crate::mesh::Mesh;
 use crate::three_edge_group::ThreeEdgeGroup;
 
@@ -168,43 +170,52 @@ impl FaceNeighbours {
     /// ```
     pub fn from_three_edge_groups(three_edge_groups: &Vec<ThreeEdgeGroup>) -> Vec<FaceNeighbours> {
 
+        let edge_hashmap = ThreeEdgeGroup::get_edge_with_face_ids_hashmap_with_reversed_edges_merged(three_edge_groups);
+        FaceNeighbours::from_edge_with_face_ids_hashmap(&edge_hashmap, three_edge_groups)
+    }
+
+    /// Private method for turning edge_with_face_ids_hashmap into `vec` of [FaceNeighbours].
+    fn from_edge_with_face_ids_hashmap(edge_with_face_ids_hashmap: &HashMap<Edge, Vec<usize>>, three_edge_groups: &Vec<ThreeEdgeGroup>) -> Vec<FaceNeighbours> {
+
         let number_of_faces = three_edge_groups.len();
         let mut face_neighbours: Vec<FaceNeighbours> = vec![FaceNeighbours::new(None, None, None); number_of_faces];
 
-        for i in 0..number_of_faces {
-            let current_face = three_edge_groups[i];
-            for j in 0..number_of_faces {
-                if i != j {
-                    let current_neighbour_candidate = three_edge_groups[j];
-                    let neighbour_edge_option = current_face.which_edge_is_neighbour_to(&current_neighbour_candidate);
-                    if neighbour_edge_option.is_some() {
-                        let neighbour_edge_id = neighbour_edge_option.unwrap();
-                        if neighbour_edge_id == 0 {
-                            if face_neighbours[i].first.is_none() {
-                                face_neighbours[i].first = Some(j);
-                            }
-                            else {
-                                panic!("There is more than 1 neighbour for the first edge of the face id: {i}")
-                            }
-                        }
-                        else if neighbour_edge_id == 1 {
-                            if face_neighbours[i].second.is_none() {
-                                face_neighbours[i].second = Some(j);
-                            }
-                            else {
-                                panic!("There is more than 1 neighbour for the second edge of the face id: {i}")
-                            }
-                        }
-                        else {
-                            if face_neighbours[i].third.is_none() {
-                                face_neighbours[i].third = Some(j);
-                            }
-                            else {
-                                panic!("There is more than 1 neighbour for the third edge of the face id: {i}")
-                            }
-                        }
-                    }
+        for (key, value) in edge_with_face_ids_hashmap.into_iter() {
+            let current_edge = key;
+            let number_of_neighbour_faces = value.len();
+            if number_of_neighbour_faces == 0 { 
+                panic!("Seems like the edge_with_face_ids_hashmap is not structured properly")
+            }
+            else if number_of_neighbour_faces == 1 {
+                // This edge has only 1 face, so it's not useful to find FaceNeighbour
+            }
+            else if number_of_neighbour_faces == 2 {
+                let face_a = three_edge_groups[value[0]];
+                
+                if face_a.first.eq_regardless_of_direction(current_edge) { 
+                    face_neighbours[value[0]].first = Some(value[1]);
                 }
+                else if face_a.second.eq_regardless_of_direction(current_edge) {
+                    face_neighbours[value[0]].second = Some(value[1]);
+                }
+                else if face_a.third.eq_regardless_of_direction(current_edge) {
+                    face_neighbours[value[0]].third = Some(value[1]);
+                }
+
+                let face_b = three_edge_groups[value[1]];
+
+                if face_b.first.eq_regardless_of_direction(current_edge) {
+                    face_neighbours[value[1]].first = Some(value[0]);
+                }
+                else if face_b.second.eq_regardless_of_direction(current_edge) {
+                    face_neighbours[value[1]].second = Some(value[0]);
+                }
+                else if face_b.third.eq_regardless_of_direction(current_edge) {
+                    face_neighbours[value[1]].third = Some(value[0]);
+                }
+            }
+            else {
+                panic!("There is more than 2 neighbours for the edge, which is illegal for FaceNeighbours")
             }
         }
 
@@ -323,7 +334,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "There is more than 1 neighbour for the second edge of the face id: 1")]
+    #[should_panic(expected = "There is more than 2 neighbours for the edge, which is illegal for FaceNeighbours")]
     fn test_from_three_edge_groups_first_edge_panic() {
         let input = vec![
             ThreeEdgeGroup::new(Edge::new(0, 2), Edge::new(2, 1), Edge::new(1, 0)), // first face
