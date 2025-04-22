@@ -1,14 +1,11 @@
 use std::cmp::Ordering;
 
-/// Represents an edge of the Mesh.
-/// 
-/// Sometimes for some operations it is easier to work on grouped edges rather than on the
-/// flattened list of all ids.
+/// Represents an edge.
 #[derive(Debug, Clone, Copy, Eq, Hash)]
 pub struct Edge {
-    /// Index of vertex that represents start of the Mesh edge.
+    /// Index of vertex that represents start of the edge.
     pub start: usize,
-    /// Index of vertex that represents end of the Mesh edge.
+    /// Index of vertex that represents end of the edge.
     pub end: usize,
 }
 

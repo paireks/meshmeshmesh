@@ -53,6 +53,38 @@ impl Edge {
             false
         }
     }
+    
+    /// Creates a flat `vec` of `usize` indices from a `vec` of [Edge]s.
+    /// 
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// 
+    /// let mut edges: Vec<Edge> = Vec::new();
+    /// 
+    /// edges.push(Edge::new(0, 1));
+    /// edges.push(Edge::new(1, 2));
+    /// edges.push(Edge::new(1, 2));
+    /// edges.push(Edge::new(5, 7));
+    ///
+    /// let actual = Edge::get_flatten_from_edges(&edges);
+    ///
+    /// let expected = vec![0, 1, 1, 2, 1, 2, 5, 7];
+    /// 
+    /// assert!(actual.eq(&actual));
+    /// 
+    /// ```
+    pub fn get_flatten_from_edges(edges: &Vec<Edge>) -> Vec<usize> {
+        let mut flat:Vec<usize> = Vec::new();
+
+        for edge in edges {
+            flat.push(edge.start);
+            flat.push(edge.end);
+        }
+        
+        flat
+    }
 }
 
 #[cfg(test)]
@@ -87,5 +119,30 @@ mod tests {
         let actual = a.eq_regardless_of_direction(&b);
 
         assert_eq!(actual, false);
+    }
+    
+    #[test]
+    fn test_get_flatten_from_edges() {
+        let mut edges: Vec<Edge> = Vec::new();
+        
+        edges.push(Edge::new(0, 1));
+        edges.push(Edge::new(1, 2));
+        edges.push(Edge::new(1, 2));
+        edges.push(Edge::new(5, 7));
+        
+        let actual = Edge::get_flatten_from_edges(&edges);
+        
+        let expected = vec![0, 1, 1, 2, 1, 2, 5, 7];
+        
+        assert!(actual.eq(&expected));
+    }
+
+    #[test]
+    fn test_get_flatten_from_edges_empty() {
+        let edges: Vec<Edge> = Vec::new();
+
+        let actual = Edge::get_flatten_from_edges(&edges);
+
+        assert_eq!(actual.len(), 0);
     }
 }
