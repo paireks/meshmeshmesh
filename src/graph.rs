@@ -7,10 +7,10 @@ pub struct Graph {
 
     /// Adjacency vertices. For each vertex it tells you all its neighbour vertices,
     /// by storing their ids.
-    pub adjacency_vertices: Vec<Vec<usize>>,
+    adjacency_vertices: Vec<Vec<usize>>,
 
     /// Adjacency edges. For each vertex it tells you all its neighbour edges, by storing edge ids.
-    pub adjacency_edges: Vec<Vec<usize>>,
+    adjacency_edges: Vec<Vec<usize>>,
 }
 
 impl PartialEq for Graph {
@@ -55,8 +55,8 @@ impl Graph {
     /// let actual = Graph::new(edges);
     /// 
     /// assert!(actual.edges.eq(&vec![Edge::new(0, 1), Edge::new(1, 0), Edge::new(1, 2), Edge::new(2, 3), Edge::new(1, 4), Edge::new(6, 0)]));
-    /// assert_eq!(actual.adjacency_vertices, expected_adjacency_vertices);
-    /// assert_eq!(actual.adjacency_edges, expected_adjacency_edges);
+    /// assert_eq!(actual.get_adjacency_vertices(), expected_adjacency_vertices);
+    /// assert_eq!(actual.get_adjacency_edges(), expected_adjacency_edges);
     /// 
     /// ```
     pub fn new(edges: Vec<Edge>) -> Graph {
@@ -67,6 +67,63 @@ impl Graph {
         let adjacency_edges = Self::create_adjacency_edges(&edges, number_of_vertices);
 
         Graph {edges, adjacency_vertices, adjacency_edges}
+    }
+
+    /// Get adjacency vertices. For each vertex it tells you all its neighbour vertices,
+    /// by storing their ids.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::graph::Graph;
+    ///
+    /// let edges = vec![Edge::new(0, 1), Edge::new(1, 0), Edge::new(1, 2), Edge::new(2, 3), Edge::new(1, 4), Edge::new(6, 0)];
+    /// let actual = Graph::new(edges).get_adjacency_vertices();
+    ///
+    /// let expected = vec![
+    ///     vec![1], // 0
+    ///     vec![0, 2, 4], // 1
+    ///     vec![3], // 2
+    ///     vec![], // 3
+    ///     vec![], // 4
+    ///     vec![], // 5 (not existent on any edge)
+    ///     vec![0], // 6
+    /// ];
+    ///
+    /// assert_eq!(actual, expected);
+    /// 
+    /// ```
+    pub fn get_adjacency_vertices(&self) -> Vec<Vec<usize>> {
+        self.adjacency_vertices.clone()
+    }
+
+    /// Adjacency edges. For each vertex it tells you all its neighbour edges, by storing edge ids.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::graph::Graph;
+    ///
+    /// let edges = vec![Edge::new(0, 1), Edge::new(1, 0), Edge::new(1, 2), Edge::new(2, 3), Edge::new(1, 4), Edge::new(6, 0)];
+    /// let actual = Graph::new(edges).get_adjacency_edges();
+    ///
+    /// let expected = vec![
+    ///     vec![0], // 0
+    ///     vec![1, 2, 4], // 1
+    ///     vec![3], // 2
+    ///     vec![], // 3
+    ///     vec![], // 4
+    ///     vec![], // 5 (not existent on any edge)
+    ///     vec![5], // 6
+    /// ];
+    ///
+    /// assert_eq!(actual, expected);
+    ///
+    /// ```
+    pub fn get_adjacency_edges(&self) -> Vec<Vec<usize>> {
+        self.adjacency_edges.clone()
     }
 
     fn create_adjacency_vertices(edges: &Vec<Edge>, number_of_vertices: usize) -> Vec<Vec<usize>> {
@@ -133,5 +190,58 @@ mod tests {
         assert_eq!(actual.adjacency_vertices, expected_adjacency_vertices);
         assert_eq!(actual.adjacency_edges, expected_adjacency_edges);
         
+    }
+
+    #[test]
+    fn get_adjacency_vertices() {
+        let edges = vec![
+            Edge::new(0, 1),
+            Edge::new(1, 0),
+            Edge::new(1, 2),
+            Edge::new(2, 3),
+            Edge::new(1, 4),
+            Edge::new(6, 0)
+        ];
+        
+        let actual = Graph::new(edges).get_adjacency_vertices();
+
+        let expected = vec![
+            vec![1], // 0
+            vec![0, 2, 4], // 1
+            vec![3], // 2
+            vec![], // 3
+            vec![], // 4
+            vec![], // 5 (not existent on any edge)
+            vec![0], // 6
+        ];
+
+        assert_eq!(actual, expected);
+        
+    }
+
+    #[test]
+    fn get_adjacency_edges() {
+        let edges = vec![
+            Edge::new(0, 1),
+            Edge::new(1, 0),
+            Edge::new(1, 2),
+            Edge::new(2, 3),
+            Edge::new(1, 4),
+            Edge::new(6, 0)
+        ];
+        let actual = Graph::new(edges).get_adjacency_edges();
+        
+        let expected = vec![
+            vec![0], // 0
+            vec![1, 2, 4], // 1
+            vec![3], // 2
+            vec![], // 3
+            vec![], // 4
+            vec![], // 5 (not existent on any edge)
+            vec![5], // 6
+        ];
+        
+        assert_eq!(actual, expected);
+
     }
 }
