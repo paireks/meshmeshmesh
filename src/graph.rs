@@ -1,9 +1,16 @@
 use crate::edge::Edge;
 
-/// Graph representation
+/// Graph representation.
+/// 
+/// This representation stores data in a specific way internally in a private fields.
+/// 
+/// These fields are accessible by getters.
+/// 
+/// They are private, because they are coupled: if the `edges` change, then `adjacency_` fields
+/// should also change accordingly.
 pub struct Graph {
     /// List of [Edge]s that define a [Graph].
-    pub edges: Vec<Edge>,
+    edges: Vec<Edge>,
 
     /// Adjacency vertices. For each vertex it tells you all its neighbour vertices,
     /// by storing their ids.
@@ -54,7 +61,7 @@ impl Graph {
     /// 
     /// let actual = Graph::new(edges);
     /// 
-    /// assert!(actual.edges.eq(&vec![Edge::new(0, 1), Edge::new(1, 0), Edge::new(1, 2), Edge::new(2, 3), Edge::new(1, 4), Edge::new(6, 0)]));
+    /// assert!(actual.get_edges().eq(&vec![Edge::new(0, 1), Edge::new(1, 0), Edge::new(1, 2), Edge::new(2, 3), Edge::new(1, 4), Edge::new(6, 0)]));
     /// assert_eq!(actual.get_adjacency_vertices(), expected_adjacency_vertices);
     /// assert_eq!(actual.get_adjacency_edges(), expected_adjacency_edges);
     /// 
@@ -67,6 +74,24 @@ impl Graph {
         let adjacency_edges = Self::create_adjacency_edges(&edges, number_of_vertices);
 
         Graph {edges, adjacency_vertices, adjacency_edges}
+    }
+
+    /// Gets [Edge]s of [Graph]. These Edges are defining the [Graph].
+    ///
+    /// # Example
+    /// 
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::graph::Graph;
+    ///
+    /// let edges = vec![Edge::new(0, 1), Edge::new(1, 0), Edge::new(1, 2), Edge::new(2, 3), Edge::new(1, 4), Edge::new(6, 0)];
+    ///
+    /// let actual = Graph::new(edges).get_edges();
+    ///
+    /// assert!(actual.eq(&vec![Edge::new(0, 1), Edge::new(1, 0), Edge::new(1, 2), Edge::new(2, 3), Edge::new(1, 4), Edge::new(6, 0)]));
+    /// ```
+    pub fn get_edges(&self) -> Vec<Edge> {
+        self.edges.clone()
     }
 
     /// Get adjacency vertices. For each vertex it tells you all its neighbour vertices,
@@ -92,7 +117,7 @@ impl Graph {
     /// ];
     ///
     /// assert_eq!(actual, expected);
-    /// 
+    ///
     /// ```
     pub fn get_adjacency_vertices(&self) -> Vec<Vec<usize>> {
         self.adjacency_vertices.clone()
@@ -202,7 +227,7 @@ mod tests {
             Edge::new(1, 4),
             Edge::new(6, 0)
         ];
-        
+
         let actual = Graph::new(edges).get_adjacency_vertices();
 
         let expected = vec![
@@ -216,7 +241,7 @@ mod tests {
         ];
 
         assert_eq!(actual, expected);
-        
+
     }
 
     #[test]
@@ -230,7 +255,7 @@ mod tests {
             Edge::new(6, 0)
         ];
         let actual = Graph::new(edges).get_adjacency_edges();
-        
+
         let expected = vec![
             vec![0], // 0
             vec![1, 2, 4], // 1
@@ -240,7 +265,7 @@ mod tests {
             vec![], // 5 (not existent on any edge)
             vec![5], // 6
         ];
-        
+
         assert_eq!(actual, expected);
 
     }
