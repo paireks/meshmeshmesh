@@ -1,4 +1,5 @@
 use crate::edge::Edge;
+use crate::face_neighbours::FaceNeighbours;
 
 /// Graph representation.
 /// 
@@ -150,6 +151,59 @@ impl Graph {
     pub fn get_adjacency_edges(&self) -> Vec<Vec<usize>> {
         self.adjacency_edges.clone()
     }
+    
+    /// Creates a [Graph] by looking at the `vec` of [FaceNeighbours].
+    /// 
+    /// This way it is possible to create a Graph showing which faces are connected together.
+    /// 
+    /// Indices of Graph edges are indices of faces this way.
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::face_neighbours::FaceNeighbours;
+    /// use meshmeshmesh::graph::Graph;
+    ///
+    /// let input = vec![
+    ///     FaceNeighbours::new(None, Some(1), None),
+    ///     FaceNeighbours::new(Some(0), Some(2), Some(3)),
+    ///     FaceNeighbours::new(None, None, Some(1)),
+    ///     FaceNeighbours::new(Some(1), None, None),
+    /// ];
+    ///
+    /// let actual = Graph::from_face_neighbours(&input);
+    /// let expected = Graph::new(vec![
+    ///     Edge::new(0, 1),
+    ///     Edge::new(1, 0),
+    ///     Edge::new(1, 2),
+    ///     Edge::new(1, 3),
+    ///     Edge::new(2, 1),
+    ///     Edge::new(3, 1),
+    /// ]);
+    ///
+    /// assert!(expected.eq(&actual));
+    ///
+    /// ```
+    pub fn from_face_neighbours(face_neighbours: &Vec<FaceNeighbours>) -> Graph {
+        let mut graph_edges: Vec<Edge> = Vec::new();
+        let number_of_face_neighbours = face_neighbours.len();
+
+        for i in 0..number_of_face_neighbours {
+            let current_face_neighbours = face_neighbours[i];
+            if current_face_neighbours.first.is_some() { 
+                graph_edges.push(Edge::new(i, current_face_neighbours.first.unwrap()));
+            }
+            if current_face_neighbours.second.is_some() {
+                graph_edges.push(Edge::new(i, current_face_neighbours.second.unwrap()));
+            }
+            if current_face_neighbours.third.is_some() {
+                graph_edges.push(Edge::new(i, current_face_neighbours.third.unwrap()));
+            }
+        }
+        
+        Graph::new(graph_edges)
+    }
 
     fn create_adjacency_vertices(edges: &Vec<Edge>, number_of_vertices: usize) -> Vec<Vec<usize>> {
         let mut adjacency_vertices = vec![Vec::new(); number_of_vertices];
@@ -268,5 +322,27 @@ mod tests {
 
         assert_eq!(actual, expected);
 
+    }
+    
+    #[test]
+    fn test_from_face_neighbours() {
+        let input = vec![
+            FaceNeighbours::new(None, Some(1), None),
+            FaceNeighbours::new(Some(0), Some(2), Some(3)),
+            FaceNeighbours::new(None, None, Some(1)),
+            FaceNeighbours::new(Some(1), None, None),
+        ];
+        
+        let actual = Graph::from_face_neighbours(&input);
+        let expected = Graph::new(vec![
+            Edge::new(0, 1),
+            Edge::new(1, 0),
+            Edge::new(1, 2),
+            Edge::new(1, 3),
+            Edge::new(2, 1),
+            Edge::new(3, 1),
+        ]);
+        
+        assert!(expected.eq(&actual));
     }
 }
