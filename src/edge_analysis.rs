@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use crate::edge::Edge;
 
 impl Edge {
@@ -85,6 +86,44 @@ impl Edge {
         
         flat
     }
+
+    /// Creates a flat `vec` of `usize` indices from a `vec` of [Edge]s.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::collections::HashSet;
+    /// use meshmeshmesh::edge::Edge;
+    ///
+    /// let mut edges: Vec<Edge> = Vec::new();
+    ///
+    /// edges.push(Edge::new(0, 1));
+    /// edges.push(Edge::new(1, 2));
+    /// edges.push(Edge::new(1, 2));
+    /// edges.push(Edge::new(5, 7));
+    ///
+    /// let actual = Edge::get_hashset_of_ids(&edges);
+    ///
+    /// let mut expected = HashSet::new();
+    /// expected.insert(0);
+    /// expected.insert(1);
+    /// expected.insert(2);
+    /// expected.insert(5);
+    /// expected.insert(7);
+    ///
+    /// assert!(actual.eq(&actual));
+    ///
+    /// ```
+    pub fn get_hashset_of_ids(edges: &Vec<Edge>) -> HashSet<usize> {
+        let mut hashset:HashSet<usize> = HashSet::new();
+
+        for edge in edges {
+            hashset.insert(edge.start);
+            hashset.insert(edge.end);
+        }
+
+        hashset
+    }
 }
 
 #[cfg(test)]
@@ -144,5 +183,26 @@ mod tests {
         let actual = Edge::get_flatten_from_edges(&edges);
 
         assert_eq!(actual.len(), 0);
+    }
+    
+    #[test]
+    fn test_get_hashset_of_ids() {
+        let mut edges: Vec<Edge> = Vec::new();
+        
+        edges.push(Edge::new(0, 1));
+        edges.push(Edge::new(1, 2));
+        edges.push(Edge::new(1, 2));
+        edges.push(Edge::new(5, 7));
+        
+        let actual = Edge::get_hashset_of_ids(&edges);
+        
+        let mut expected = HashSet::new();
+        expected.insert(0);
+        expected.insert(1);
+        expected.insert(2);
+        expected.insert(5);
+        expected.insert(7);
+        
+        assert!(actual.eq(&actual));
     }
 }

@@ -7,6 +7,7 @@ mod edge_transformations;
 pub mod face_neighbours;
 mod face_neighbours_analysis;
 pub mod graph;
+mod graph_analysis;
 pub mod mesh;
 mod mesh_analysis;
 mod mesh_processing;
