@@ -20,7 +20,7 @@ impl Graph {
     /// go visit all vertices, but from the other start it won't. When all the edges are undirected
     /// then it doesn't matter where you start. This method starts arbitrally on the vertex with
     /// id = 0.
-    fn is_connected(&self) -> bool {
+    pub fn is_connected(&self) -> bool {
         let number_of_vertices: usize = self.get_number_of_vertices();
         let mut bfs = BFS {
             previous_vertex: vec![None; number_of_vertices],

@@ -261,7 +261,7 @@ impl Mesh {
     /// ```
     pub fn to_three_edge_groups(&self) -> Vec<ThreeEdgeGroup> {
         let number_of_faces = self.get_number_of_faces();
-        let mut three_edge_groups: Vec<ThreeEdgeGroup> = Vec::new();
+        let mut three_edge_groups: Vec<ThreeEdgeGroup> = Vec::with_capacity(number_of_faces);
         for i in 0..number_of_faces {
             let first = Edge::new(self.indices[i*3], self.indices[i*3+1]);
             let second = Edge::new(self.indices[i*3+1], self.indices[i*3+2]);
@@ -270,6 +270,57 @@ impl Mesh {
         }
 
         three_edge_groups
+    }
+
+    /// Converts [Mesh] into list of [Edge]s
+    ///
+    /// # Example
+    ///
+    /// Here is an example with simple 4 face planar [Mesh] converted into [Edge]s.
+    ///
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::three_edge_group::ThreeEdgeGroup;
+    /// use meshmeshmesh::triangle::Triangle;
+    ///
+    /// let input = Mesh::new(
+    ///     vec![0.0, 0.0, 0.0,
+    ///          2.5, 5.0, 0.0,
+    ///          5.0, 0.0, 0.0,
+    ///          7.5, 5.0, 0.0,
+    ///          10.0, 0.0, 0.0,
+    ///          5.0, 10.0, 0.0,
+    ///          ],
+    ///     vec![0, 2, 1, // first face
+    ///          1, 2, 3, // second face
+    ///          2, 4, 3, // third face
+    ///          1, 3, 5, // fourth face
+    ///          ]
+    /// );
+    /// let actual = input.to_edges();
+    /// let expected = vec![
+    ///     Edge::new(0, 2), Edge::new(2, 1), Edge::new(1, 0),
+    ///     Edge::new(1, 2), Edge::new(2, 3), Edge::new(3, 1),
+    ///     Edge::new(2, 4), Edge::new(4, 3), Edge::new(3, 2),
+    ///     Edge::new(1, 3), Edge::new(3, 5), Edge::new(5, 1)
+    /// ];
+    /// assert_eq!(expected.len(), actual.len());
+    /// for i in 0..expected.len() {
+    ///     assert_eq!(expected[i].eq(&actual[i]), true);
+    /// }
+    /// ```
+    pub fn to_edges(&self) -> Vec<Edge> {
+        let number_of_faces = self.get_number_of_faces();
+        let mut edges: Vec<Edge> = Vec::with_capacity(number_of_faces*3);
+        for i in 0..number_of_faces {
+            edges.push(Edge::new(self.indices[i*3], self.indices[i*3+1]));
+            edges.push(Edge::new(self.indices[i*3+1], self.indices[i*3+2]));
+            edges.push(Edge::new(self.indices[i*3+2], self.indices[i*3]));
+        }
+
+        edges
     }
 }
 
@@ -491,6 +542,35 @@ mod tests {
             ThreeEdgeGroup::new(Edge::new(1, 2), Edge::new(2, 3), Edge::new(3, 1)), // second face
             ThreeEdgeGroup::new(Edge::new(2, 4), Edge::new(4, 3), Edge::new(3, 2)), // third face
             ThreeEdgeGroup::new(Edge::new(1, 3), Edge::new(3, 5), Edge::new(5, 1)), // fourth face
+        ];
+        assert_eq!(expected.len(), actual.len());
+        for i in 0..expected.len() {
+            assert_eq!(expected[i].eq(&actual[i]), true);
+        }
+    }
+    
+    #[test]
+    fn test_to_edges() {
+        let input = Mesh::new(
+            vec![0.0, 0.0, 0.0,
+                 2.5, 5.0, 0.0,
+                 5.0, 0.0, 0.0,
+                 7.5, 5.0, 0.0,
+                 10.0, 0.0, 0.0,
+                 5.0, 10.0, 0.0,
+                 ],
+            vec![0, 2, 1, // first face
+                 1, 2, 3, // second face
+                 2, 4, 3, // third face
+                 1, 3, 5, // fourth face
+                 ]
+        );
+        let actual = input.to_edges();
+        let expected = vec![
+            Edge::new(0, 2), Edge::new(2, 1), Edge::new(1, 0),
+            Edge::new(1, 2), Edge::new(2, 3), Edge::new(3, 1),
+            Edge::new(2, 4), Edge::new(4, 3), Edge::new(3, 2),
+            Edge::new(1, 3), Edge::new(3, 5), Edge::new(5, 1)
         ];
         assert_eq!(expected.len(), actual.len());
         for i in 0..expected.len() {
