@@ -224,6 +224,13 @@ impl Graph {
         Graph::new(graph_edges)
     }
 
+    /// Creates an undirected [Graph] from the `vec` of [Edge]s.
+    pub fn from_edges_into_undirected(edges: &Vec<Edge>) -> Graph {
+        let graph_edges = Edge::get_unique_undirected(edges).into_iter().collect();
+
+        Graph::new(graph_edges)
+    }
+
     fn create_adjacency_vertices(edges: &Vec<Edge>, number_of_vertices: usize) -> Vec<Vec<usize>> {
         let mut adjacency_vertices = vec![Vec::new(); number_of_vertices];
 
@@ -249,6 +256,7 @@ impl Graph {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
     use super::*;
 
     #[test]
@@ -368,5 +376,39 @@ mod tests {
         ]);
         
         assert!(expected.eq(&actual));
+    }
+
+    #[test]
+    fn test_from_edges_into_undirected() {
+        let input: Vec<Edge> = vec![
+            Edge::new(0, 1),
+            Edge::new(1, 2),
+            Edge::new(2, 0),
+            Edge::new(1, 0),
+            Edge::new(0, 3),
+            Edge::new(3, 1),
+        ];
+
+        let actual = Graph::from_edges_into_undirected(&input);
+
+        let expected_edges: Vec<Edge> = vec![
+            Edge::new(0, 1),
+            Edge::new(1, 0),
+            Edge::new(1, 2),
+            Edge::new(2, 1),
+            Edge::new(2, 0),
+            Edge::new(0, 2),
+            Edge::new(0, 3),
+            Edge::new(3, 0),
+            Edge::new(3, 1),
+            Edge::new(1, 3),
+        ];
+
+        let expected = Graph::new(expected_edges);
+
+        let a: HashSet<Edge> = expected.edges.into_iter().collect();
+        let b: HashSet<Edge> = actual.edges.into_iter().collect();
+
+        assert_eq!(a, b);
     }
 }
