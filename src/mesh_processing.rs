@@ -714,8 +714,6 @@ impl Mesh {
 
     /// Splits given disconnected [Mesh] into separate connected parts.
     ///
-    /// If the Mesh is already connected, then it should return the input Mesh as a whole.
-    ///
     /// Disconnected parts here means their faces are separated.
     ///
     /// # Example
@@ -1676,7 +1674,7 @@ mod tests {
     }
     
     #[test]
-    pub fn test_split_disconnected() {
+    pub fn test_split_face_disconnected() {
         let input = Mesh::new(
             vec![0.0, 0.0, 0.0, // 0
                  2.5, 5.0, 0.0, // 1
@@ -1726,6 +1724,49 @@ mod tests {
             println!("{:?}", act);
         }
         
+        assert_eq!(expected.len(), actual.len());
+        for i in 0..expected.len() {
+            assert!(expected[i].eq(&actual[i]));
+        }
+    }
+
+    #[test]
+    pub fn test_split_face_disconnected_whole_connected() {
+        let input = Mesh::new(
+            vec![
+                // Base
+                -2.0,1.0,0.0,
+                8.0,1.0,0.0,
+                8.0,11.0,0.0,
+                -2.0,11.0,0.0,
+
+                // Top
+                3.0,6.0,4.0
+            ],
+            vec![
+                // Base faces
+                0,1,2,
+                0,2,3,
+
+                // Side faces
+                0,1,4,
+                1,2,4,
+                2,3,4,
+                3,0,4
+            ]);
+
+        let expected_group = Mesh::new(vec![-2.0, 1.0, 0.0, 8.0, 1.0, 0.0, 8.0, 11.0, 0.0, -2.0, 1.0, 0.0, 8.0, 11.0, 0.0, -2.0, 11.0, 0.0, -2.0, 1.0, 0.0, 8.0, 1.0, 0.0, 3.0, 6.0, 4.0, 8.0, 1.0, 0.0, 8.0, 11.0, 0.0, 3.0, 6.0, 4.0, 8.0, 11.0, 0.0, -2.0, 11.0, 0.0, 3.0, 6.0, 4.0, -2.0, 11.0, 0.0, -2.0, 1.0, 0.0, 3.0, 6.0, 4.0], vec![
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
+        ]);
+
+        let expected = vec![expected_group];
+
+        let actual = input.split_by_face_disconnected();
+
+        for act in &actual {
+            println!("{:?}", act);
+        }
+
         assert_eq!(expected.len(), actual.len());
         for i in 0..expected.len() {
             assert!(expected[i].eq(&actual[i]));
