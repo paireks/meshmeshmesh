@@ -8,7 +8,8 @@ use crate::three_edge_group::ThreeEdgeGroup;
 /// Each neighbour is an index to a specific face.
 /// 
 /// There is an assumption that each face's edge has only 1 face neighbour. It might not always be
-/// true, because it is possible that some faces have multiple faces as a neighbours.
+/// true, because it is possible that some faces have multiple faces as a neighbours for the same
+/// edge.
 /// 
 /// If index is `None` = there is no neighbour face for that edge.
 #[derive(Debug, Clone, Copy)]

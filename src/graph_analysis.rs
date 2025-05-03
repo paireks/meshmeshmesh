@@ -31,6 +31,42 @@ impl Graph {
         !bfs.visited.contains(&false)
     }
 
+    /// Splits [Graph] into separate parts that are isolated.
+    pub fn split_disconnected_vertices(&self) -> Vec<Vec<usize>> {
+        let mut isolated_groups: Vec<Vec<usize>> = Vec::new();
+        
+        let number_of_vertices: usize = self.get_number_of_vertices();
+        let mut bfs = BFS {
+            previous_vertex: vec![None; number_of_vertices],
+            visited: vec![false; number_of_vertices],
+            queue: VecDeque::new(),
+        };
+        
+        while bfs.visited.contains(&false) {
+            let mut new_isolated_group: Vec<usize> = Vec::new();
+            
+            let old_visited = bfs.visited.clone();
+            let mut new_start_vertex = 0;
+            for i in 0..number_of_vertices { // Finding the index of first not visited yet vertex
+                let is_visited = bfs.visited[i];
+                if !is_visited { 
+                    new_start_vertex = i;
+                }
+            }
+            bfs = self.main_bfs_loop(new_start_vertex, bfs); // BFS searching starting from this not visited
+            
+            for i in 0..number_of_vertices { // Comparison between before/after version of visited to get new isolated island
+                if old_visited[i] != bfs.visited[i] { 
+                    new_isolated_group.push(i);
+                }
+            }
+            
+            isolated_groups.push(new_isolated_group);
+        }
+
+        isolated_groups
+    }
+
 
     /// It is the main breadth-first search loop.
     fn main_bfs_loop(&self, start_vertex: usize, mut bfs: BFS) ->  BFS{
@@ -76,7 +112,7 @@ mod tests {
             Edge::new(3, 2),
         ];
         
-        let actual = Graph::new(edges).is_connected();
+        let actual = Graph::new(4, edges).is_connected();
         assert_eq!(actual, true);
         
     }
@@ -92,7 +128,7 @@ mod tests {
             Edge::new(0, 2),
         ];
 
-        let actual = Graph::new(edges).is_connected();
+        let actual = Graph::new(3, edges).is_connected();
         assert_eq!(actual, true);
 
     }
@@ -110,7 +146,7 @@ mod tests {
             Edge::new(3, 2),
         ];
 
-        let actual = Graph::new(edges).is_connected();
+        let actual = Graph::new(4, edges).is_connected();
         assert_eq!(actual, true);
 
     }
@@ -128,7 +164,7 @@ mod tests {
             Edge::new(4, 3),
         ];
 
-        let actual = Graph::new(edges).is_connected();
+        let actual = Graph::new(5, edges).is_connected();
         assert_eq!(actual, false);
     }
 }

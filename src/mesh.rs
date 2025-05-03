@@ -35,6 +35,7 @@ use crate::triangle::Triangle;
 /// assert_eq!(result.indices, vec![0, 1, 2]); // We create 1 face there using point0, point1 and point2.
 /// ```
 ///
+#[derive(Debug)]
 pub struct Mesh {
     /// The list of coordinates for the mesh vertices.
     pub coordinates: Vec<f64>,

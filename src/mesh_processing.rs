@@ -1,5 +1,7 @@
 use crate::mesh::Mesh;
 use std::collections::{HashMap, HashSet};
+use crate::face_neighbours::FaceNeighbours;
+use crate::graph::Graph;
 use crate::point::Point;
 
 impl Mesh {
@@ -706,6 +708,162 @@ impl Mesh {
         coordinates.extend(another_mesh_with_indices_offset.coordinates.clone());
         let mut indices: Vec<usize> = self.indices.clone();
         indices.extend(another_mesh_with_indices_offset.indices.clone());
+
+        Mesh::new(coordinates, indices)
+    }
+
+    /// Splits given disconnected [Mesh] into separate connected parts.
+    ///
+    /// If the Mesh is already connected, then it should return the input Mesh as a whole.
+    ///
+    /// Disconnected parts here means their faces are separated.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    /// vec![0.0, 0.0, 0.0, // 0
+    ///      2.5, 5.0, 0.0, // 1
+    ///      5.0, 0.0, 0.0, // 2
+    ///      7.5, 5.0, 0.0, // 3
+    ///      10.0, 0.0, 0.0, // 4
+    ///      5.0, 10.0, 0.0, // 5
+    ///      5.0, 5.0, 3.0, // 6
+    ///      2.5, 5.0, 3.0, // 7
+    ///      0.0, 0.0, 3.0, // 8
+    ///      10.0, 0.0, 3.0, // 9
+    ///      5.0, 5.0, 5.0, // 10
+    ///      2.5, 5.0, 5.0, // 11
+    ///      0.0, 0.0, 5.0, // 12
+    /// ],
+    /// vec![0, 2, 1, // big_group
+    ///      10, 11, 12, // isolated_triangle
+    ///      1, 2, 3, // big_group
+    ///      2, 4, 3, // big_group
+    ///      1, 3, 5, // big_group
+    ///      7, 8, 6, // small_group
+    ///      7, 8, 9, // small_group
+    ///      6, 7, 12, // small_group
+    /// ]
+    /// );
+    ///
+    /// let big_group = Mesh::new(
+    /// vec![0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 2.5, 5.0, 0.0, 2.5, 5.0, 0.0, 5.0, 0.0, 0.0, 7.5, 5.0, 0.0, 5.0, 0.0, 0.0, 10.0, 0.0, 0.0, 7.5, 5.0, 0.0, 2.5, 5.0, 0.0, 7.5, 5.0, 0.0, 5.0, 10.0, 0.0],
+    /// vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    /// );
+    ///
+    /// let isolated_triangle = Mesh::new(
+    /// vec![5.0, 5.0, 5.0, 2.5, 5.0, 5.0, 0.0, 0.0, 5.0],
+    /// vec![0, 1, 2]
+    /// );
+    ///
+    /// let small_group = Mesh::new(
+    /// vec![2.5, 5.0, 3.0, 0.0, 0.0, 3.0, 5.0, 5.0, 3.0, 2.5, 5.0, 3.0, 0.0, 0.0, 3.0, 10.0, 0.0, 3.0, 5.0, 5.0, 3.0, 2.5, 5.0, 3.0, 0.0, 0.0, 5.0],
+    /// vec![0, 1, 2, 3, 4, 5, 6, 7, 8]
+    /// );
+    ///
+    /// let expected = vec![small_group, big_group, isolated_triangle];
+    ///
+    /// let actual = input.split_by_face_disconnected();
+    ///
+    /// assert_eq!(expected.len(), actual.len());
+    /// for i in 0..expected.len() {
+    ///     assert!(expected[i].eq(&actual[i]));
+    /// }
+    ///
+    /// ```
+    pub fn split_by_face_disconnected(&self) -> Vec<Mesh> {
+
+        let face_neighbours = FaceNeighbours::from_mesh(self);
+        let graph = Graph::from_face_neighbours(&face_neighbours);
+
+        let isolated_groups = graph.split_disconnected_vertices();
+        let mut isolated_meshes:Vec<Mesh> = Vec::new();
+        for isolated_group in isolated_groups {
+            isolated_meshes.push(self.get_part_by_face_ids(&isolated_group))
+        }
+
+        isolated_meshes
+    }
+
+    /// Gets only specific part of the [Mesh] using specified face ids.
+    ///
+    /// The result Mesh is unwelded.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3, // Specified (1)
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4, // Specified (3)
+    ///     2,3,4, // Specified (4)
+    ///     3,0,4
+    /// ]);
+    ///
+    /// let face_ids_specified = vec![1, 3, 4];
+    ///
+    /// let actual = input.get_part_by_face_ids(&face_ids_specified);
+    ///
+    /// let expected = Mesh::new(
+    /// vec![
+    ///     -2.0,1.0,0.0, // 0
+    ///     8.0,11.0,0.0, // 2
+    ///     -2.0,11.0,0.0, // 3
+    ///
+    ///     8.0,1.0,0.0, // 1
+    ///     8.0,11.0,0.0, // 2
+    ///     3.0,6.0,4.0, //4
+    ///
+    ///     8.0,11.0,0.0, // 2
+    ///     -2.0,11.0,0.0, // 3
+    ///     3.0,6.0,4.0, // 4
+    /// ],
+    /// vec![
+    ///     0,1,2, // Specified (1)
+    ///     3,4,5, // Specified (3)
+    ///     6,7,8, // Specified (4)
+    /// ]);
+    ///
+    /// assert!(expected.eq(&actual));
+    ///
+    /// ```
+    pub fn get_part_by_face_ids(&self, face_ids: &Vec<usize>) -> Mesh {
+        let mut coordinates: Vec<f64> = Vec::new();
+        let mut indices: Vec<usize> = Vec::new();
+
+        let mut current_max: usize = 0;
+        for face_id in face_ids {
+            for i in 0..3 {
+                let coordinate_id = self.indices[face_id * 3 + i];
+                for j in 0..3 {
+                    coordinates.push(self.coordinates[coordinate_id * 3 + j]);
+                }
+                indices.push(current_max + i);
+            }
+            current_max += 3;
+        }
 
         Mesh::new(coordinates, indices)
     }
@@ -1461,5 +1619,116 @@ mod tests {
                                                         5,6,7]);
 
         assert_eq!(expected.eq(&actual), true);
+    }
+
+    #[test]
+    pub fn test_get_part_by_face_ids() {
+        let input = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3, // Specified (1)
+
+            // Side faces
+            0,1,4,
+            1,2,4, // Specified (3)
+            2,3,4, // Specified (4)
+            3,0,4
+        ]);
+
+        let face_ids_specified = vec![1, 3, 4];
+
+        let actual = input.get_part_by_face_ids(&face_ids_specified);
+
+        let expected = Mesh::new(
+        vec![
+            -2.0,1.0,0.0, // 0
+            8.0,11.0,0.0, // 2
+            -2.0,11.0,0.0, // 3
+
+            8.0,1.0,0.0, // 1
+            8.0,11.0,0.0, // 2
+            3.0,6.0,4.0, // 4
+
+            8.0,11.0,0.0, // 2
+            -2.0,11.0,0.0, // 3
+            3.0,6.0,4.0, // 4
+        ],
+        vec![
+            0,1,2, // Specified (1)
+            3,4,5, // Specified (3)
+            6,7,8, // Specified (4)
+        ]);
+
+        println!("Actual: {:?}", actual);
+
+        assert!(expected.eq(&actual));
+    }
+    
+    #[test]
+    pub fn test_split_disconnected() {
+        let input = Mesh::new(
+            vec![0.0, 0.0, 0.0, // 0
+                 2.5, 5.0, 0.0, // 1
+                 5.0, 0.0, 0.0, // 2
+                 7.5, 5.0, 0.0, // 3
+                 10.0, 0.0, 0.0, // 4
+                 5.0, 10.0, 0.0, // 5
+                 5.0, 5.0, 3.0, // 6
+                 2.5, 5.0, 3.0, // 7
+                 0.0, 0.0, 3.0, // 8
+                 10.0, 0.0, 3.0, // 9
+                 5.0, 5.0, 5.0, // 10
+                 2.5, 5.0, 5.0, // 11
+                 0.0, 0.0, 5.0, // 12
+                 ],
+            vec![0, 2, 1, // big_group
+                 10, 11, 12, // isolated_triangle
+                 1, 2, 3, // big_group
+                 2, 4, 3, // big_group
+                 1, 3, 5, // big_group
+                 7, 8, 6, // small_group
+                 7, 8, 9, // small_group
+                 6, 7, 12, // small_group
+                 ]
+        );
+        
+        let big_group = Mesh::new(
+            vec![0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 2.5, 5.0, 0.0, 2.5, 5.0, 0.0, 5.0, 0.0, 0.0, 7.5, 5.0, 0.0, 5.0, 0.0, 0.0, 10.0, 0.0, 0.0, 7.5, 5.0, 0.0, 2.5, 5.0, 0.0, 7.5, 5.0, 0.0, 5.0, 10.0, 0.0],
+            vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        );
+        
+        let isolated_triangle = Mesh::new(
+            vec![5.0, 5.0, 5.0, 2.5, 5.0, 5.0, 0.0, 0.0, 5.0],
+            vec![0, 1, 2]
+        );
+        
+        let small_group = Mesh::new(
+            vec![2.5, 5.0, 3.0, 0.0, 0.0, 3.0, 5.0, 5.0, 3.0, 2.5, 5.0, 3.0, 0.0, 0.0, 3.0, 10.0, 0.0, 3.0, 5.0, 5.0, 3.0, 2.5, 5.0, 3.0, 0.0, 0.0, 5.0],
+            vec![0, 1, 2, 3, 4, 5, 6, 7, 8]
+        );
+        
+        let expected = vec![small_group, big_group, isolated_triangle];
+        
+        let actual = input.split_by_face_disconnected();
+
+        for act in &actual {
+            println!("{:?}", act);
+        }
+        
+        assert_eq!(expected.len(), actual.len());
+        for i in 0..expected.len() {
+            assert!(expected[i].eq(&actual[i]));
+        }
     }
 }

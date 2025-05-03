@@ -69,7 +69,8 @@ impl Mesh {
     ///
     /// ```
     pub fn is_connected(&self) -> bool {
-        Graph::from_edges_into_undirected(&self.to_edges()).is_connected()
+        let number_of_vertices = self.get_number_of_vertices();
+        Graph::from_edges_into_undirected(number_of_vertices, &self.to_edges()).is_connected()
     }
 
     /// Gets number of all faces (triangles) which defines a [Mesh]
