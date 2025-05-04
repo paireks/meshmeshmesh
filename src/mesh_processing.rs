@@ -717,6 +717,11 @@ impl Mesh {
     /// Disconnected parts here means their faces are separated.
     ///
     /// # Example
+    /// 
+    /// Below there is the example of splitting 1 [Mesh] that has 3 isolated parts, so in result
+    /// of splitting it returns 3 separate Meshes. Because `weld_vertices_tolerance` is set to `None`
+    /// then there is no welding used for output. If you'd like to weld resulting Meshes, just
+    /// set this parameter.
     ///
     /// ```
     /// use meshmeshmesh::edge::Edge;
@@ -766,7 +771,7 @@ impl Mesh {
     ///
     /// let expected = vec![small_group, big_group, isolated_triangle];
     ///
-    /// let actual = input.split_by_face_disconnected();
+    /// let actual = input.split_by_face_disconnected(None);
     ///
     /// assert_eq!(expected.len(), actual.len());
     /// for i in 0..expected.len() {
@@ -774,7 +779,7 @@ impl Mesh {
     /// }
     ///
     /// ```
-    pub fn split_by_face_disconnected(&self) -> Vec<Mesh> {
+    pub fn split_by_face_disconnected(&self, weld_vertices_tolerance: Option<f64>) -> Vec<Mesh> {
 
         let face_neighbours = FaceNeighbours::from_mesh(self);
         let graph = Graph::from_face_neighbours(&face_neighbours);
@@ -783,6 +788,13 @@ impl Mesh {
         let mut isolated_meshes:Vec<Mesh> = Vec::new();
         for isolated_group in isolated_groups {
             isolated_meshes.push(self.get_part_by_face_ids(&isolated_group))
+        }
+        
+        if weld_vertices_tolerance.is_some() {
+            let tolerance = weld_vertices_tolerance.unwrap();
+            for i in 0..isolated_meshes.len() {
+                isolated_meshes[i] = isolated_meshes[i].get_with_welded_vertices(tolerance);
+            }
         }
 
         isolated_meshes
@@ -1718,12 +1730,69 @@ mod tests {
         
         let expected = vec![small_group, big_group, isolated_triangle];
         
-        let actual = input.split_by_face_disconnected();
+        let actual = input.split_by_face_disconnected(None);
 
         for act in &actual {
             println!("{:?}", act);
         }
         
+        assert_eq!(expected.len(), actual.len());
+        for i in 0..expected.len() {
+            assert!(expected[i].eq(&actual[i]));
+        }
+    }
+
+    #[test]
+    pub fn test_split_face_disconnected_with_vertices_welding() {
+        let input = Mesh::new(
+            vec![0.0, 0.0, 0.0, // 0
+                 2.5, 5.0, 0.0, // 1
+                 5.0, 0.0, 0.0, // 2
+                 7.5, 5.0, 0.0, // 3
+                 10.0, 0.0, 0.0, // 4
+                 5.0, 10.0, 0.0, // 5
+                 5.0, 5.0, 3.0, // 6
+                 2.5, 5.0, 3.0, // 7
+                 0.0, 0.0, 3.0, // 8
+                 10.0, 0.0, 3.0, // 9
+                 5.0, 5.0, 5.0, // 10
+                 2.5, 5.0, 5.0, // 11
+                 0.0, 0.0, 5.0, // 12
+            ],
+            vec![0, 2, 1, // big_group
+                 10, 11, 12, // isolated_triangle
+                 1, 2, 3, // big_group
+                 2, 4, 3, // big_group
+                 1, 3, 5, // big_group
+                 7, 8, 6, // small_group
+                 7, 8, 9, // small_group
+                 6, 7, 12, // small_group
+            ]
+        );
+
+        let big_group = Mesh::new(
+            vec![0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 2.5, 5.0, 0.0, 7.5, 5.0, 0.0, 10.0, 0.0, 0.0, 5.0, 10.0, 0.0],
+            vec![0, 1, 2, 2, 1, 3, 1, 4, 3, 2, 3, 5]
+        );
+
+        let isolated_triangle = Mesh::new(
+            vec![5.0, 5.0, 5.0, 2.5, 5.0, 5.0, 0.0, 0.0, 5.0],
+            vec![0, 1, 2]
+        );
+
+        let small_group = Mesh::new(
+            vec![2.5, 5.0, 3.0, 0.0, 0.0, 3.0, 5.0, 5.0, 3.0, 10.0, 0.0, 3.0, 0.0, 0.0, 5.0],
+            vec![0, 1, 2, 0, 1, 3, 2, 0, 4]
+        );
+
+        let expected = vec![small_group, big_group, isolated_triangle];
+
+        let actual = input.split_by_face_disconnected(Some(0.001));
+
+        for act in &actual {
+            println!("{:?}", act);
+        }
+
         assert_eq!(expected.len(), actual.len());
         for i in 0..expected.len() {
             assert!(expected[i].eq(&actual[i]));
@@ -1761,7 +1830,7 @@ mod tests {
 
         let expected = vec![expected_group];
 
-        let actual = input.split_by_face_disconnected();
+        let actual = input.split_by_face_disconnected(None);
 
         for act in &actual {
             println!("{:?}", act);
