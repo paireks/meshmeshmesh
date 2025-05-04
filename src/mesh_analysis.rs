@@ -1,11 +1,77 @@
 use std::collections::HashSet;
 use crate::bounding_box::BoundingBox;
 use crate::edge::Edge;
+use crate::graph::Graph;
 use crate::mesh::Mesh;
 use crate::three_edge_group::ThreeEdgeGroup;
 use crate::vector::Vector;
 
 impl Mesh {
+    
+    /// Checks if given [Mesh] is connected, meaning all vertices are connected together into
+    /// single graph.
+    /// 
+    /// # Examples
+    /// 
+    /// Here is an example with 1 face separated from others so `false` is returned.
+    /// 
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    ///     vec![0.0, 0.0, 0.0,
+    ///          2.5, 5.0, 0.0,
+    ///          5.0, 0.0, 0.0,
+    ///          7.5, 5.0, 0.0,
+    ///          10.0, 0.0, 0.0,
+    ///          5.0, 10.0, 0.0,
+    ///          5.0, 5.0, 3.0,
+    ///          2.5, 5.0, 3.0,
+    ///          0.0, 0.0, 3.0,
+    ///          ],
+    ///     vec![0, 2, 1, // first face
+    ///          1, 2, 3, // second face
+    ///          2, 4, 3, // third face
+    ///          1, 3, 5, // fourth face
+    ///          7, 8, 6, // fifth face separated
+    ///          ]
+    /// );
+    /// 
+    /// assert!(!input.is_connected());
+    /// 
+    /// ```
+    ///
+    /// Here below is an example with all vertices connected so `true` is returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    ///     vec![0.0, 0.0, 0.0,
+    ///          2.5, 5.0, 0.0,
+    ///          5.0, 0.0, 0.0,
+    ///          7.5, 5.0, 0.0,
+    ///          10.0, 0.0, 0.0,
+    ///          5.0, 10.0, 0.0,
+    ///          ],
+    ///     vec![0, 2, 1, // first face
+    ///          1, 2, 3, // second face
+    ///          2, 4, 3, // third face
+    ///          1, 3, 5, // fourth face
+    ///          ]
+    /// );
+    ///
+    /// assert!(input.is_connected());
+    ///
+    /// ```
+    pub fn is_connected(&self) -> bool {
+        let number_of_vertices = self.get_number_of_vertices();
+        Graph::from_edges_into_undirected(number_of_vertices, &self.to_edges()).is_connected()
+    }
 
     /// Gets number of all faces (triangles) which defines a [Mesh]
     ///
@@ -772,6 +838,50 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+    
+    #[test]
+    fn test_is_connected_false() {
+        let input = Mesh::new(
+            vec![0.0, 0.0, 0.0,
+                 2.5, 5.0, 0.0,
+                 5.0, 0.0, 0.0,
+                 7.5, 5.0, 0.0,
+                 10.0, 0.0, 0.0,
+                 5.0, 10.0, 0.0,
+                 5.0, 5.0, 3.0,
+                 2.5, 5.0, 3.0,
+                 0.0, 0.0, 3.0,
+                 ],
+            vec![0, 2, 1, // first face
+                 1, 2, 3, // second face
+                 2, 4, 3, // third face
+                 1, 3, 5, // fourth face
+                 7, 8, 6, // fifth face separated
+                 ]
+        );
+        
+        assert!(!input.is_connected());
+    }
+
+    #[test]
+    fn test_is_connected_true() {
+        let input = Mesh::new(
+            vec![0.0, 0.0, 0.0,
+                 2.5, 5.0, 0.0,
+                 5.0, 0.0, 0.0,
+                 7.5, 5.0, 0.0,
+                 10.0, 0.0, 0.0,
+                 5.0, 10.0, 0.0,
+                 ],
+            vec![0, 2, 1, // first face
+                 1, 2, 3, // second face
+                 2, 4, 3, // third face
+                 1, 3, 5, // fourth face
+                 ]
+        );
+        
+        assert!(input.is_connected());
+    }
 
     #[test]
     fn test_get_number_of_faces() {
