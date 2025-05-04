@@ -878,8 +878,8 @@ impl Mesh {
         isolated_meshes
     }
     
-/*    /// Splits given [Mesh] where the value of angle between faces' normals is equal or higher
-    /// to the given one in the `min_split_angle` parameter. This angle should be given in radians.
+/*    /// Splits given [Mesh] where the value of angle between faces' normals is equal or lower
+    /// to the given one in the `max_angle` parameter. This angle should be given in radians.
     /// 
     /// Optionally you can use `weld_vertices_tolerance` to weld resulting [Mesh]es.
     /// 
@@ -888,7 +888,7 @@ impl Mesh {
     /// ```
     /// 
     /// ```
-    pub fn split_by_face_angle(&self, min_split_angle: f64, weld_vertices_tolerance: Option<f64>) -> Vec<Mesh> {
+    pub fn split_by_face_angle(&self, max_angle: f64, weld_vertices_tolerance: Option<f64>) -> Vec<Mesh> {
         
     }*/
 }

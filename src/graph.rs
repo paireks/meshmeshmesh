@@ -1,5 +1,6 @@
 use crate::edge::Edge;
 use crate::face_neighbours::FaceNeighbours;
+use crate::face_neighbours_angle::FaceNeighboursAngle;
 
 /// Graph representation.
 /// 
@@ -224,6 +225,78 @@ impl Graph {
         Graph::new(number_of_face_neighbours, graph_edges)
     }
 
+    /// Creates a [Graph] by looking at the `vec` of [FaceNeighboursAngle]s and [FaceNeighbours].
+    /// 
+    /// If the angle between faces is > than `max_angle`, then it won't create an edge even though
+    /// these faces are neighbours.
+    ///
+    /// Indices of Graph edges are indices of faces.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::face_neighbours::FaceNeighbours;
+    /// use meshmeshmesh::face_neighbours_angle::FaceNeighboursAngle;
+    /// use meshmeshmesh::graph::Graph;
+    ///
+    /// let face_neighbours = vec![
+    ///     FaceNeighbours::new(None, Some(1), None),
+    ///     FaceNeighbours::new(Some(0), Some(2), Some(3)),
+    ///     FaceNeighbours::new(None, None, Some(1)),
+    ///     FaceNeighbours::new(Some(1), None, None),
+    /// ];
+    ///
+    /// let face_neighbours_angles = vec![
+    ///     FaceNeighboursAngle::new(None, Some(0.37540037779770735), None),
+    ///     FaceNeighboursAngle::new(Some(0.37540037779770735), Some(0.15445199884596061), Some(0.21494519445616783)),
+    ///     FaceNeighboursAngle::new(None, None, Some(0.15445199884596061)),
+    ///     FaceNeighboursAngle::new(Some(0.21494519445616783), None, None),
+    /// ];
+    ///
+    /// let actual = Graph::from_face_neighbours_with_max_angle(&face_neighbours, &face_neighbours_angles, 0.2);
+    /// let expected = Graph::new(4, vec![
+    ///     //Edge::new(0, 1), // <- ignoring, because 0.37540037779770735 > 0.2
+    ///     //Edge::new(1, 0), // <- ignoring, because 0.37540037779770735 > 0.2
+    ///     Edge::new(1, 2), // <- keeping, because 0.15445199884596061 <= 0.2
+    ///     //Edge::new(1, 3), // <- ignoring, because 0.21494519445616783 > 0.2
+    ///     Edge::new(2, 1), // <- keeping, because 0.15445199884596061 <= 0.2
+    ///     //Edge::new(3, 1), // <- ignoring, because 0.21494519445616783 > 0.2
+    /// ]);
+    ///
+    /// assert!(expected.eq(&actual));
+    ///
+    /// ```
+    pub fn from_face_neighbours_with_max_angle(face_neighbours: &Vec<FaceNeighbours>, face_neighbours_angles: &Vec<FaceNeighboursAngle>, max_angle: f64) -> Graph {
+        let mut graph_edges: Vec<Edge> = Vec::new();
+        let number_of_face_neighbours = face_neighbours.len();
+        if number_of_face_neighbours != face_neighbours_angles.len() {
+            panic!("The input of the from_face_neighbours_with_max_angle (for both FaceNeighbours and FaceNeighboursAngles) should be the same length.")
+        }
+
+        for i in 0..number_of_face_neighbours {
+            let current_face_neighbours = face_neighbours[i];
+            let current_face_neighbours_angle = face_neighbours_angles[i];
+            if current_face_neighbours.first.is_some() {
+                if current_face_neighbours_angle.first.unwrap() <= max_angle {
+                    graph_edges.push(Edge::new(i, current_face_neighbours.first.unwrap()));
+                }
+            }
+            if current_face_neighbours.second.is_some() {
+                if current_face_neighbours_angle.second.unwrap() <= max_angle {
+                    graph_edges.push(Edge::new(i, current_face_neighbours.second.unwrap()));
+                }
+            }
+            if current_face_neighbours.third.is_some() {
+                if current_face_neighbours_angle.third.unwrap() <= max_angle {
+                    graph_edges.push(Edge::new(i, current_face_neighbours.third.unwrap()));
+                }
+            }
+        }
+
+        Graph::new(number_of_face_neighbours, graph_edges)
+    }
+
     /// Creates an undirected [Graph] from the `vec` of [Edge]s.
     pub fn from_edges_into_undirected(number_of_vertices: usize, edges: &Vec<Edge>) -> Graph {
         let graph_edges = Edge::get_unique_undirected(edges).into_iter().collect();
@@ -400,6 +473,56 @@ mod tests {
         ]);
 
         assert!(expected.eq(&actual));
+    }
+    
+    #[test]
+    fn test_from_face_neighbours_with_max_angle() {
+        let face_neighbours = vec![
+            FaceNeighbours::new(None, Some(1), None),
+            FaceNeighbours::new(Some(0), Some(2), Some(3)),
+            FaceNeighbours::new(None, None, Some(1)),
+            FaceNeighbours::new(Some(1), None, None),
+        ];
+        
+        let face_neighbours_angles = vec![
+            FaceNeighboursAngle::new(None, Some(0.37540037779770735), None),
+            FaceNeighboursAngle::new(Some(0.37540037779770735), Some(0.15445199884596061), Some(0.21494519445616783)),
+            FaceNeighboursAngle::new(None, None, Some(0.15445199884596061)),
+            FaceNeighboursAngle::new(Some(0.21494519445616783), None, None),
+        ];
+        
+        let actual = Graph::from_face_neighbours_with_max_angle(&face_neighbours, &face_neighbours_angles, 0.2);
+        let expected = Graph::new(4, vec![
+            //Edge::new(0, 1), // <- ignoring, because 0.37540037779770735 > 0.2
+            //Edge::new(1, 0), // <- ignoring, because 0.37540037779770735 > 0.2
+            Edge::new(1, 2), // <- keeping, because 0.15445199884596061 <= 0.2
+            //Edge::new(1, 3), // <- ignoring, because 0.21494519445616783 > 0.2
+            Edge::new(2, 1), // <- keeping, because 0.15445199884596061 <= 0.2
+            //Edge::new(3, 1), // <- ignoring, because 0.21494519445616783 > 0.2
+        ]);
+        for act in actual.get_edges() {
+            println!("{:?}", act);
+        }
+        assert!(expected.eq(&actual));
+    }
+
+    #[test]
+    #[should_panic(expected = "The input of the from_face_neighbours_with_max_angle (for both FaceNeighbours and FaceNeighboursAngles) should be the same length.")]
+    fn test_from_face_neighbours_with_max_angle_wrong_number_of_inputs() {
+        let face_neighbours = vec![
+            FaceNeighbours::new(None, Some(1), None),
+            FaceNeighbours::new(Some(0), Some(2), Some(3)),
+            FaceNeighbours::new(None, None, Some(1)),
+        ];
+
+        let face_neighbours_angles = vec![
+            FaceNeighboursAngle::new(None, Some(0.37540037779770735), None),
+            FaceNeighboursAngle::new(Some(0.37540037779770735), Some(0.15445199884596061), Some(0.21494519445616783)),
+            FaceNeighboursAngle::new(None, None, Some(0.15445199884596061)),
+            FaceNeighboursAngle::new(Some(0.21494519445616783), None, None),
+        ];
+
+        Graph::from_face_neighbours_with_max_angle(&face_neighbours, &face_neighbours_angles, 0.2);
     }
 
     #[test]
