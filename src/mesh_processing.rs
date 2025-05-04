@@ -712,6 +712,84 @@ impl Mesh {
         Mesh::new(coordinates, indices)
     }
 
+    /// Gets only specific part of the [Mesh] using specified face ids.
+    ///
+    /// The result Mesh is unwelded.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3, // Specified (1)
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4, // Specified (3)
+    ///     2,3,4, // Specified (4)
+    ///     3,0,4
+    /// ]);
+    ///
+    /// let face_ids_specified = vec![1, 3, 4];
+    ///
+    /// let actual = input.get_part_by_face_ids(&face_ids_specified);
+    ///
+    /// let expected = Mesh::new(
+    /// vec![
+    ///     -2.0,1.0,0.0, // 0
+    ///     8.0,11.0,0.0, // 2
+    ///     -2.0,11.0,0.0, // 3
+    ///
+    ///     8.0,1.0,0.0, // 1
+    ///     8.0,11.0,0.0, // 2
+    ///     3.0,6.0,4.0, //4
+    ///
+    ///     8.0,11.0,0.0, // 2
+    ///     -2.0,11.0,0.0, // 3
+    ///     3.0,6.0,4.0, // 4
+    /// ],
+    /// vec![
+    ///     0,1,2, // Specified (1)
+    ///     3,4,5, // Specified (3)
+    ///     6,7,8, // Specified (4)
+    /// ]);
+    ///
+    /// assert!(expected.eq(&actual));
+    ///
+    /// ```
+    pub fn get_part_by_face_ids(&self, face_ids: &Vec<usize>) -> Mesh {
+        let mut coordinates: Vec<f64> = Vec::new();
+        let mut indices: Vec<usize> = Vec::new();
+
+        let mut current_max: usize = 0;
+        for face_id in face_ids {
+            for i in 0..3 {
+                let coordinate_id = self.indices[face_id * 3 + i];
+                for j in 0..3 {
+                    coordinates.push(self.coordinates[coordinate_id * 3 + j]);
+                }
+                indices.push(current_max + i);
+            }
+            current_max += 3;
+        }
+
+        Mesh::new(coordinates, indices)
+    }
+
     /// Splits given disconnected [Mesh] into separate connected parts.
     ///
     /// Disconnected parts here means their faces are separated.
@@ -799,84 +877,20 @@ impl Mesh {
 
         isolated_meshes
     }
-
-    /// Gets only specific part of the [Mesh] using specified face ids.
-    ///
-    /// The result Mesh is unwelded.
-    ///
+    
+/*    /// Splits given [Mesh] where the value of angle between faces' normals is equal or higher
+    /// to the given one in the `min_split_angle` parameter. This angle should be given in radians.
+    /// 
+    /// Optionally you can use `weld_vertices_tolerance` to weld resulting [Mesh]es.
+    /// 
     /// # Example
-    ///
+    /// 
     /// ```
-    /// use meshmeshmesh::mesh::Mesh;
-    ///
-    /// let input = Mesh::new(
-    /// vec![
-    ///     // Base
-    ///     -2.0,1.0,0.0,
-    ///     8.0,1.0,0.0,
-    ///     8.0,11.0,0.0,
-    ///     -2.0,11.0,0.0,
-    ///
-    ///     // Top
-    ///     3.0,6.0,4.0
-    /// ],
-    /// vec![
-    ///     // Base faces
-    ///     0,1,2,
-    ///     0,2,3, // Specified (1)
-    ///
-    ///     // Side faces
-    ///     0,1,4,
-    ///     1,2,4, // Specified (3)
-    ///     2,3,4, // Specified (4)
-    ///     3,0,4
-    /// ]);
-    ///
-    /// let face_ids_specified = vec![1, 3, 4];
-    ///
-    /// let actual = input.get_part_by_face_ids(&face_ids_specified);
-    ///
-    /// let expected = Mesh::new(
-    /// vec![
-    ///     -2.0,1.0,0.0, // 0
-    ///     8.0,11.0,0.0, // 2
-    ///     -2.0,11.0,0.0, // 3
-    ///
-    ///     8.0,1.0,0.0, // 1
-    ///     8.0,11.0,0.0, // 2
-    ///     3.0,6.0,4.0, //4
-    ///
-    ///     8.0,11.0,0.0, // 2
-    ///     -2.0,11.0,0.0, // 3
-    ///     3.0,6.0,4.0, // 4
-    /// ],
-    /// vec![
-    ///     0,1,2, // Specified (1)
-    ///     3,4,5, // Specified (3)
-    ///     6,7,8, // Specified (4)
-    /// ]);
-    ///
-    /// assert!(expected.eq(&actual));
-    ///
+    /// 
     /// ```
-    pub fn get_part_by_face_ids(&self, face_ids: &Vec<usize>) -> Mesh {
-        let mut coordinates: Vec<f64> = Vec::new();
-        let mut indices: Vec<usize> = Vec::new();
-
-        let mut current_max: usize = 0;
-        for face_id in face_ids {
-            for i in 0..3 {
-                let coordinate_id = self.indices[face_id * 3 + i];
-                for j in 0..3 {
-                    coordinates.push(self.coordinates[coordinate_id * 3 + j]);
-                }
-                indices.push(current_max + i);
-            }
-            current_max += 3;
-        }
-
-        Mesh::new(coordinates, indices)
-    }
+    pub fn split_by_face_angle(&self, min_split_angle: f64, weld_vertices_tolerance: Option<f64>) -> Vec<Mesh> {
+        
+    }*/
 }
 
 #[cfg(test)]
