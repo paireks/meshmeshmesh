@@ -7,7 +7,7 @@ impl Edge {
     /// Internally undirected edge is stored as 2 [Edge]s with the same vertices, but different
     /// directions.
     /// 
-    /// In other words what this algorithm is doing is it duplicates [Edges] that seems to be
+    /// In other words what this algorithm is doing is it duplicates [Edge]s that seems to be
     /// directional in the input and reverse these duplicates.
     /// 
     /// # Example

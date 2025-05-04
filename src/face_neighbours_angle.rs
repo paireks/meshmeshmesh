@@ -1,12 +1,12 @@
 use crate::face_neighbours::FaceNeighbours;
 use crate::triangle::Triangle;
 
-/// Gets [Mesh]'s face neighbours angles.
+/// Mesh's face neighbours angles.
 ///
 /// Each neighbour is a value of angle between specific faces' normals or `None` if there is no
 /// neighbour for that edge.
 ///
-/// Should be used most of the time together with [FaceNeighbour]s, so it is known then which
+/// Should be used most of the time together with [FaceNeighbours], so it is known then which
 /// faces are neighbouring, so then we know between which faces this angle is measured.
 ///
 /// There is an assumption that each face's edge has only 1 face neighbour. It might not always be
@@ -44,7 +44,7 @@ impl FaceNeighboursAngle {
     /// ```
     pub fn new(first: Option<f64>, second: Option<f64>, third: Option<f64>) -> FaceNeighboursAngle { FaceNeighboursAngle { first, second, third } }
 
-    /// Creates a `vec` of [FaceNeighboursAngle]s from [FaceNeighbour]s and [Triangle]s.
+    /// Creates a `vec` of [FaceNeighboursAngle]s from [FaceNeighbours] and [Triangle]s.
     ///
     /// To make it correct both input lists (`face_neighbours` and `triangles`) have to match.
     ///
