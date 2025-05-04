@@ -1,6 +1,7 @@
 use crate::mesh::Mesh;
 use std::collections::{HashMap, HashSet};
 use crate::face_neighbours::FaceNeighbours;
+use crate::face_neighbours_angle::FaceNeighboursAngle;
 use crate::graph::Graph;
 use crate::point::Point;
 
@@ -795,7 +796,7 @@ impl Mesh {
     /// Disconnected parts here means their faces are separated.
     ///
     /// # Example
-    /// 
+    ///
     /// Below there is the example of splitting 1 [Mesh] that has 3 isolated parts, so in result
     /// of splitting it returns 3 separate Meshes. Because `weld_vertices_tolerance` is set to `None`
     /// then there is no welding used for output. If you'd like to weld resulting Meshes, just
@@ -867,7 +868,7 @@ impl Mesh {
         for isolated_group in isolated_groups {
             isolated_meshes.push(self.get_part_by_face_ids(&isolated_group))
         }
-        
+
         if weld_vertices_tolerance.is_some() {
             let tolerance = weld_vertices_tolerance.unwrap();
             for i in 0..isolated_meshes.len() {
@@ -877,20 +878,72 @@ impl Mesh {
 
         isolated_meshes
     }
-    
-/*    /// Splits given [Mesh] where the value of angle between faces' normals is equal or lower
-    /// to the given one in the `max_angle` parameter. This angle should be given in radians.
-    /// 
+
+    /// Splits given [Mesh] where the value of angle between faces' normals is higher then given one
+    /// in the `max_angle` parameter. This angle should be given in radians.
+    ///
     /// Optionally you can use `weld_vertices_tolerance` to weld resulting [Mesh]es.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
-    /// 
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let mesh = Mesh::new(
+    ///     vec![0.0, 0.0, -0.5,
+    ///          2.5, 5.0, 0.5,
+    ///          5.0, 0.0, 0.3,
+    ///          7.5, 5.0, -0.4,
+    ///          10.0, 0.0, 0.1,
+    ///          5.0, 10.0, 0.9,
+    ///          ],
+    ///     vec![0, 2, 1, // first face
+    ///          1, 2, 3, // second face
+    ///          2, 4, 3, // third face
+    ///          1, 3, 5, // fourth face
+    ///          ]
+    /// );
+    ///
+    /// let actual = mesh.split_by_face_angle(0.3, Some(0.001));
+    ///
+    /// let big_group = Mesh::new(
+    ///     vec![2.5, 5.0, 0.5, 5.0, 0.0, 0.3, 7.5, 5.0, -0.4, 10.0, 0.0, 0.1, 5.0, 10.0, 0.9],
+    ///     vec![0, 1, 2, 1, 3, 2, 0, 2, 4]
+    /// );
+    ///
+    /// let small_group = Mesh::new(
+    ///     vec![0.0, 0.0, -0.5, 5.0, 0.0, 0.3, 2.5, 5.0, 0.5],
+    ///     vec![0, 1, 2]
+    /// );
+    ///
+    /// let expected = vec![big_group, small_group];
+    ///
+    /// assert_eq!(expected, actual);
+    ///
     /// ```
     pub fn split_by_face_angle(&self, max_angle: f64, weld_vertices_tolerance: Option<f64>) -> Vec<Mesh> {
-        
-    }*/
+
+        let face_neighbours = FaceNeighbours::from_mesh(self);
+        let triangles = self.to_triangles();
+        let face_neighbours_angles = FaceNeighboursAngle::from_face_neighbours_and_triangles(&face_neighbours, &triangles);
+
+        let graph = Graph::from_face_neighbours_with_max_angle(&face_neighbours, &face_neighbours_angles, max_angle);
+
+        let isolated_groups = graph.split_disconnected_vertices();
+        let mut isolated_meshes:Vec<Mesh> = Vec::new();
+        for isolated_group in isolated_groups {
+            isolated_meshes.push(self.get_part_by_face_ids(&isolated_group))
+        }
+
+        if weld_vertices_tolerance.is_some() {
+            let tolerance = weld_vertices_tolerance.unwrap();
+            for i in 0..isolated_meshes.len() {
+                isolated_meshes[i] = isolated_meshes[i].get_with_welded_vertices(tolerance);
+            }
+        }
+
+        isolated_meshes
+    }
 }
 
 #[cfg(test)]
@@ -1845,6 +1898,47 @@ mod tests {
         let expected = vec![expected_group];
 
         let actual = input.split_by_face_disconnected(None);
+
+        for act in &actual {
+            println!("{:?}", act);
+        }
+
+        assert_eq!(expected.len(), actual.len());
+        for i in 0..expected.len() {
+            assert!(expected[i].eq(&actual[i]));
+        }
+    }
+    
+    #[test]
+    pub fn test_split_by_face_angle() {
+        let mesh = Mesh::new(
+            vec![0.0, 0.0, -0.5,
+                 2.5, 5.0, 0.5,
+                 5.0, 0.0, 0.3,
+                 7.5, 5.0, -0.4,
+                 10.0, 0.0, 0.1,
+                 5.0, 10.0, 0.9,
+                 ],
+            vec![0, 2, 1, // first face
+                 1, 2, 3, // second face
+                 2, 4, 3, // third face
+                 1, 3, 5, // fourth face
+                 ]
+        );
+
+        let big_group = Mesh::new(
+            vec![2.5, 5.0, 0.5, 5.0, 0.0, 0.3, 7.5, 5.0, -0.4, 10.0, 0.0, 0.1, 5.0, 10.0, 0.9],
+            vec![0, 1, 2, 1, 3, 2, 0, 2, 4]
+        );
+        
+        let small_group = Mesh::new(
+            vec![0.0, 0.0, -0.5, 5.0, 0.0, 0.3, 2.5, 5.0, 0.5],
+            vec![0, 1, 2]
+        );
+
+        let expected = vec![big_group, small_group];
+        
+        let actual = mesh.split_by_face_angle(0.3, Some(0.001));
 
         for act in &actual {
             println!("{:?}", act);
