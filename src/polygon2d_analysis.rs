@@ -16,9 +16,9 @@ impl Polygon2D {
     /// use meshmeshmesh::point2d::Point2D;
     /// use meshmeshmesh::polygon2d::Polygon2D;
     ///
-    /// let result = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(10.0, 0.0), Point2D::new(5.0, -10.0)]);
+    /// let input = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(10.0, 0.0), Point2D::new(5.0, -10.0)]);
     ///
-    /// assert!(result.is_clockwise());
+    /// assert!(input.is_clockwise());
     ///
     /// ```
     ///
@@ -28,9 +28,9 @@ impl Polygon2D {
     /// use meshmeshmesh::point2d::Point2D;
     /// use meshmeshmesh::polygon2d::Polygon2D;
     ///
-    /// let result = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, -10.0), Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0)]);
+    /// let input = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, -10.0), Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0)]);
     ///
-    /// assert!(!result.is_clockwise());
+    /// assert!(!input.is_clockwise());
     ///
     /// ```
     pub fn is_clockwise(&self) -> bool {
@@ -60,15 +60,15 @@ mod tests {
     
     #[test]
     fn test_is_clockwise_true() {
-        let result = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(10.0, 0.0), Point2D::new(5.0, -10.0)]);
+        let input = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(10.0, 0.0), Point2D::new(5.0, -10.0)]);
 
-        assert!(result.is_clockwise());
+        assert!(input.is_clockwise());
     }
 
     #[test]
     fn test_is_clockwise_false() {
-        let result = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, -10.0), Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0)]);
+        let input = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, -10.0), Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0)]);
 
-        assert!(!result.is_clockwise());
+        assert!(!input.is_clockwise());
     }
 }
