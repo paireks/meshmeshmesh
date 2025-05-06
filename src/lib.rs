@@ -18,6 +18,7 @@ pub mod point2d;
 mod point_analysis;
 mod point_transformations;
 pub mod polygon2d;
+mod polygon2d_analysis;
 pub mod ray;
 mod ray_analysis;
 pub mod three_edge_group;
