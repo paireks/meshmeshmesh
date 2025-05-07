@@ -26,14 +26,6 @@ pub struct Polygon2D {
     pub vertices: Vec<Point2D>,
 }
 
-enum MonotoneVertexType {
-    Start,
-    Split,
-    End,
-    Merge,
-    Regular
-}
-
 impl PartialEq for Polygon2D {
     fn eq(&self, other: &Self) -> bool {
         if self.vertices.len() != other.vertices.len() {

@@ -1,3 +1,4 @@
+use crate::point2d::Point2D;
 
 /// Represents a three-dimensional point with double-precision floating-point coordinates.
 ///
@@ -41,6 +42,25 @@ impl Point {
     /// assert_eq!(result.z, 3.9);
     /// ```
     pub fn new(x: f64, y: f64, z: f64) -> Point { Point { x, y, z } }
+    
+    /// Creates a new [Point] from [Point2D].
+    /// 
+    /// # Example 
+    /// 
+    /// ```
+    /// use meshmeshmesh::point2d::Point2D;
+    /// use meshmeshmesh::point::Point;
+    ///
+    /// let input = Point2D::new(1.5, -2.3);
+    /// let actual = Point::from_point2d(input);
+    /// let expected = Point::new(1.5, -2.3, 0.0);
+    ///
+    /// assert_eq!(expected, actual);
+    /// 
+    /// ```
+    pub fn from_point2d(point2d: Point2D) -> Point {
+        Point::new(point2d.x, point2d.y, 0.0)
+    }
 }
 
 #[cfg(test)]
@@ -53,6 +73,15 @@ mod tests {
         assert_eq!(result.x, 1.5);
         assert_eq!(result.y, -2.3);
         assert_eq!(result.z, 3.9);
+    }
+    
+    #[test]
+    fn test_from_point2d() {
+        let input = Point2D::new(1.5, -2.3);
+        let actual = Point::from_point2d(input);
+        let expected = Point::new(1.5, -2.3, 0.0);
+        
+        assert_eq!(expected, actual);
     }
 
     #[test]
