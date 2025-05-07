@@ -15,6 +15,7 @@ mod mesh_analysis;
 mod mesh_processing;
 pub mod point;
 pub mod point2d;
+mod point2d_analysis;
 mod point_analysis;
 mod point_transformations;
 pub mod polygon2d;
