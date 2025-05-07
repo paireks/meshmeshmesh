@@ -29,5 +29,6 @@ mod triangle_analysis;
 mod triangle_transformations;
 pub mod vector;
 pub mod vector2d;
+mod vector2d_analysis;
 mod vector_analysis;
 mod vector_transformations;
