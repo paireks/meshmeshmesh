@@ -1,4 +1,5 @@
-use crate::point2d::MonotoneVertexType;
+use std::collections::HashMap;
+use crate::point2d::{MonotoneVertexType, Point2D};
 use crate::polygon2d::Polygon2D;
 
 impl Polygon2D {
@@ -75,6 +76,56 @@ impl Polygon2D {
 
         monotone_vertex_types
     }
+
+    /// Gets the intersection between given [Polygon2D] and the y-line (horizontal infinite
+    /// length line).
+    ///
+    /// The output is the [HashMap] where key is an id of the input [Polygon2D] segment, and the
+    /// value is the x-position of intersection point. This way it is easier to know
+    /// which segment is crossed and where exactly. The y-position is obviously the input y.
+    ///
+    /// It shouldn't take into an account parallel segments.
+    fn get_hashmap_intersections_with_y(&self, y: f64) -> HashMap<usize, f64> {
+        let mut intersections: HashMap<usize, f64> = HashMap::new();
+        let number_of_vertices= self.vertices.len();
+
+        for i in 0..number_of_vertices-1 { // Iterating segments
+            let intersection = self.get_intersection_with_y_for_segment(y, i, i+1);
+            if intersection.is_some() {
+                intersections.insert(i, intersection.unwrap());
+            }
+        }
+
+        let intersection = self.get_intersection_with_y_for_segment(y, number_of_vertices - 1, 0); // Last segment
+        if intersection.is_some() {
+            intersections.insert(number_of_vertices - 1, intersection.unwrap());
+        }
+
+        intersections
+    }
+
+    /// Gets the intersection between given [Polygon2D]s' specified segment and the y-line
+    /// (horizontal infinite length line).
+    ///
+    /// The output is the `Option`: if `None` then there is no intersection, if value then it is
+    /// the x-value of the intersection point. The y-value of intersection is obvious, because it
+    /// is the input y value.
+    ///
+    /// It shouldn't take into an account parallel segments.
+    fn get_intersection_with_y_for_segment(&self, y: f64, start_vertex_id: usize, end_vertex_id: usize) -> Option<f64> {
+        let start_point = self.vertices[start_vertex_id];
+        let end_point = self.vertices[end_vertex_id];
+
+        if (start_point.y >= y && end_point.y < y) || (start_point.y <= y && end_point.y > y) { // Check if it even intersects
+            let a = start_point.y - end_point.y; // Preparing Ax + By + C = 0 equation for that segment
+            let b = end_point.x - start_point.x;
+            let c = start_point.x * end_point.y - end_point.x * start_point.y;
+
+            return Some((-b * y - c) / a); // x = (-By - C) / A
+        }
+
+        None
+    }
 }
 
 #[cfg(test)]
@@ -138,6 +189,70 @@ mod tests {
             MonotoneVertexType::Regular
         ];
         
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_get_hashmap_intersections_for_given_y_first() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(-5.981672, 50.875287),
+            Point2D::new(3.075768, 55.323137),
+            Point2D::new(7.725793, 50.996592),
+            Point2D::new(15.044527, 59.892292),
+            Point2D::new(13.184517, 53.665302),
+            Point2D::new(17.025842, 49.055712),
+            Point2D::new(16.864102, 41.777413),
+            Point2D::new(12.456687, 46.063523),
+            Point2D::new(12.375817, 37.208258),
+            Point2D::new(7.829037, 32.495452),
+            Point2D::new(3.106803, 37.191157),
+            Point2D::new(-1.456255, 32.548511),
+            Point2D::new(-8.141664, 35.174922),
+            Point2D::new(-10.590682, 46.392687),
+            Point2D::new(-5.091522, 42.510927),
+            Point2D::new(-1.290632, 46.433122),
+        ]);
+
+        let mut expected: HashMap<usize, f64> = HashMap::new();
+
+        expected.insert(5, 17.01299610934615);
+        expected.insert(15, -3.449702758515264);
+
+        let actual = input.get_hashmap_intersections_with_y(48.477647);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_get_hashmap_intersections_for_given_y_second() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(-5.981672, 50.875287),
+            Point2D::new(3.075768, 55.323137),
+            Point2D::new(7.725793, 50.996592),
+            Point2D::new(15.044527, 59.892292),
+            Point2D::new(13.184517, 53.665302),
+            Point2D::new(17.025842, 49.055712),
+            Point2D::new(16.864102, 41.777413),
+            Point2D::new(12.456687, 46.063523),
+            Point2D::new(12.375817, 37.208258),
+            Point2D::new(7.829037, 32.495452),
+            Point2D::new(3.106803, 37.191157),
+            Point2D::new(-1.456255, 32.548511),
+            Point2D::new(-8.141664, 35.174922),
+            Point2D::new(-10.590682, 46.392687),
+            Point2D::new(-5.091522, 42.510927),
+            Point2D::new(-1.290632, 46.433122),
+        ]);
+
+        let mut expected: HashMap<usize, f64> = HashMap::new();
+
+        expected.insert(8, 9.513355006380916);
+        expected.insert(9, 6.073352755756808);
+        expected.insert(10, 0.20748830202991556);
+        expected.insert(11, -5.7651031999420415);
+
+        let actual = input.get_hashmap_intersections_with_y(34.241273);
+
         assert_eq!(expected, actual);
     }
 }
