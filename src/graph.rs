@@ -1,6 +1,7 @@
 use crate::edge::Edge;
 use crate::face_neighbours::FaceNeighbours;
 use crate::face_neighbours_angle::FaceNeighboursAngle;
+use crate::polygon2d::Polygon2D;
 
 /// Graph representation.
 /// 
@@ -303,6 +304,42 @@ impl Graph {
 
         Graph::new(number_of_vertices, graph_edges)
     }
+    
+    /// Creates a new directed [Graph] from the given [Polygon2D].
+    /// 
+    /// This Graph should be a single loop, because Polygon2D is always a loop.
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::graph::Graph;
+    /// use meshmeshmesh::point2d::Point2D;
+    /// use meshmeshmesh::polygon2d::Polygon2D;
+    ///
+    /// let input = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(10.0, 0.0)]);
+    /// let actual = Graph::from_polygon2d_into_directed(&input);
+    ///
+    /// let expected = Graph::new(4, vec![
+    ///     Edge::new(0, 1),
+    ///     Edge::new(1, 2),
+    ///     Edge::new(2, 0),
+    /// ]);
+    ///
+    /// assert!(expected.eq(&actual));
+    ///
+    /// ```
+    pub fn from_polygon2d_into_directed(polygon2d: &Polygon2D) -> Graph {
+        let number_of_vertices = polygon2d.vertices.len();
+        let mut graph_edges: Vec<Edge> = Vec::new();
+
+        for i in 0..number_of_vertices-1 {
+            graph_edges.push(Edge::new(i, i+1));
+        }
+        graph_edges.push(Edge::new(number_of_vertices-1, 0)); // Last segment
+
+        Graph::new(number_of_vertices, graph_edges)
+    }
 
     fn create_adjacency_vertices(edges: &Vec<Edge>, number_of_vertices: usize) -> Vec<Vec<usize>> {
         let mut adjacency_vertices = vec![Vec::new(); number_of_vertices];
@@ -330,6 +367,7 @@ impl Graph {
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
+    use crate::point2d::Point2D;
     use super::*;
 
     #[test]
@@ -557,5 +595,19 @@ mod tests {
         let b: HashSet<Edge> = actual.edges.into_iter().collect();
 
         assert_eq!(a, b);
+    }
+    
+    #[test]
+    fn test_from_polygon2d_into_directed() {
+        let input = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(10.0, 0.0)]);
+        let actual = Graph::from_polygon2d_into_directed(&input);
+        
+        let expected = Graph::new(4, vec![
+            Edge::new(0, 1),
+            Edge::new(1, 2),
+            Edge::new(2, 0),
+        ]);
+        
+        assert!(expected.eq(&actual));
     }
 }
