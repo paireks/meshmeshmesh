@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
+use crate::graph::Graph;
 use crate::point2d::{MonotoneVertexType, Point2D};
 use crate::polygon2d::Polygon2D;
 
@@ -77,6 +78,30 @@ impl Polygon2D {
         monotone_vertex_types
     }
 
+    /// Gets [MonotoneVertexType]s for specific vertex of [Polygon2D] assuming it's clockwise.
+    fn get_monotone_vertex_type_for_vertex_id_for_clockwise(&self, vertex_id: usize) -> MonotoneVertexType {
+        let number_of_vertices = self.vertices.len();
+
+        let current_vertex = self.vertices[vertex_id];
+        let previous_vertex;
+        let next_vertex;
+
+        if vertex_id == 0 {
+            previous_vertex = self.vertices[number_of_vertices - 1];
+            next_vertex = self.vertices[1];
+        }
+        else if vertex_id == number_of_vertices - 1 {
+            previous_vertex = self.vertices[number_of_vertices - 2];
+            next_vertex = self.vertices[0];
+        }
+        else {
+            previous_vertex = self.vertices[vertex_id - 1];
+            next_vertex = self.vertices[vertex_id + 1];
+        }
+
+        current_vertex.get_monotone_vertex_type_for_clockwise(&previous_vertex, &next_vertex)
+    }
+
     /// Gets the intersection between given [Polygon2D] and the y-line (horizontal infinite
     /// length line).
     ///
@@ -126,6 +151,33 @@ impl Polygon2D {
 
         None
     }
+
+    /// Creates the queue of vertices' ids where vertices at the front are vertices with the highest
+    /// Y coordinate.
+    fn get_queue_of_vertices_from_top_to_bottom(&self) -> VecDeque<usize> {
+        let mut vertices_ids: Vec<usize> = Vec::from_iter(0..self.vertices.len());
+        vertices_ids.sort_by(|&a, &b| self.vertices[b].y.partial_cmp(&self.vertices[a].y).unwrap());
+        VecDeque::from(vertices_ids)
+    }
+
+/*    /// Gets monotone [Graph].
+    fn get_monotone_graph(&self) -> Graph {
+
+        let mut d = Graph::from_polygon2d_into_directed(self);
+        let mut q:VecDeque<usize> = self.get_queue_of_vertices_from_top_to_bottom();
+
+        while q.len() != 0 {
+            let current_vertex_id = q.pop_front().unwrap();
+            let current_vertex_type = self.get_monotone_vertex_type_for_vertex_id_for_clockwise(current_vertex_id);
+            d = Self::handle_vertex(d, current_vertex_id, current_vertex_type);
+        }
+
+        d
+    }
+
+   fn handle_vertex(mut d: Graph, vertex_id: usize, vertex_type: MonotoneVertexType) -> Graph {
+
+    }*/
 }
 
 #[cfg(test)]
@@ -254,5 +306,50 @@ mod tests {
         let actual = input.get_hashmap_intersections_with_y(34.241273);
 
         assert_eq!(expected, actual);
+    }
+    
+    #[test]
+    fn test_get_queue_of_vertices_from_top_to_bottom() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(-5.981672, 50.875287),
+            Point2D::new(3.075768, 55.323137),
+            Point2D::new(7.725793, 50.996592),
+            Point2D::new(15.044527, 59.892292),
+            Point2D::new(13.184517, 53.665302),
+            Point2D::new(17.025842, 49.055712),
+            Point2D::new(16.864102, 41.777413),
+            Point2D::new(12.456687, 46.063523),
+            Point2D::new(12.375817, 37.208258),
+            Point2D::new(7.829037, 32.495452),
+            Point2D::new(3.106803, 37.191157),
+            Point2D::new(-1.456255, 32.548511),
+            Point2D::new(-8.141664, 35.174922),
+            Point2D::new(-10.590682, 46.392687),
+            Point2D::new(-5.091522, 42.510927),
+            Point2D::new(-1.290632, 46.433122),
+        ]);
+        
+        let mut expected = VecDeque::new();
+        expected.push_back(3);
+        expected.push_back(1);
+        expected.push_back(4);
+        expected.push_back(2);
+        expected.push_back(0);
+        expected.push_back(5);
+        expected.push_back(15);
+        expected.push_back(13);
+        expected.push_back(7);
+        expected.push_back(14);
+        expected.push_back(6);
+        expected.push_back(8);
+        expected.push_back(10);
+        expected.push_back(12);
+        expected.push_back(11);
+        expected.push_back(9);
+
+        let actual = input.get_queue_of_vertices_from_top_to_bottom();
+        
+        assert_eq!(expected, actual);
+        
     }
 }
