@@ -154,11 +154,20 @@ impl Polygon2D {
 
     /// Creates the queue of vertices' ids where vertices at the front are vertices with the highest
     /// Y coordinate.
-    fn get_queue_of_vertices_from_top_to_bottom(&self) -> VecDeque<usize> {
+    ///
+    /// If there are 2 points at the same height: left one will come first.
+    fn get_queue_of_vertices_top_to_bottom_then_left_right(&self) -> VecDeque<usize> {
         let mut vertices_ids: Vec<usize> = Vec::from_iter(0..self.vertices.len());
-        vertices_ids.sort_by(|&a, &b| self.vertices[b].y.partial_cmp(&self.vertices[a].y).unwrap());
+        vertices_ids.sort_by(|&a, &b| self.vertices[a].total_cmp_top_bottom_then_left_right(&self.vertices[b]));
         VecDeque::from(vertices_ids)
     }
+
+/*    /// Creates the queue of edges' ids that are intersecting Y axis on the given height.
+    ///
+    /// The order is from the left to right.
+    fn get_queue_of_edges_intersecting_y_from_left_to_right(&self, y: f64) -> VecDeque<usize> {
+
+    }*/
 
 /*    /// Gets monotone [Graph].
     fn get_monotone_graph(&self) -> Graph {
@@ -309,7 +318,7 @@ mod tests {
     }
     
     #[test]
-    fn test_get_queue_of_vertices_from_top_to_bottom() {
+    fn test_get_queue_of_vertices_from_top_to_bottom_then_left_to_right_unregular() {
         let input = Polygon2D::new(vec![
             Point2D::new(-5.981672, 50.875287),
             Point2D::new(3.075768, 55.323137),
@@ -347,9 +356,42 @@ mod tests {
         expected.push_back(11);
         expected.push_back(9);
 
-        let actual = input.get_queue_of_vertices_from_top_to_bottom();
+        let actual = input.get_queue_of_vertices_top_to_bottom_then_left_right();
         
         assert_eq!(expected, actual);
         
+    }
+
+    #[test]
+    fn test_get_queue_of_vertices_from_top_to_bottom_then_left_to_right_letter_f() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(50.0, 25.0),
+            Point2D::new(50.0, 50.0),
+            Point2D::new(65.0, 50.0),
+            Point2D::new(65.0, 45.0),
+            Point2D::new(55.0, 45.0),
+            Point2D::new(55.0, 40.0),
+            Point2D::new(65.0, 40.0),
+            Point2D::new(65.0, 35.0),
+            Point2D::new(55.0, 35.0),
+            Point2D::new(55.0, 25.0),
+        ]);
+
+        let mut expected = VecDeque::new();
+        expected.push_back(1);
+        expected.push_back(2);
+        expected.push_back(4);
+        expected.push_back(3);
+        expected.push_back(5);
+        expected.push_back(6);
+        expected.push_back(8);
+        expected.push_back(7);
+        expected.push_back(0);
+        expected.push_back(9);
+
+        let actual = input.get_queue_of_vertices_top_to_bottom_then_left_right();
+
+        assert_eq!(expected, actual);
+
     }
 }
