@@ -162,31 +162,38 @@ impl Polygon2D {
         VecDeque::from(vertices_ids)
     }
 
-/*    /// Creates the queue of edges' ids that are intersecting Y axis on the given height.
-    ///
-    /// The order is from the left to right.
-    fn get_queue_of_edges_intersecting_y_from_left_to_right(&self, y: f64) -> VecDeque<usize> {
-
-    }*/
-
 /*    /// Gets monotone [Graph].
     fn get_monotone_graph(&self) -> Graph {
 
         let mut d = Graph::from_polygon2d_into_directed(self);
-        let mut q:VecDeque<usize> = self.get_queue_of_vertices_from_top_to_bottom();
+        let mut q:VecDeque<usize> = self.get_queue_of_vertices_top_to_bottom_then_left_right();
+        let mut helpers: HashMap<usize, usize> = HashMap::new(); // Key: edge id, value: vertex id of helper
 
         while q.len() != 0 {
             let current_vertex_id = q.pop_front().unwrap();
             let current_vertex_type = self.get_monotone_vertex_type_for_vertex_id_for_clockwise(current_vertex_id);
-            d = Self::handle_vertex(d, current_vertex_id, current_vertex_type);
+
+            (d, helpers) = self.handle_vertex(d, helpers, current_vertex_id, current_vertex_type);
         }
 
         d
     }
 
-   fn handle_vertex(mut d: Graph, vertex_id: usize, vertex_type: MonotoneVertexType) -> Graph {
-
-    }*/
+   fn handle_vertex(&self, mut d: Graph, mut helpers: HashMap<usize, usize>, vertex_id: usize, vertex_type: MonotoneVertexType) -> (Graph, HashMap<usize, usize>) {
+       if vertex_type == MonotoneVertexType::Start {
+           helpers.insert(vertex_id, vertex_id);
+           (d, helpers)
+       }
+       else if vertex_type == MonotoneVertexType::End {
+           if helpers.contains_key(&vertex_id) { 
+               let helper_id = helpers[&vertex_id];
+               let helper_type = self.get_monotone_vertex_type_for_vertex_id_for_clockwise(helper_id);
+               if helper_type == MonotoneVertexType::Merge { 
+                   d.ed
+               }
+           }
+       }
+   }*/
 }
 
 #[cfg(test)]
