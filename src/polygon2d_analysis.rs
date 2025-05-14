@@ -1,4 +1,5 @@
 use std::collections::{HashMap, VecDeque};
+use crate::edge::Edge;
 use crate::graph::Graph;
 use crate::point2d::{MonotoneVertexType, Point2D};
 use crate::polygon2d::Polygon2D;
@@ -162,36 +163,46 @@ impl Polygon2D {
         VecDeque::from(vertices_ids)
     }
 
+    /// Creates the queue of vertices' ids where vertices at the front are vertices with the lowest
+    /// Y coordinate.
+    ///
+    /// If there are 2 points at the same height: right one will come first.
+    fn get_queue_of_vertices_bottom_to_top_then_right_left(&self) -> VecDeque<usize> {
+        let mut vertices_ids: Vec<usize> = Vec::from_iter(0..self.vertices.len());
+        vertices_ids.sort_by(|&a, &b| self.vertices[a].total_cmp_bottom_top_then_right_left(&self.vertices[b]));
+        VecDeque::from(vertices_ids)
+    }
+    
 /*    /// Gets monotone [Graph].
     fn get_monotone_graph(&self) -> Graph {
 
+        let vertex_types = self.get_monotone_vertices_types_for_clockwise();
         let mut d = Graph::from_polygon2d_into_directed(self);
         let mut q:VecDeque<usize> = self.get_queue_of_vertices_top_to_bottom_then_left_right();
         let mut helpers: HashMap<usize, usize> = HashMap::new(); // Key: edge id, value: vertex id of helper
 
         while q.len() != 0 {
             let current_vertex_id = q.pop_front().unwrap();
-            let current_vertex_type = self.get_monotone_vertex_type_for_vertex_id_for_clockwise(current_vertex_id);
+            let current_vertex_type = vertex_types[current_vertex_id];
+            (d, helpers) = self.handle_split(d, helpers, current_vertex_id, current_vertex_type);
+        }
+        
+        q = self.get_queue_of_vertices_bottom_to_top_then_right_left();
+        helpers = HashMap::new();
 
-            (d, helpers) = self.handle_vertex(d, helpers, current_vertex_id, current_vertex_type);
+        while q.len() != 0 {
+            let current_vertex_id = q.pop_front().unwrap();
+            let current_vertex_type = vertex_types[current_vertex_id];
+            (d, helpers) = self.handle_merge(d, helpers, current_vertex_id, current_vertex_type);
         }
 
         d
-    }
+    }*/
 
-   fn handle_vertex(&self, mut d: Graph, mut helpers: HashMap<usize, usize>, vertex_id: usize, vertex_type: MonotoneVertexType) -> (Graph, HashMap<usize, usize>) {
+/*   fn handle_vertex(&self, mut d: Graph, mut helpers: HashMap<usize, usize>, vertex_id: usize, vertex_type: MonotoneVertexType) -> (Graph, HashMap<usize, usize>) {
+       
        if vertex_type == MonotoneVertexType::Start {
-           helpers.insert(vertex_id, vertex_id);
-           (d, helpers)
-       }
-       else if vertex_type == MonotoneVertexType::End {
-           if helpers.contains_key(&vertex_id) { 
-               let helper_id = helpers[&vertex_id];
-               let helper_type = self.get_monotone_vertex_type_for_vertex_id_for_clockwise(helper_id);
-               if helper_type == MonotoneVertexType::Merge { 
-                   d.ed
-               }
-           }
+           
        }
    }*/
 }
@@ -397,6 +408,84 @@ mod tests {
         expected.push_back(9);
 
         let actual = input.get_queue_of_vertices_top_to_bottom_then_left_right();
+
+        assert_eq!(expected, actual);
+
+    }
+
+    #[test]
+    fn test_get_queue_of_vertices_bottom_to_top_then_right_left_unregular() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(-5.981672, 50.875287),
+            Point2D::new(3.075768, 55.323137),
+            Point2D::new(7.725793, 50.996592),
+            Point2D::new(15.044527, 59.892292),
+            Point2D::new(13.184517, 53.665302),
+            Point2D::new(17.025842, 49.055712),
+            Point2D::new(16.864102, 41.777413),
+            Point2D::new(12.456687, 46.063523),
+            Point2D::new(12.375817, 37.208258),
+            Point2D::new(7.829037, 32.495452),
+            Point2D::new(3.106803, 37.191157),
+            Point2D::new(-1.456255, 32.548511),
+            Point2D::new(-8.141664, 35.174922),
+            Point2D::new(-10.590682, 46.392687),
+            Point2D::new(-5.091522, 42.510927),
+            Point2D::new(-1.290632, 46.433122),
+        ]);
+
+        let mut expected = VecDeque::new();
+        expected.push_front(3);
+        expected.push_front(1);
+        expected.push_front(4);
+        expected.push_front(2);
+        expected.push_front(0);
+        expected.push_front(5);
+        expected.push_front(15);
+        expected.push_front(13);
+        expected.push_front(7);
+        expected.push_front(14);
+        expected.push_front(6);
+        expected.push_front(8);
+        expected.push_front(10);
+        expected.push_front(12);
+        expected.push_front(11);
+        expected.push_front(9);
+
+        let actual = input.get_queue_of_vertices_bottom_to_top_then_right_left();
+
+        assert_eq!(expected, actual);
+
+    }
+
+    #[test]
+    fn test_get_queue_of_vertices_bottom_to_top_then_right_left_letter_f() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(50.0, 25.0),
+            Point2D::new(50.0, 50.0),
+            Point2D::new(65.0, 50.0),
+            Point2D::new(65.0, 45.0),
+            Point2D::new(55.0, 45.0),
+            Point2D::new(55.0, 40.0),
+            Point2D::new(65.0, 40.0),
+            Point2D::new(65.0, 35.0),
+            Point2D::new(55.0, 35.0),
+            Point2D::new(55.0, 25.0),
+        ]);
+
+        let mut expected = VecDeque::new();
+        expected.push_front(1);
+        expected.push_front(2);
+        expected.push_front(4);
+        expected.push_front(3);
+        expected.push_front(5);
+        expected.push_front(6);
+        expected.push_front(8);
+        expected.push_front(7);
+        expected.push_front(0);
+        expected.push_front(9);
+
+        let actual = input.get_queue_of_vertices_bottom_to_top_then_right_left();
 
         assert_eq!(expected, actual);
 
