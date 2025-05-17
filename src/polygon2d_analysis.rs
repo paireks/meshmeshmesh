@@ -80,7 +80,7 @@ impl Polygon2D {
     }
 
     /// Gets [MonotoneVertexType]s for specific vertex of [Polygon2D] assuming it's clockwise.
-    fn get_monotone_vertex_type_for_vertex_id_for_clockwise(&self, vertex_id: usize) -> MonotoneVertexType {
+    pub(crate) fn get_monotone_vertex_type_for_vertex_id_for_clockwise(&self, vertex_id: usize) -> MonotoneVertexType {
         let number_of_vertices = self.vertices.len();
 
         let current_vertex = self.vertices[vertex_id];
@@ -111,7 +111,7 @@ impl Polygon2D {
     /// which segment is crossed and where exactly. The y-position is obviously the input y.
     ///
     /// It shouldn't take into an account parallel segments.
-    fn get_hashmap_intersections_with_y(&self, y: f64) -> HashMap<usize, f64> {
+    pub(crate) fn get_hashmap_intersections_with_y(&self, y: f64) -> HashMap<usize, f64> {
         let mut intersections: HashMap<usize, f64> = HashMap::new();
         let number_of_vertices= self.vertices.len();
 
@@ -138,7 +138,7 @@ impl Polygon2D {
     /// is the input y value.
     ///
     /// It shouldn't take into an account parallel segments.
-    fn get_intersection_with_y_for_segment(&self, y: f64, start_vertex_id: usize, end_vertex_id: usize) -> Option<f64> {
+    pub(crate) fn get_intersection_with_y_for_segment(&self, y: f64, start_vertex_id: usize, end_vertex_id: usize) -> Option<f64> {
         let start_point = self.vertices[start_vertex_id];
         let end_point = self.vertices[end_vertex_id];
 
@@ -157,7 +157,7 @@ impl Polygon2D {
     /// Y coordinate.
     ///
     /// If there are 2 points at the same height: left one will come first.
-    fn get_queue_of_vertices_top_to_bottom_then_left_right(&self) -> VecDeque<usize> {
+    pub(crate) fn get_queue_of_vertices_top_to_bottom_then_left_right(&self) -> VecDeque<usize> {
         let mut vertices_ids: Vec<usize> = Vec::from_iter(0..self.vertices.len());
         vertices_ids.sort_by(|&a, &b| self.vertices[a].total_cmp_top_bottom_then_left_right(&self.vertices[b]));
         VecDeque::from(vertices_ids)
@@ -167,7 +167,7 @@ impl Polygon2D {
     /// Y coordinate.
     ///
     /// If there are 2 points at the same height: right one will come first.
-    fn get_queue_of_vertices_bottom_to_top_then_right_left(&self) -> VecDeque<usize> {
+    pub(crate) fn get_queue_of_vertices_bottom_to_top_then_right_left(&self) -> VecDeque<usize> {
         let mut vertices_ids: Vec<usize> = Vec::from_iter(0..self.vertices.len());
         vertices_ids.sort_by(|&a, &b| self.vertices[a].total_cmp_bottom_top_then_right_left(&self.vertices[b]));
         VecDeque::from(vertices_ids)
@@ -180,7 +180,7 @@ impl Polygon2D {
     /// If the element of tuple is `None` then there is no helper for that side.
     ///
     /// `offset` value is used to don't check the intersections that are exactly on the vertices.
-    fn get_monotone_helpers(&self, y: f64) -> (Option<usize>, Option<usize>) {
+    pub(crate) fn get_monotone_helpers(&self, y: f64) -> (Option<usize>, Option<usize>) {
         let intersections = self.get_hashmap_intersections_with_y(y);
 
         let mut left = None;
@@ -207,39 +207,6 @@ impl Polygon2D {
 
         (left, right)
     }
-    
-/*    /// Gets monotone [Graph].
-    fn get_monotone_graph(&self) -> Graph {
-
-        let vertex_types = self.get_monotone_vertices_types_for_clockwise();
-        let mut d = Graph::from_polygon2d_into_directed(self);
-        let mut q:VecDeque<usize> = self.get_queue_of_vertices_top_to_bottom_then_left_right();
-        let mut helpers: HashMap<usize, usize> = HashMap::new(); // Key: edge id, value: vertex id of helper
-
-        while q.len() != 0 {
-            let current_vertex_id = q.pop_front().unwrap();
-            let current_vertex_type = vertex_types[current_vertex_id];
-            (d, helpers) = self.handle_split(d, helpers, current_vertex_id, current_vertex_type);
-        }
-        
-        q = self.get_queue_of_vertices_bottom_to_top_then_right_left();
-        helpers = HashMap::new();
-
-        while q.len() != 0 {
-            let current_vertex_id = q.pop_front().unwrap();
-            let current_vertex_type = vertex_types[current_vertex_id];
-            (d, helpers) = self.handle_merge(d, helpers, current_vertex_id, current_vertex_type);
-        }
-
-        d
-    }*/
-
-/*   fn handle_vertex(&self, mut d: Graph, mut helpers: HashMap<usize, usize>, vertex_id: usize, vertex_type: MonotoneVertexType) -> (Graph, HashMap<usize, usize>) {
-       
-       if vertex_type == MonotoneVertexType::Start {
-           
-       }
-   }*/
 }
 
 #[cfg(test)]
