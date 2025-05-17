@@ -172,6 +172,41 @@ impl Polygon2D {
         vertices_ids.sort_by(|&a, &b| self.vertices[a].total_cmp_bottom_top_then_right_left(&self.vertices[b]));
         VecDeque::from(vertices_ids)
     }
+
+    /// Returns tuple of helper ids, which represents ids of the edges.
+    ///
+    /// First element of the tuple is the helper on the left, second one: helper on the right.
+    ///
+    /// If the element of tuple is `None` then there is no helper for that side.
+    ///
+    /// `offset` value is used to don't check the intersections that are exactly on the vertices.
+    fn get_monotone_helpers(&self, y: f64) -> (Option<usize>, Option<usize>) {
+        let intersections = self.get_hashmap_intersections_with_y(y);
+
+        let mut left = None;
+        let mut max_negative = f64::NEG_INFINITY;
+
+        let mut right = None;
+        let mut min_positive = f64::INFINITY;
+
+        for intersection in intersections {
+            if intersection.1 < 0.0 {
+                if intersection.1 > max_negative {
+                    max_negative = intersection.1;
+                    left = Some(intersection.0);
+                }
+            }
+
+            if intersection.1 > 0.0 {
+                if intersection.1 < min_positive {
+                    min_positive = intersection.1;
+                    right = Some(intersection.0);
+                }
+            }
+        }
+
+        (left, right)
+    }
     
 /*    /// Gets monotone [Graph].
     fn get_monotone_graph(&self) -> Graph {
@@ -489,5 +524,61 @@ mod tests {
 
         assert_eq!(expected, actual);
 
+    }
+
+    #[test]
+    fn test_get_monotone_helpers_2() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(-5.981672, 50.875287),
+            Point2D::new(3.075768, 55.323137),
+            Point2D::new(7.725793, 50.996592),
+            Point2D::new(15.044527, 59.892292),
+            Point2D::new(13.184517, 53.665302),
+            Point2D::new(17.025842, 49.055712),
+            Point2D::new(16.864102, 41.777413),
+            Point2D::new(12.456687, 46.063523),
+            Point2D::new(12.375817, 37.208258),
+            Point2D::new(7.829037, 32.495452),
+            Point2D::new(3.106803, 37.191157),
+            Point2D::new(-1.456255, 32.548511),
+            Point2D::new(-8.141664, 35.174922),
+            Point2D::new(-10.590682, 46.392687),
+            Point2D::new(-5.091522, 42.510927),
+            Point2D::new(-1.290632, 46.433122),
+        ]);
+
+        let y = 50.996592 - 0.001;
+        let expected = (Some(0), Some(4));
+        let actual = input.get_monotone_helpers(y);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_get_monotone_helpers_7() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(-5.981672, 50.875287),
+            Point2D::new(3.075768, 55.323137),
+            Point2D::new(7.725793, 50.996592),
+            Point2D::new(15.044527, 59.892292),
+            Point2D::new(13.184517, 53.665302),
+            Point2D::new(17.025842, 49.055712),
+            Point2D::new(16.864102, 41.777413),
+            Point2D::new(12.456687, 46.063523),
+            Point2D::new(12.375817, 37.208258),
+            Point2D::new(7.829037, 32.495452),
+            Point2D::new(3.106803, 37.191157),
+            Point2D::new(-1.456255, 32.548511),
+            Point2D::new(-8.141664, 35.174922),
+            Point2D::new(-10.590682, 46.392687),
+            Point2D::new(-5.091522, 42.510927),
+            Point2D::new(-1.290632, 46.433122),
+        ]);
+
+        let y = 46.063523 + 0.0001;
+        let expected = (Some(14), Some(5));
+        let actual = input.get_monotone_helpers(y);
+
+        assert_eq!(expected, actual);
     }
 }
