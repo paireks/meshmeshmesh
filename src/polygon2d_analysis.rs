@@ -178,8 +178,6 @@ impl Polygon2D {
     /// First element of the tuple is the helper on the left, second one: helper on the right.
     ///
     /// If the element of tuple is `None` then there is no helper for that side.
-    ///
-    /// `offset` value is used to don't check the intersections that are exactly on the vertices.
     pub(crate) fn get_monotone_helpers(&self, y: f64) -> (Option<usize>, Option<usize>) {
         let intersections = self.get_hashmap_intersections_with_y(y);
 
