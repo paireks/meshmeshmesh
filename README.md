@@ -24,6 +24,12 @@ cargo add meshmeshmesh
 
 https://docs.rs/meshmeshmesh/latest/meshmeshmesh/
 
+## Dependencies
+
+meshmeshmesh is using:
+
+- iTriangle (https://github.com/iShape-Rust/iTriangle) for triangulation / tesselation.
+
 ## Author
 
 Wojciech Radaczyński (https://radaczynski.pl/)

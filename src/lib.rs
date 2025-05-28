@@ -21,6 +21,7 @@ mod point_transformations;
 pub mod polygon2d;
 mod polygon2d_analysis;
 mod polygon2d_transformations;
+mod polygon2d_triangulation;
 pub mod ray;
 mod ray_analysis;
 pub mod three_edge_group;

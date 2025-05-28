@@ -94,6 +94,55 @@ impl Polygon2D {
 
         Polygon2D::new(new_vertices)
     }
+
+    /// Creates a new anticlockwise version of given [Polygon2D].
+    ///
+    /// Sometimes it's easier to have all Polygons in one direction, that's when such method
+    /// might be useful.
+    ///
+    /// # Examples
+    ///
+    /// This example shows that the clockwise [Polygon2D] is turned into anticlockwise.
+    ///
+    /// ```
+    /// use meshmeshmesh::point2d::Point2D;
+    /// use meshmeshmesh::polygon2d::Polygon2D;
+    ///
+    /// let input = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(10.0, 0.0)]);
+    ///
+    /// let expected = Polygon2D::new(vec![Point2D::new(10.0, 0.0), Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0)]);
+    ///
+    /// let actual = input.get_anticlockwise();
+    ///
+    /// assert!(expected.eq(&actual));
+    ///
+    /// ```
+    ///
+    /// This example shows that the input Polygon is already anticlockwise, so new same direction
+    /// Polygon is being returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::point2d::Point2D;
+    /// use meshmeshmesh::polygon2d::Polygon2D;
+    ///
+    /// let input = Polygon2D::new(vec![Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(0.0, 0.0)]);
+    ///
+    /// let expected = Polygon2D::new(vec![Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(0.0, 0.0)]);
+    ///
+    /// let actual = input.get_anticlockwise();
+    ///
+    /// assert!(expected.eq(&actual));
+    ///
+    /// ```
+    pub fn get_anticlockwise(&self) -> Polygon2D {
+        let mut new_vertices = self.vertices.clone();
+
+        if self.is_clockwise() {
+            new_vertices.reverse();
+        }
+
+        Polygon2D::new(new_vertices)
+    }
 }
 
 #[cfg(test)]
@@ -141,6 +190,28 @@ mod tests {
         let expected = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(10.0, 0.0)]);
         
         let actual = input.get_clockwise();
+        
+        assert!(expected.eq(&actual));
+    }
+
+    #[test]
+    fn test_get_anticlockwise_counterclockwise() {
+        let input = Polygon2D::new(vec![Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(0.0, 0.0)]);
+
+        let expected = Polygon2D::new(vec![Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(0.0, 0.0)]);
+        
+        let actual = input.get_anticlockwise();
+        
+        assert!(expected.eq(&actual));
+    }
+
+    #[test]
+    fn test_get_anticlockwise_clockwise() {
+        let input = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(10.0, 0.0)]);
+
+        let expected = Polygon2D::new(vec![Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(0.0, 0.0)]);
+        
+        let actual = input.get_anticlockwise();
         
         assert!(expected.eq(&actual));
     }
