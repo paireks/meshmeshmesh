@@ -20,7 +20,6 @@ mod point_analysis;
 mod point_transformations;
 pub mod polygon2d;
 mod polygon2d_analysis;
-mod polygon2d_processing;
 mod polygon2d_transformations;
 pub mod ray;
 mod ray_analysis;

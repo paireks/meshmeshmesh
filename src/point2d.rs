@@ -18,15 +18,6 @@ pub struct Point2D {
     pub y: f64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum MonotoneVertexType {
-    Start,
-    Split,
-    End,
-    Merge,
-    Regular
-}
-
 impl PartialEq for Point2D {
     fn eq(&self, other: &Self) -> bool {
         self.x == other.x && self.y == other.y
