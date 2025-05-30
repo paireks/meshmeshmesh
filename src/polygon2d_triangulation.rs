@@ -1,7 +1,6 @@
 use i_triangle::float::triangulatable::Triangulatable;
 use i_triangle::float::triangulation::Triangulation;
 use crate::mesh::Mesh;
-use crate::point2d::Point2D;
 use crate::polygon2d::Polygon2D;
 
 impl Polygon2D {
@@ -44,10 +43,7 @@ impl Polygon2D {
     /// ```
     pub fn triangulate_raw(&self) -> Mesh {
         let polygon_for_triangulation = self.get_anticlockwise();
-        let mut flat_polygon_for_triangulation = Vec::with_capacity(polygon_for_triangulation.vertices.len());
-        for i in polygon_for_triangulation.vertices {
-            flat_polygon_for_triangulation.push([i.x, i.y]);
-        }
+        let flat_polygon_for_triangulation = polygon_for_triangulation.into_vec_arrays();
 
         let shape = vec![
             flat_polygon_for_triangulation
@@ -55,6 +51,19 @@ impl Polygon2D {
 
         let triangulation: Triangulation<[f64; 2], usize> = shape.triangulate().to_triangulation();
 
+        Self::triangulation_into_mesh(triangulation)
+    }
+    
+    fn into_vec_arrays(self) -> Vec<[f64; 2]> {
+        let mut flat_polygon_for_triangulation = Vec::with_capacity(self.vertices.len());
+        for i in self.vertices {
+            flat_polygon_for_triangulation.push([i.x, i.y]);
+        }
+        
+        flat_polygon_for_triangulation
+    }
+    
+    fn triangulation_into_mesh(triangulation: Triangulation<[f64; 2], usize>) -> Mesh {
         let mut points = Vec::new();
         for point2d in triangulation.points {
             points.push(point2d[0]);
