@@ -13,6 +13,7 @@ mod graph_analysis;
 pub mod mesh;
 mod mesh_analysis;
 mod mesh_processing;
+pub mod local_coordinate_system;
 pub mod point;
 pub mod point2d;
 mod point2d_analysis;
