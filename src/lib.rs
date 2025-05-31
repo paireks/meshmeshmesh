@@ -15,6 +15,7 @@ mod mesh_analysis;
 mod mesh_processing;
 pub mod local_coordinate_system;
 mod local_coordinate_system_analysis;
+mod local_coordinate_system_transformations;
 pub mod point;
 pub mod point2d;
 mod point2d_analysis;
