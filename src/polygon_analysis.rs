@@ -50,9 +50,9 @@ impl Polygon {
     ///
     /// let actual = input.get_local_coordinate_system();
     ///
-    /// let expected_origin = Point::new(0.0, 5.0, -1.2);
-    /// let expected_x = Vector::new(0.0, 0.0, 1.0);
-    /// let expected_y = Vector::new(0.0, -1.0, 0.0);
+    /// let expected_origin = Point::new(-15.519542, 33.6924,54.752506);
+    /// let expected_x = Vector::new(0.13940120784477725,0.6260669228918656,0.767207606396162);
+    /// let expected_y = Vector::new(0.7651247740152495,0.4237333029589709,-0.4848032262182198);
     ///
     /// let expected = LocalCoordinateSystem::new(expected_origin, expected_x, expected_y);
     ///
@@ -82,15 +82,15 @@ mod tests {
             Point::new(20.315263, 45.368737, 19.312824),
             Point::new(4.753062, 55.839337, 58.928299),
         ]);
-        
+
         let actual = input.get_local_coordinate_system();
-        
+
         let expected_origin = Point::new(-15.519542, 33.6924,54.752506);
         let expected_x = Vector::new(0.13940120784477725,0.6260669228918656,0.767207606396162);
         let expected_y = Vector::new(0.7651247740152495,0.4237333029589709,-0.4848032262182198);
-        
+
         let expected = LocalCoordinateSystem::new(expected_origin, expected_x, expected_y);
-        
+
         assert_eq!(expected, actual);
     }
 }
