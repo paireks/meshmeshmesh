@@ -86,6 +86,40 @@ impl Point {
     pub fn get_in_local_coordinate_system(&self, local_coordinate_system: &LocalCoordinateSystem) -> Point {
         local_coordinate_system.origin + local_coordinate_system.x * self.x + local_coordinate_system.y * self.y + local_coordinate_system.z * self.z
     }
+
+    /// Creates a new [Point], but with coordinates in the given Global Coordinate System.
+    ///
+    /// Global Coordinate System is cartesian with the origin in 0.0,0.0,0.0, with Z axis
+    /// defined by the right hand thumb rule.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::local_coordinate_system::LocalCoordinateSystem;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Point::new(-11.949745, 8.895507, 40.020804);
+    /// let local_coordinate_system = LocalCoordinateSystem::new(
+    ///     Point::new(-43.836955, -22.211852, 10.0),
+    ///     Vector::new(0.721276,0.692648,0.0),
+    ///     Vector::new(-0.290878,0.3029,0.907547)
+    /// );
+    ///
+    /// let expected = Point::new(44.545922, 27.392431, 12.289269);
+    ///
+    /// let actual = input.get_in_global_coordinate_system(&local_coordinate_system);
+    ///
+    /// assert!(expected.eq_with_tolerance(&actual, 0.001));
+    ///
+    /// ```
+    pub fn get_in_global_coordinate_system(&self, local_coordinate_system: &LocalCoordinateSystem) -> Point {
+        Point::new(
+            local_coordinate_system.get_x_ray().get_distance_from_origin_to_closest_point(self),
+            local_coordinate_system.get_y_ray().get_distance_from_origin_to_closest_point(self),
+            local_coordinate_system.get_z_ray().get_distance_from_origin_to_closest_point(self),
+        )
+    }
 }
 
 #[cfg(test)]
@@ -122,6 +156,22 @@ mod tests {
         let expected = Point::new(-11.949745, 8.895507, 40.020804);
         
         let actual = input.get_in_local_coordinate_system(&local_coordinate_system);
+        
+        assert!(expected.eq_with_tolerance(&actual, 0.001));
+    }
+
+    #[test]
+    fn test_get_in_global_coordinate_system() {
+        let input = Point::new(-11.949745, 8.895507, 40.020804);
+        let local_coordinate_system = LocalCoordinateSystem::new(
+            Point::new(-43.836955, -22.211852, 10.0),
+            Vector::new(0.721276,0.692648,0.0),
+            Vector::new(-0.290878,0.3029,0.907547)
+        );
+        
+        let expected = Point::new(44.545922, 27.392431, 12.289269);
+        
+        let actual = input.get_in_global_coordinate_system(&local_coordinate_system);
         
         assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
