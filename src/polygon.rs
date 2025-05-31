@@ -3,6 +3,12 @@ use crate::point::Point;
 /// Represents a three-dimensional closed polygon.
 ///
 /// Polygon should contain at least 3 vertices, all vertices should be unique.
+/// 
+/// Even though this polygon is three-dimensional: it should be planar.
+/// 
+/// Polygon shouldn't contain duplicate vertices.
+/// 
+/// It also shouldn't have parallel segments neighbour segments.
 ///
 /// # Example
 ///

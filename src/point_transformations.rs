@@ -84,7 +84,7 @@ impl Point {
     /// 
     /// ```
     pub fn get_in_local_coordinate_system(&self, local_coordinate_system: &LocalCoordinateSystem) -> Point {
-        local_coordinate_system.origin + local_coordinate_system.x * self.x + local_coordinate_system.y * self.y + local_coordinate_system.z * self.z
+        local_coordinate_system.origin + local_coordinate_system.x * self.x + local_coordinate_system.y * self.y + local_coordinate_system.get_z() * self.z
     }
 
     /// Creates a new `vec` of [Point]s, but with coordinates in the given [LocalCoordinateSystem].

@@ -63,6 +63,30 @@ impl Vector {
 
         Vector::new(self.x / length, self.y / length, self.z / length)
     }
+
+    /// Returns the rotated [Vector] using given axis and rotation angle in radians.
+    ///
+    /// It uses Rodrigue's rotation formula.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Vector::new(-35.950453, 27.164182, 25.901055);
+    /// let rotation_axis = Vector::new(27.845467, 18.872629, 11.197679);
+    ///
+    /// let actual = input.get_rotated(&rotation_axis, 0.797);
+    /// let expected = Vector::new(-22.722373, -4.58531, 46.517321);
+    ///
+    /// assert!(expected.eq_with_tolerance(&actual, 0.001));
+    /// ```
+    pub fn get_rotated(&self, rotation_axis: &Vector, angle: f64) -> Vector {
+        let k = rotation_axis.get_unitized();
+        let v = self.clone();
+
+        v * f64::cos(angle) + (k.get_cross_product(&v)) * f64::sin(angle) + k * (k.get_dot_product(&v)) * (1.0 - f64::cos(angle))
+    }
 }
 
 impl ops::Mul<f64> for Vector {
@@ -208,5 +232,16 @@ mod tests {
         let result = a - b;
         let expected = Vector::new(5.231-(-12.564), -0.341-5.642, 11.034-7.731);
         assert_eq!(result.eq(&expected), true);
+    }
+    
+    #[test]
+    fn test_get_rotated() {
+        let input = Vector::new(-35.950453, 27.164182, 25.901055);
+        let rotation_axis = Vector::new(27.845467, 18.872629, 11.197679);
+        
+        let actual = input.get_rotated(&rotation_axis, 0.797);
+        let expected = Vector::new(-22.722373, -4.58531, 46.517321);
+        
+        assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
 }

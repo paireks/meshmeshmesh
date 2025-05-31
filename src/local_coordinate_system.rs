@@ -22,7 +22,6 @@ use crate::vector::Vector;
 /// assert_eq!(result.origin, Point::new(0.0, 5.0, -1.2));
 /// assert_eq!(result.x, Vector::new(0.0, 0.0, 1.0));
 /// assert_eq!(result.y, Vector::new(0.0, -1.0, 0.0));
-/// assert_eq!(result.z, Vector::new(1.0, 0.0, 0.0));
 ///
 /// ```
 #[derive(Debug, Clone, Copy)]
@@ -33,8 +32,24 @@ pub struct LocalCoordinateSystem {
     pub x: Vector,
     /// The y-axis. Should be unitized.
     pub y: Vector,
-    /// The z-axis. Should be unitized.
-    pub z: Vector,
+}
+
+impl PartialEq for LocalCoordinateSystem {
+    fn eq(&self, other: &Self) -> bool {
+        if self.origin != other.origin { 
+            return false;
+        }
+
+        if self.x != other.x {
+            return false;
+        }
+
+        if self.y != other.y {
+            return false;
+        }
+        
+        true
+    }
 }
 
 impl LocalCoordinateSystem {
@@ -56,15 +71,13 @@ impl LocalCoordinateSystem {
     /// assert_eq!(result.origin, Point::new(0.0, 5.0, -1.2));
     /// assert_eq!(result.x, Vector::new(0.0, 0.0, 1.0));
     /// assert_eq!(result.y, Vector::new(0.0, -1.0, 0.0));
-    /// assert_eq!(result.z, Vector::new(1.0, 0.0, 0.0));
     /// 
     /// ```
     pub fn new(origin: Point, x: Vector, y: Vector) -> LocalCoordinateSystem {
         let x_unitized = x.get_unitized();
         let y_unitized = y.get_unitized();
-        let z_unitized = x.get_cross_product(&y).get_unitized();
 
-        LocalCoordinateSystem {origin, x: x_unitized, y: y_unitized, z: z_unitized}
+        LocalCoordinateSystem {origin, x: x_unitized, y: y_unitized}
     }
 }
 
@@ -83,7 +96,6 @@ mod tests {
         assert_eq!(result.origin, Point::new(0.0, 5.0, -1.2));
         assert_eq!(result.x, Vector::new(0.0, 0.0, 1.0));
         assert_eq!(result.y, Vector::new(0.0, -1.0, 0.0));
-        assert_eq!(result.z, Vector::new(1.0, 0.0, 0.0));
     }
 }
 
