@@ -1,4 +1,7 @@
+use crate::local_coordinate_system::LocalCoordinateSystem;
+use crate::point2d::Point2D;
 use crate::point::Point;
+use crate::polygon2d::Polygon2D;
 
 /// Represents a three-dimensional closed polygon.
 ///
@@ -64,10 +67,64 @@ impl Polygon {
     ///
     /// ```
     pub fn new(vertices: Vec<Point>) -> Polygon { Polygon { vertices } }
+    
+    /// Converts to the [Polygon2D] using given [LocalCoordinateSystem].
+    /// 
+    /// It transforms all the vertices using XY plane of the [LocalCoordinateSystem] into Global
+    /// Coordinate System, and then it projects onto this global XY plane.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::local_coordinate_system::LocalCoordinateSystem;
+    /// use meshmeshmesh::point2d::Point2D;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::polygon2d::Polygon2D;
+    /// use meshmeshmesh::polygon::Polygon;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input_points = vec![
+    ///     Point::new(-15.519542, 33.6924, 54.752506),
+    ///     Point::new(-6.776692, 72.957549, 102.8696),
+    ///     Point::new(38.186615, 79.290175, 45.436313),
+    ///     Point::new(20.315263, 45.368737, 19.312824),
+    ///     Point::new(4.753062, 55.839337, 58.928299),
+    /// ];
+    ///
+    /// let input = Polygon::new(input_points);
+    /// 
+    /// let origin = Point::new(-15.519542, 33.6924,54.752506);
+    /// let x = Vector::new(0.13940120784477725,0.6260669228918656,0.767207606396162);
+    /// let y = Vector::new(0.7651247740152495,0.4237333029589709,-0.4848032262182198);
+    /// let local_coordinate_system = LocalCoordinateSystem::new(origin, x, y);
+    ///
+    /// let expected = Polygon2D::new( vec![
+    ///     Point2D::new(0.0,0.0),
+    ///     Point2D::new(62.71717537580547,7.105427357601002e-15),
+    ///     Point2D::new(28.886507707212203,64.92972746865411),
+    ///     Point2D::new(-14.884010122540644,49.54702209072535),
+    ///     Point2D::new(19.89519033516472,22.871028401215423),
+    /// ]);
+    ///
+    /// let actual = input.to_polygon2d(&local_coordinate_system);
+    ///
+    /// assert_eq!(expected, actual);
+    /// 
+    /// ```
+    pub fn to_polygon2d(&self, local_coordinate_system: &LocalCoordinateSystem) -> Polygon2D {
+        let polygon_transformed = self.get_in_global_coordinate_system(local_coordinate_system);
+        let mut point2ds = Vec::with_capacity(self.vertices.len());
+        for vertex in polygon_transformed.vertices {
+            point2ds.push(Point2D::new(vertex.x, vertex.y))
+        }
+        
+        Polygon2D::new(point2ds)
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::vector::Vector;
     use super::*;
 
     #[test]
@@ -123,5 +180,35 @@ mod tests {
         let b = Polygon::new(vec![Point::new(0.0, 0.0, 5.0), Point::new(5.0, 10.0, 5.0)]);
         assert_eq!(a.eq(&b), false);
         assert_eq!(b.eq(&a), false);
+    }
+    
+    #[test]
+    fn test_to_polygon2d() {
+        let input_points = vec![
+            Point::new(-15.519542, 33.6924, 54.752506),
+            Point::new(-6.776692, 72.957549, 102.8696),
+            Point::new(38.186615, 79.290175, 45.436313),
+            Point::new(20.315263, 45.368737, 19.312824),
+            Point::new(4.753062, 55.839337, 58.928299),
+        ];
+        
+        let input = Polygon::new(input_points);
+        
+        let origin = Point::new(-15.519542, 33.6924,54.752506);
+        let x = Vector::new(0.13940120784477725,0.6260669228918656,0.767207606396162);
+        let y = Vector::new(0.7651247740152495,0.4237333029589709,-0.4848032262182198);
+        let local_coordinate_system = LocalCoordinateSystem::new(origin, x, y);
+        
+        let expected = Polygon2D::new( vec![
+            Point2D::new(0.0,0.0),
+            Point2D::new(62.71717537580547,7.105427357601002e-15),
+            Point2D::new(28.886507707212203,64.92972746865411),
+            Point2D::new(-14.884010122540644,49.54702209072535),
+            Point2D::new(19.89519033516472,22.871028401215423),
+        ]);
+        
+        let actual = input.to_polygon2d(&local_coordinate_system);
+        
+        assert_eq!(expected, actual);
     }
 }

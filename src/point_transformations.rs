@@ -131,7 +131,7 @@ impl Point {
         translated
     }
 
-    /// Creates a new [Point], but with coordinates in the given Global Coordinate System.
+    /// Creates a new [Point], but with coordinates in the Global Coordinate System.
     ///
     /// Global Coordinate System is cartesian with the origin in 0.0,0.0,0.0, with Z axis
     /// defined by the right hand thumb rule.
@@ -165,7 +165,7 @@ impl Point {
         )
     }
 
-    /// Creates a new `vec` of [Point]s, but with coordinates in the given Global Coordinate System.
+    /// Creates a new `vec` of [Point]s, but with coordinates in the Global Coordinate System.
     ///
     /// Global Coordinate System is cartesian with the origin in 0.0,0.0,0.0, with Z axis
     /// defined by the right hand thumb rule.
