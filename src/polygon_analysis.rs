@@ -5,6 +5,76 @@ use crate::ray::Ray;
 use crate::vector::Vector;
 
 impl Polygon {
+    
+    /// Checks if this [Polygon] is actually planar (as it should be).
+    /// 
+    /// True = it is, false = it's not.
+    /// 
+    /// It uses a tolerance for check.
+    ///
+    /// # Examples
+    /// 
+    /// This is an example of a planar Polygon, so `true` should be returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::local_coordinate_system::LocalCoordinateSystem;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::polygon::Polygon;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Polygon::new(vec![
+    ///     Point::new(-15.519542, 33.6924, 54.752506),
+    ///     Point::new(-6.776692, 72.957549, 102.8696),
+    ///     Point::new(38.186615, 79.290175, 45.436313),
+    ///     Point::new(20.315263, 45.368737, 19.312824),
+    ///     Point::new(4.753062, 55.839337, 58.928299),
+    /// ]);
+    ///
+    /// let actual = input.is_planar_with_tolerance(0.001);
+    /// 
+    /// assert!(actual);
+    ///
+    /// ```
+    ///
+    /// Below is an example of a non-planar Polygon, so `false` should be returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::local_coordinate_system::LocalCoordinateSystem;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::polygon::Polygon;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Polygon::new(vec![
+    ///     Point::new(-15.519542, 33.6924, 54.752506),
+    ///     Point::new(-6.776692, 72.957549, 102.8696),
+    ///     Point::new(38.186615, 79.290175, 45.436313),
+    ///     Point::new(20.315263, 45.368737, 19.312824),
+    ///     Point::new(4.753062, 55.839337, 59.928299), // Changed vertex
+    /// ]);
+    ///
+    /// let actual = input.is_planar_with_tolerance(0.001);
+    ///
+    /// assert!(!actual);
+    ///
+    /// ```
+    pub fn is_planar_with_tolerance(&self, tolerance: f64) -> bool {
+        let number_of_vertices = self.vertices.len();
+        
+        if number_of_vertices <= 3 { // It's always planar if there are 3 (or less) vertices.
+            return true;
+        }
+        
+        let z_ray = self.get_z_ray();
+
+        for point in &self.vertices {
+            if z_ray.get_distance_from_origin_to_closest_point(point).abs() > tolerance { 
+                return false;
+            }
+        }
+        
+        true
+    }
+    
     /// Gets x-axis as [Ray].
     ///
     /// Its x-axis comes from first to the second [Point].
@@ -72,6 +142,50 @@ impl Polygon {
 mod tests {
     use crate::point::Point;
     use super::*;
+    
+    #[test]
+    fn test_is_planar_with_tolerance_true() {
+        let input = Polygon::new(vec![
+            Point::new(-15.519542, 33.6924, 54.752506),
+            Point::new(-6.776692, 72.957549, 102.8696),
+            Point::new(38.186615, 79.290175, 45.436313),
+            Point::new(20.315263, 45.368737, 19.312824),
+            Point::new(4.753062, 55.839337, 58.928299),
+        ]);
+        
+        let actual = input.is_planar_with_tolerance(0.001);
+        
+        assert!(actual);
+    }
+
+    #[test]
+    fn test_is_planar_with_tolerance_false() {
+        let input = Polygon::new(vec![
+            Point::new(-15.519542, 33.6924, 54.752506),
+            Point::new(-6.776692, 72.957549, 102.8696),
+            Point::new(38.186615, 79.290175, 45.436313),
+            Point::new(20.315263, 45.368737, 19.312824),
+            Point::new(4.753062, 55.839337, 59.928299), // Changed vertex
+        ]);
+        
+        let actual = input.is_planar_with_tolerance(0.001);
+        
+        assert!(!actual);
+    }
+
+    #[test]
+    fn test_is_planar_with_tolerance_true_three_point() {
+        let input = Polygon::new(vec![
+            Point::new(-15.519542, 33.6924, 54.752506),
+            Point::new(-6.776692, 72.957549, 102.8696),
+            Point::new(38.186615, 79.290175, 45.436313),
+        ]);
+
+        let actual = input.is_planar_with_tolerance(0.001);
+
+        assert!(actual);
+    }
+    
 
     #[test]
     fn test_get_local_coordinate_system() {
