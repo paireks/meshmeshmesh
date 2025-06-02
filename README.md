@@ -4,11 +4,9 @@
 
 ## Introduction
 
-Open-source mesh processing library written in Rust programming language.
+Open-source mesh engine written in Rust programming language.
 
-Mesh processing meaning: mesh in -> processing -> mesh out.
-
-It could be useful for mesh modification, fixing, etc.
+It could be useful for mesh modification, processing, fixing, etc.
 
 ## Installation
 
