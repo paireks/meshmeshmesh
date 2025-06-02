@@ -20,6 +20,29 @@ Run the following command:
 cargo add meshmeshmesh
 ```
 
+## Features
+
+### Mesh analysis tools
+- Triangle/Ray intersection
+- Mesh/Ray intersection
+- Normals calculation
+- Area
+- Finding non-manifold edges
+- Is connected
+- Mesh -> Graph
+- ... and more ;)
+
+### Mesh processing tools
+- Mesh welding
+![Welding](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/welding.gif)
+- Split by angle
+![Split by angle](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/split_by_angle.gif)
+- Normals flipping
+![Normals flipping](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/normals_flipping.gif)
+
+### Mesh creation tools
+- 3D Polygon triangulation with holes
+
 ## Documentation & Examples
 
 https://docs.rs/meshmeshmesh/latest/meshmeshmesh/
