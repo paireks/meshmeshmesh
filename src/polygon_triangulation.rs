@@ -1,4 +1,3 @@
-use i_triangle::float::triangulatable::Triangulatable;
 use crate::mesh::Mesh;
 use crate::polygon::Polygon;
 
