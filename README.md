@@ -42,6 +42,7 @@ cargo add meshmeshmesh
 
 ### Mesh creation tools
 - 3D Polygon triangulation with holes
+![Polygon triangulation](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/polygon_triangulation.gif)
 
 ## Documentation & Examples
 
