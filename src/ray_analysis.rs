@@ -152,6 +152,7 @@ impl Ray {
     /// Negative value of distance is also accepted, will create a [Point] in the reversed direction.
     ///
     /// # Example
+    ///
     /// ```
     /// use meshmeshmesh::point::Point;
     /// use meshmeshmesh::ray::Ray;
@@ -168,6 +169,49 @@ impl Ray {
         let move_vector = self.direction * distance;
 
         self.origin + move_vector
+    }
+
+    /// Gets distance from [Ray]s origin to the closest [Point] to the given one,
+    /// which is located on the [Ray].
+    ///
+    /// If the output distance is negative, this means the closest [Point] is located in the
+    /// opposite direction.
+    ///
+    /// # Examples
+    ///
+    /// This an example with positive distance as an output.
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::ray::Ray;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Ray::new(Point::new(19.945547, 14.606347, 25.49375), Vector::new(0.62795,-0.249624,0.737134));
+    /// let point = Point::new(14.64437, -18.601827, 38.908651);
+    /// let actual = input.get_distance_from_origin_to_closest_point(&point);
+    /// let expected = 14.84926367021245;
+    ///
+    /// assert_eq!(actual, expected);
+    ///
+    /// ```
+    ///
+    /// The example below shows the case with negative distance as output.
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::ray::Ray;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Ray::new(Point::new(19.945547, 14.606347, 25.49375), Vector::new(0.62795,-0.249624,0.737134));
+    /// let point = Point::new(-10.121151, -18.601827, 14.761326);
+    /// let actual = input.get_distance_from_origin_to_closest_point(&point);
+    /// let expected = -18.502061545519965;
+    ///
+    /// assert_eq!(actual, expected);
+    ///
+    /// ```
+    pub fn get_distance_from_origin_to_closest_point(&self, point: &Point) -> f64 {
+        self.direction.get_dot_product(&Vector::from_2_points(&self.origin, point))
     }
 
     /// Calculates intersection of the [Ray] with given [Triangle] using Möller–Trumbore intersection algorithm.
@@ -457,6 +501,26 @@ mod tests {
         let actual = ray.get_point_at(distance);
 
         assert_eq!(expected.eq_with_tolerance(&actual, 0.001), true);
+    }
+
+    #[test]
+    pub fn test_get_distance_from_origin_to_closest_point_positive() {
+        let input = Ray::new(Point::new(19.945547, 14.606347, 25.49375), Vector::new(0.62795,-0.249624,0.737134));
+        let point = Point::new(14.64437, -18.601827, 38.908651);
+        let actual = input.get_distance_from_origin_to_closest_point(&point);
+        let expected = 14.84926367021245;
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    pub fn test_get_distance_from_origin_to_closest_point_negative() {
+        let input = Ray::new(Point::new(19.945547, 14.606347, 25.49375), Vector::new(0.62795,-0.249624,0.737134));
+        let point = Point::new(-10.121151, -18.601827, 14.761326);
+        let actual = input.get_distance_from_origin_to_closest_point(&point);
+        let expected = -18.502061545519965;
+
+        assert_eq!(actual, expected);
     }
 
     #[test]

@@ -15,3 +15,4 @@ exclude = [
 ]
 
 [dependencies]
+i_triangle = "=0.35.0"

@@ -140,7 +140,7 @@ impl Vector {
     /// assert!((actual - 1.8720947029995874).abs() < 0.00001);
     /// ```
     pub fn get_angle(&self, second_vector: &Vector) -> f64 {
-        f64::acos(self.get_dot_product(second_vector) / (self.get_length() * second_vector.get_length()))
+        f64::acos((self.get_dot_product(second_vector) / (self.get_length() * second_vector.get_length())).clamp(-1.0, 1.0))
     }
 
     /// Calculates a cross product.
