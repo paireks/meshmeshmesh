@@ -77,7 +77,7 @@ impl Polygon {
     
     /// Gets x-axis as [Ray].
     ///
-    /// Its x-axis comes from first to the second [Point].
+    /// Its x-axis comes from first to the second Point.
     pub fn get_x_ray(&self) -> Ray {
         Ray::new(self.vertices[0], Vector::from_2_points(&self.vertices[0], &self.vertices[1]))
     }
@@ -94,9 +94,9 @@ impl Polygon {
 
     /// Gets [LocalCoordinateSystem] for given [Polygon].
     ///
-    /// This system is located in the first [Point] of the [Polygon].
+    /// This system is located in the first Point of the [Polygon].
     ///
-    /// Its x-axis points to the second [Point].
+    /// Its x-axis points to the second Point.
     ///
     /// The z-axis is perpendicular to the plane of this [Polygon].
     ///
