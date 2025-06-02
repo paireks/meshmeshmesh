@@ -110,7 +110,7 @@ impl Polygon2D {
     ///
     /// let input = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(10.0, 0.0)]);
     ///
-    /// let expected = Polygon2D::new(vec![Point2D::new(10.0, 0.0), Point2D::new(0.0, 0.0), Point2D::new(5.0, 10.0)]);
+    /// let expected = Polygon2D::new(vec![Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0), Point2D::new(0.0, 0.0)]);
     ///
     /// let actual = input.get_anticlockwise();
     ///

@@ -78,7 +78,7 @@ impl Vector2D {
     /// let vector = Vector2D::new(5.231, -0.341);
     /// let result = vector.get_length();
     ///
-    /// assert_eq!(result, 5.242102822341430);
+    /// assert_eq!(result, 5.242102822341431);
     /// ```
     pub fn get_length(&self) -> f64 {
         (self.x * self.x + self.y * self.y).sqrt()
