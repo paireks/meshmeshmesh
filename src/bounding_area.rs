@@ -12,6 +12,7 @@
 /// assert_eq!(result.min_y, -2.3);
 /// assert_eq!(result.max_y, 0.7);
 /// ```
+#[derive(Debug)]
 pub struct BoundingArea {
     /// Minimum x value.
     pub min_x: f64,
