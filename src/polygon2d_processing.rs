@@ -81,6 +81,12 @@ impl Polygon2D {
             i += 1;
         }
 
+        let current = self.vertices[number_of_vertices-1]; // Check if last one is the duplicate of first one
+        let below = self.vertices[0];
+        if current.eq_with_tolerance(&below, tolerance) { 
+            cleaned_vertices.remove(cleaned_vertices.len() - 1);
+        }
+
         Polygon2D::new(cleaned_vertices)
     }
 
@@ -212,6 +218,52 @@ mod tests {
             Point2D::new(-5.091522, 42.510927),
             Point2D::new(-1.290632, 46.433122),
             Point2D::new(-1.290632, 46.433122), // duplicate
+        ]);
+
+        let actual = input.get_with_removed_neighbour_duplicates_with_tolerance(0.001);
+
+        let expected = Polygon2D::new(vec![
+            Point2D::new(-5.981672, 50.875287),
+            Point2D::new(3.075768, 55.323137),
+            Point2D::new(7.725793, 50.996592),
+            Point2D::new(15.044527, 59.892292),
+            Point2D::new(13.184517, 53.665302),
+            Point2D::new(17.025842, 49.055712),
+            Point2D::new(16.864102, 41.777413),
+            Point2D::new(12.456687, 46.063523),
+            Point2D::new(12.375817, 37.208258),
+            Point2D::new(7.829037, 32.495452),
+            Point2D::new(3.106803, 37.191157),
+            Point2D::new(-1.456255, 32.548511),
+            Point2D::new(-8.141664, 35.174922),
+            Point2D::new(-10.590682, 46.392687),
+            Point2D::new(-5.091522, 42.510927),
+            Point2D::new(-1.290632, 46.433122),
+        ]);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_get_with_removed_neighbour_duplicates_with_tolerance_last() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(-5.981672, 50.875287),
+            Point2D::new(3.075768, 55.323137),
+            Point2D::new(7.725793, 50.996592),
+            Point2D::new(15.044527, 59.892292),
+            Point2D::new(13.184517, 53.665302),
+            Point2D::new(17.025842, 49.055712),
+            Point2D::new(16.864102, 41.777413),
+            Point2D::new(12.456687, 46.063523),
+            Point2D::new(12.375817, 37.208258),
+            Point2D::new(7.829037, 32.495452),
+            Point2D::new(3.106803, 37.191157),
+            Point2D::new(-1.456255, 32.548511),
+            Point2D::new(-8.141664, 35.174922),
+            Point2D::new(-10.590682, 46.392687),
+            Point2D::new(-5.091522, 42.510927),
+            Point2D::new(-1.290632, 46.433122),
+            Point2D::new(-5.981672, 50.875287), // This one is same as last one
         ]);
 
         let actual = input.get_with_removed_neighbour_duplicates_with_tolerance(0.001);
