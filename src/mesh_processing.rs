@@ -879,7 +879,7 @@ impl Mesh {
         isolated_meshes
     }
 
-    /// Splits given [Mesh] where the value of angle between faces' normals is higher then given one
+    /// Splits given [Mesh] where the value of angle between faces' normals is higher than given one
     /// in the `max_angle` parameter. This angle should be given in radians.
     ///
     /// Optionally you can use `weld_vertices_tolerance` to weld resulting [Mesh]es.
