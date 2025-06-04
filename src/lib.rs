@@ -45,3 +45,4 @@ pub mod vector2d;
 mod vector2d_analysis;
 mod vector_analysis;
 mod vector_transformations;
+mod bounding_box_analysis;

@@ -757,7 +757,7 @@ impl Mesh {
         for i in 1..number_of_meshes {
             joined = joined.get_by_joining_with(&meshes[i]);
         }
-        
+
         joined
     }
 
@@ -846,7 +846,10 @@ impl Mesh {
     /// Returns ([`Ok`]) or failure ([`Err`]) depending on the remesh result, if it succeeds or not.
     ///
     /// Even if it succeeds - it's good to additionally check if it looks correct.
-    pub fn get_planar_remesh(&self, max_angle: f64, tolerance: f64) -> Result<Mesh> {
+    pub fn get_planar_remesh(&self, max_angle: f64, tolerance: f64) -> Result<Mesh, String> {
+        let original_aabb = self.get_bounding_box();
+        let original_area = self.get_area();
+
         let planar_meshes: Vec<Mesh> = self.split_by_face_angle(max_angle, Some(tolerance));
         let planar_meshes_remeshed: Vec<Mesh> = Vec::with_capacity(planar_meshes.len());
 
@@ -862,7 +865,17 @@ impl Mesh {
         let mut remeshed = Mesh::join(&planar_meshes_remeshed);
         let remeshed_welded = remeshed.get_with_welded_vertices(tolerance);
 
-        remeshed_welded
+        let remeshed_aabb = remeshed_welded.get_bounding_box();
+        if !remeshed_aabb.eq_with_tolerance(&original_aabb, tolerance) {
+            return Err("The bounding box of the remeshed Mesh seems to be different from the original one".to_string())
+        }
+        
+        let remeshed_area = remeshed.get_area();
+        if (remeshed_area - original_area).abs() > tolerance { 
+            return Err("The area of the remeshed Mesh seems to be different from the original one".to_string())
+        }
+
+        Ok(remeshed_welded)
     }*/
 
     /// Splits given disconnected [Mesh] into separate connected parts.
@@ -1771,25 +1784,25 @@ mod tests {
 
         assert_eq!(expected.eq(&actual), true);
     }
-    
+
     #[test]
     pub fn test_join() {
         let a = Mesh::new(vec![0.0, 0.0, 0.0,
                                10.0, 0.0, 0.0,
                                10.0, -15.0, 0.0],
         vec![0, 1, 2]);
-        
+
         let b = Mesh::new(vec![20.0, 20.0, 20.0,
                                30.0, 20.0, 20.0,
                                30.0, 5.0, 20.0],
         vec![0, 1, 2]);
-        
+
         let c = Mesh::new(vec![0.0, 0.0, 5.0,
                                10.0, 0.0, 5.0,
                                10.0, 5.0, 5.0,
                                10.0, -15.0, 5.0],
         vec![0, 1, 2, 1, 2, 3]);
-        
+
         let actual = Mesh::join(&vec![a, b, c]);
         let expected = Mesh::new(vec![0.0, 0.0, 0.0,
                                       10.0, 0.0, 0.0,
@@ -1802,7 +1815,7 @@ mod tests {
                                       10.0, 5.0, 5.0,
                                       10.0, -15.0, 5.0],
         vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 7, 8, 9]);
-        
+
         assert_eq!(expected.eq(&actual), true);
     }
 
