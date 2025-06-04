@@ -713,6 +713,54 @@ impl Mesh {
         Mesh::new(coordinates, indices)
     }
 
+    /// Creates a new [Mesh] which is a result of joining it with another one.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let a = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    ///
+    /// let b = Mesh::new(vec![20.0, 20.0, 20.0,
+    ///                        30.0, 20.0, 20.0,
+    ///                        30.0, 5.0, 20.0],
+    /// vec![0, 1, 2]);
+    ///
+    /// let c = Mesh::new(vec![0.0, 0.0, 5.0,
+    ///                        10.0, 0.0, 5.0,
+    ///                        10.0, 5.0, 5.0,
+    ///                        10.0, -15.0, 5.0],
+    /// vec![0, 1, 2, 1, 2, 3]);
+    ///
+    /// let actual = Mesh::join(&vec![a, b, c]);
+    /// let expected = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                               10.0, 0.0, 0.0,
+    ///                               10.0, -15.0, 0.0,
+    ///                               20.0, 20.0, 20.0,
+    ///                               30.0, 20.0, 20.0,
+    ///                               30.0, 5.0, 20.0,
+    ///                               0.0, 0.0, 5.0,
+    ///                               10.0, 0.0, 5.0,
+    ///                               10.0, 5.0, 5.0,
+    ///                               10.0, -15.0, 5.0],
+    /// vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 7, 8, 9]);
+    ///
+    /// assert_eq!(expected.eq(&actual), true);
+    /// ```
+    pub fn join(meshes: &Vec<Mesh>) -> Mesh {
+        let mut joined = Mesh::new(meshes[0].coordinates.clone(), meshes[0].indices.clone());
+        let number_of_meshes = meshes.len();
+        for i in 1..number_of_meshes {
+            joined = joined.get_by_joining_with(&meshes[i]);
+        }
+        
+        joined
+    }
+
     /// Gets only specific part of the [Mesh] using specified face ids.
     ///
     /// The result Mesh is unwelded.
@@ -790,6 +838,32 @@ impl Mesh {
 
         Mesh::new(coordinates, indices)
     }
+
+/*    /// Tries to remesh the planar parts of the [Mesh].
+    ///
+    /// It tries to detect and group planar parts of given [Mesh] and remesh it from scratch.
+    ///
+    /// Returns ([`Ok`]) or failure ([`Err`]) depending on the remesh result, if it succeeds or not.
+    ///
+    /// Even if it succeeds - it's good to additionally check if it looks correct.
+    pub fn get_planar_remesh(&self, max_angle: f64, tolerance: f64) -> Result<Mesh> {
+        let planar_meshes: Vec<Mesh> = self.split_by_face_angle(max_angle, Some(tolerance));
+        let planar_meshes_remeshed: Vec<Mesh> = Vec::with_capacity(planar_meshes.len());
+
+        for planar_mesh in planar_meshes {
+            let edges = planar_mesh.get_edges_with_missing_neighbour();
+            let graph = Graph::from_edges_into_undirected(planar_mesh.get_number_of_vertices(), &edges);
+            let disconnected_parts = graph.split_disconnected_vertices();
+            for disconnected_part in disconnected_parts {
+                let point =
+            }
+        }
+
+        let mut remeshed = Mesh::join(&planar_meshes_remeshed);
+        let remeshed_welded = remeshed.get_with_welded_vertices(tolerance);
+
+        remeshed_welded
+    }*/
 
     /// Splits given disconnected [Mesh] into separate connected parts.
     ///
@@ -1695,6 +1769,40 @@ mod tests {
                                                         // Joined
                                                         5,6,7]);
 
+        assert_eq!(expected.eq(&actual), true);
+    }
+    
+    #[test]
+    pub fn test_join() {
+        let a = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+        vec![0, 1, 2]);
+        
+        let b = Mesh::new(vec![20.0, 20.0, 20.0,
+                               30.0, 20.0, 20.0,
+                               30.0, 5.0, 20.0],
+        vec![0, 1, 2]);
+        
+        let c = Mesh::new(vec![0.0, 0.0, 5.0,
+                               10.0, 0.0, 5.0,
+                               10.0, 5.0, 5.0,
+                               10.0, -15.0, 5.0],
+        vec![0, 1, 2, 1, 2, 3]);
+        
+        let actual = Mesh::join(&vec![a, b, c]);
+        let expected = Mesh::new(vec![0.0, 0.0, 0.0,
+                                      10.0, 0.0, 0.0,
+                                      10.0, -15.0, 0.0,
+                                      20.0, 20.0, 20.0,
+                                      30.0, 20.0, 20.0,
+                                      30.0, 5.0, 20.0,
+                                      0.0, 0.0, 5.0,
+                                      10.0, 0.0, 5.0,
+                                      10.0, 5.0, 5.0,
+                                      10.0, -15.0, 5.0],
+        vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 7, 8, 9]);
+        
         assert_eq!(expected.eq(&actual), true);
     }
 
