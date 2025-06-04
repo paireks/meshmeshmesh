@@ -1,5 +1,6 @@
 pub mod barycentric_coordinates;
 mod barycentric_coordinates_analysis;
+pub mod bounding_area;
 pub mod bounding_box;
 pub mod edge;
 mod edge_analysis;
