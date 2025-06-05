@@ -32,7 +32,7 @@ impl Graph {
     }
 
     /// Splits [Graph] into separate parts that are isolated.
-    pub fn split_disconnected_vertices(&self) -> Vec<Vec<usize>> {
+    pub(crate) fn split_disconnected_vertices(&self) -> Vec<Vec<usize>> {
         let mut isolated_groups: Vec<Vec<usize>> = Vec::new();
         
         let number_of_vertices: usize = self.get_number_of_vertices();
@@ -65,6 +65,62 @@ impl Graph {
         }
 
         isolated_groups
+    }
+
+
+    pub(crate) fn split_disconnected_paths(&self) -> Vec<Vec<usize>> {
+        let mut isolated_groups: Vec<Vec<usize>> = Vec::new();
+
+        let number_of_vertices: usize = self.get_number_of_vertices();
+        let mut bfs = BFS {
+            previous_vertex: vec![None; number_of_vertices],
+            visited: vec![false; number_of_vertices],
+            queue: VecDeque::new(),
+        };
+
+        while bfs.visited.contains(&false) {
+            let mut new_isolated_group: Vec<usize> = Vec::new();
+
+            let old_visited = bfs.visited.clone();
+            let mut new_start_vertex = 0;
+            for i in 0..number_of_vertices { // Finding the index of first not visited yet vertex
+                let is_visited = bfs.visited[i];
+                if !is_visited {
+                    new_start_vertex = i;
+                }
+            }
+            bfs = self.main_bfs_loop(new_start_vertex, bfs); // BFS searching starting from this not visited
+
+            for i in 0..number_of_vertices { // Comparison between before/after version of visited to get new isolated island
+                if old_visited[i] != bfs.visited[i] {
+                    new_isolated_group.push(i);
+                }
+            }
+
+            isolated_groups.push(new_isolated_group);
+        }
+
+        let mut paths = Vec::with_capacity(isolated_groups.len());
+
+        for isolated_group in isolated_groups {
+            if isolated_group.len() > 1 {
+                let mut path = Vec::with_capacity(isolated_group.len());
+                let end = isolated_group[isolated_group.len() - 1];
+                let start = isolated_group[0];
+
+                let mut current = end;
+                while current != start {
+                    path.push(current);
+                    current = bfs.previous_vertex[current].unwrap();
+                }
+                path.push(current);
+
+                path.reverse();
+                paths.push(path);
+            }
+        }
+
+        paths
     }
 
 
