@@ -861,7 +861,7 @@ impl Mesh {
         let mut planar_meshes_remeshed: Vec<Mesh> = Vec::with_capacity(planar_meshes.len());
 
         for planar_mesh in planar_meshes {
-            let remeshed_result = planar_mesh.get_remesh_for_planar_mesh(tolerance, angle_tolerance);
+            let remeshed_result = planar_mesh.get_planar_simplify_for_planar_mesh(tolerance, angle_tolerance);
             if remeshed_result.is_ok() {
                 planar_meshes_remeshed.push(remeshed_result?)
             }
@@ -1059,10 +1059,10 @@ impl Mesh {
         polygons
     }
 
-    /// Remeshes the [Mesh] which is already a planar one.
+    /// Remeshes in the simplified way the [Mesh] which is already a planar one.
     ///
     /// It should work for planar Meshes only.
-    fn get_remesh_for_planar_mesh(&self, tolerance: f64, angle_tolerance: f64) -> Result<Mesh, String> {
+    pub fn get_planar_simplify_for_planar_mesh(&self, tolerance: f64, angle_tolerance: f64) -> Result<Mesh, String> {
         let original_normal = self.get_face_normal_vectors_unitized()[0];
         let original_aabb = self.get_bounding_box();
         let original_area = self.get_area();
@@ -9731,7 +9731,7 @@ mod tests {
             ]
         );
 
-        let actual = mesh.get_remesh_for_planar_mesh(0.001, 0.01745);
+        let actual = mesh.get_planar_simplify_for_planar_mesh(0.001, 0.01745);
 
         let expected = Mesh::new(
             vec![
@@ -9957,7 +9957,7 @@ mod tests {
             ]
         );
 
-        let actual = mesh.get_remesh_for_planar_mesh(0.001, 0.001);
+        let actual = mesh.get_planar_simplify_for_planar_mesh(0.001, 0.001);
 
         let expected = Mesh::new(
             vec![
@@ -10335,7 +10335,7 @@ mod tests {
             ]
         );
 
-        let actual = mesh.get_remesh_for_planar_mesh(0.001, 0.001);
+        let actual = mesh.get_planar_simplify_for_planar_mesh(0.001, 0.001);
 
         let expected = Mesh::new(
             vec![
