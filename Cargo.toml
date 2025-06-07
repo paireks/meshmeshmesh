@@ -1,6 +1,6 @@
 [package]
 name = "meshmeshmesh"
-version = "0.1.12"
+version = "0.2.0"
 edition = "2021"
 authors = ["Wojciech Radaczyński"]
 description = "Open-source mesh processing library."
@@ -11,7 +11,8 @@ categories = ["algorithms"]
 keywords = ["mesh", "geometry"]
 exclude = [
     ".idea",
-    "models"
+    "models",
+    "img"
 ]
 
 [dependencies]

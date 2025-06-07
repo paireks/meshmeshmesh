@@ -2,8 +2,11 @@ use std::collections::HashSet;
 use crate::bounding_box::BoundingBox;
 use crate::edge::Edge;
 use crate::graph::Graph;
+use crate::local_coordinate_system::LocalCoordinateSystem;
 use crate::mesh::Mesh;
+use crate::point::Point;
 use crate::three_edge_group::ThreeEdgeGroup;
+use crate::triangle::Triangle;
 use crate::vector::Vector;
 
 impl Mesh {
@@ -257,6 +260,74 @@ impl Mesh {
         let max_z = z_coordinates.iter().copied().reduce(f64::max).unwrap();
 
         BoundingBox::new(min_x, max_x, min_y, max_y, min_z, max_z)
+    }
+    
+    /// Gets local coordinate system, which is a local coordinate system of the very first face
+    /// of the given [Mesh].
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use meshmeshmesh::bounding_box::BoundingBox;
+    /// use meshmeshmesh::local_coordinate_system::LocalCoordinateSystem;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2,
+    ///     0,2,3,
+    ///
+    ///     // Side faces
+    ///     0,1,4,
+    ///     1,2,4,
+    ///     2,3,4,
+    ///     3,0,4
+    /// ]);
+    /// 
+    /// let actual = input.get_local_coordinate_system_for_first_face();
+    ///
+    /// let expected_origin = Point::new(4.666666666666667, 4.333333333333333, 0.0 );
+    /// let expected_x = Vector::new(1.0, 0.0, 0.0);
+    /// let expected_y = Vector::new(6.123031769111886e-17, 1.0, 0.0);
+    ///
+    /// let expected = LocalCoordinateSystem::new(expected_origin, expected_x, expected_y);
+    ///
+    /// assert_eq!(expected, actual);
+    /// ```
+    pub fn get_local_coordinate_system_for_first_face(&self) -> LocalCoordinateSystem {
+
+        let offset0 = self.indices[0];
+        let index00 = usize::try_from(offset0*3).unwrap();
+        let index01 = usize::try_from(offset0*3 + 1).unwrap();
+        let index02 = usize::try_from(offset0*3 + 2).unwrap();
+        let point0: Point = Point::new(self.coordinates[index00], self.coordinates[index01], self.coordinates[index02]);
+
+        let offset1 = self.indices[1];
+        let index10 = usize::try_from(offset1*3).unwrap();
+        let index11 = usize::try_from(offset1*3 + 1).unwrap();
+        let index12 = usize::try_from(offset1*3 + 2).unwrap();
+        let point1: Point = Point::new(self.coordinates[index10], self.coordinates[index11], self.coordinates[index12]);
+
+        let offset2 = self.indices[2];
+        let index20 = usize::try_from(offset2*3).unwrap();
+        let index21 = usize::try_from(offset2*3 + 1).unwrap();
+        let index22 = usize::try_from(offset2*3 + 2).unwrap();
+        let point2: Point = Point::new(self.coordinates[index20], self.coordinates[index21], self.coordinates[index22]);
+
+        Triangle::new(point0, point1, point2).get_local_coordinate_system()
     }
 
     /// Gets ids of faces of the [Mesh] that probably have normals pointing inside the Mesh.
@@ -1001,6 +1072,42 @@ mod tests {
         let actual = input.get_bounding_box();
 
         assert_eq!(expected.eq(&actual), true);
+    }
+    
+    #[test]
+    fn test_get_local_coordinate_system_for_first_face() {
+        let input = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2,
+            0,2,3,
+        
+            // Side faces
+            0,1,4,
+            1,2,4,
+            2,3,4,
+            3,0,4
+        ]);
+        
+        let actual = input.get_local_coordinate_system_for_first_face();
+        
+        let expected_origin = Point::new(4.666666666666667, 4.333333333333333, 0.0 );
+        let expected_x = Vector::new(1.0, 0.0, 0.0);
+        let expected_y = Vector::new(6.123031769111886e-17, 1.0, 0.0);
+        
+        let expected = LocalCoordinateSystem::new(expected_origin, expected_x, expected_y);
+        
+        assert_eq!(expected, actual);
     }
     
     #[test]
