@@ -149,10 +149,10 @@ impl Polygon2D {
     /// assert_eq!(expected, actual);
     ///
     /// ```
-    pub fn get_with_removed_neighbour_parallel_segments_with_tolerance(&self, tolerance: f64) -> Polygon2D {
+    pub fn get_with_removed_neighbour_parallel_segments_with_tolerance(&self, angle_tolerance: f64) -> Polygon2D {
         let number_of_vertices = self.vertices.len();
         let mut cleaned_vertices = Vec::with_capacity(number_of_vertices);
-        let first_not_straight = self.get_first_not_straight_vertex_id(tolerance).unwrap();
+        let first_not_straight = self.get_first_not_straight_vertex_id(angle_tolerance).unwrap();
         
         let mut i = first_not_straight + 1;
         while i < number_of_vertices {
@@ -166,7 +166,7 @@ impl Polygon2D {
             let mut next = self.vertices[i+1];
             let mut next_vector = Vector2D::from_2_points(&this, &next);
 
-            while previous_vector.get_angle(&next_vector) <= tolerance {
+            while previous_vector.get_angle(&next_vector) <= angle_tolerance {
                 i += 1;
 
                 if i+1 == number_of_vertices { break }
@@ -182,7 +182,7 @@ impl Polygon2D {
         let next = self.vertices[0];
         let previous_vector = Vector2D::from_2_points(&previous, &this);
         let next_vector = Vector2D::from_2_points(&this, &next);
-        if previous_vector.get_angle(&next_vector) > tolerance {
+        if previous_vector.get_angle(&next_vector) > angle_tolerance {
             cleaned_vertices.push(this);
         }
 

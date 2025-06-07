@@ -851,17 +851,17 @@ impl Mesh {
     /// Returns ([`Ok`]) or failure ([`Err`]) depending on the remesh result, if it succeeds or not.
     ///
     /// Even if it succeeds - it's good to additionally check if it looks correct.
-    pub fn get_planar_remesh(&self, tolerance: f64) -> Result<Mesh, String> {
+    pub fn get_planar_remesh(&self, tolerance: f64, angle_tolerance: f64) -> Result<Mesh, String> {
         let original_aabb = self.get_bounding_box();
         let original_area = self.get_area();
 
         let welded_original = self.get_with_welded_vertices(tolerance);
 
-        let planar_meshes: Vec<Mesh> = welded_original.split_by_face_angle(tolerance, Some(tolerance));
+        let planar_meshes: Vec<Mesh> = welded_original.split_by_face_angle(angle_tolerance, Some(tolerance));
         let mut planar_meshes_remeshed: Vec<Mesh> = Vec::with_capacity(planar_meshes.len());
 
         for planar_mesh in planar_meshes {
-            let remeshed_result = planar_mesh.get_remesh_for_planar_mesh(tolerance);
+            let remeshed_result = planar_mesh.get_remesh_for_planar_mesh(tolerance, angle_tolerance);
             if remeshed_result.is_ok() {
                 planar_meshes_remeshed.push(remeshed_result?)
             }
@@ -1062,7 +1062,7 @@ impl Mesh {
     /// Remeshes the [Mesh] which is already a planar one.
     ///
     /// It should work for planar Meshes only.
-    fn get_remesh_for_planar_mesh(&self, tolerance: f64) -> Result<Mesh, String> {
+    fn get_remesh_for_planar_mesh(&self, tolerance: f64, angle_tolerance: f64) -> Result<Mesh, String> {
         let original_normal = self.get_face_normal_vectors_unitized()[0];
         let original_aabb = self.get_bounding_box();
         let original_area = self.get_area();
@@ -1080,7 +1080,7 @@ impl Mesh {
         let mut cleaned_polygon2ds = Vec::with_capacity(polygon2ds.len()); // Cleaning up 2D Polygons
         for polygon2d in polygon2ds {
             let polygon2d_with_removed_duplicates = polygon2d.get_with_removed_neighbour_duplicates_with_tolerance(tolerance);
-            let polygon2d_with_removed_parallel = polygon2d_with_removed_duplicates.get_with_removed_neighbour_parallel_segments_with_tolerance(tolerance);
+            let polygon2d_with_removed_parallel = polygon2d_with_removed_duplicates.get_with_removed_neighbour_parallel_segments_with_tolerance(angle_tolerance);
             if polygon2d_with_removed_parallel.vertices.len() > 2 {
                 cleaned_polygon2ds.push(polygon2d_with_removed_parallel);
             }
@@ -2655,7 +2655,7 @@ mod tests {
             ]
         );
 
-        let actual_result = input.get_planar_remesh(0.001);
+        let actual_result = input.get_planar_remesh(0.001, 0.001);
         let actual = actual_result.unwrap();
 
         let expected = Mesh::new(
@@ -8640,7 +8640,7 @@ mod tests {
             ]
         );
 
-        let actual_result = input.get_planar_remesh(0.001);
+        let actual_result = input.get_planar_remesh(0.001, 0.001);
         let actual = actual_result.unwrap();
 
         let expected = Mesh::new(
@@ -9731,7 +9731,7 @@ mod tests {
             ]
         );
 
-        let actual = mesh.get_remesh_for_planar_mesh(0.001);
+        let actual = mesh.get_remesh_for_planar_mesh(0.001, 0.01745);
 
         let expected = Mesh::new(
             vec![
@@ -9957,7 +9957,7 @@ mod tests {
             ]
         );
 
-        let actual = mesh.get_remesh_for_planar_mesh(0.001);
+        let actual = mesh.get_remesh_for_planar_mesh(0.001, 0.001);
 
         let expected = Mesh::new(
             vec![
@@ -10335,7 +10335,7 @@ mod tests {
             ]
         );
 
-        let actual = mesh.get_remesh_for_planar_mesh(0.001);
+        let actual = mesh.get_remesh_for_planar_mesh(0.001, 0.001);
 
         let expected = Mesh::new(
             vec![

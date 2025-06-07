@@ -86,25 +86,25 @@ impl Polygon2D {
     ///     Point2D::new(55.0, 25.0),
     /// ]);
     /// 
-    /// let actual = input.get_first_not_straight_vertex_id(0.001);
+    /// let actual = input.get_first_not_straight_vertex_id(0.01745);
     /// 
     /// assert_eq!(Some(3), actual);
     ///
     /// ```
-    pub fn get_first_not_straight_vertex_id(&self, tolerance: f64) -> Option<usize> {
+    pub fn get_first_not_straight_vertex_id(&self, angle_tolerance: f64) -> Option<usize> {
         let number_of_vertices = self.vertices.len();
         let mut not_straight_id = None;
 
         let previous_vector = Vector2D::from_2_points(&self.vertices[number_of_vertices-1], &self.vertices[0]);
         let next_vector = Vector2D::from_2_points(&self.vertices[0], &self.vertices[1]);
-        if previous_vector.get_angle(&next_vector) > tolerance {
+        if previous_vector.get_angle(&next_vector) > angle_tolerance {
             not_straight_id = Some(0);
         }
         else {
             for i in 1..number_of_vertices-1 {
                 let previous_vector = Vector2D::from_2_points(&self.vertices[i-1], &self.vertices[i]);
                 let next_vector = Vector2D::from_2_points(&self.vertices[i], &self.vertices[i+1]);
-                if previous_vector.get_angle(&next_vector) > tolerance {
+                if previous_vector.get_angle(&next_vector) > angle_tolerance {
                     not_straight_id = Some(i);
                     break
                 }
@@ -214,7 +214,7 @@ mod tests {
             Point2D::new(55.0, 25.0),
         ]);
         
-        let actual = input.get_first_not_straight_vertex_id(0.001);
+        let actual = input.get_first_not_straight_vertex_id(0.01745);
         
         assert_eq!(Some(3), actual);
     }
