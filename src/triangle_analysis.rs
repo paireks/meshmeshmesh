@@ -1,7 +1,6 @@
 use std::f64::consts::PI;
 use crate::face_neighbours::FaceNeighbours;
 use crate::local_coordinate_system::LocalCoordinateSystem;
-use crate::mesh::Mesh;
 use crate::point::Point;
 use crate::ray::Ray;
 use crate::triangle::Triangle;

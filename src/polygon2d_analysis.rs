@@ -1,5 +1,4 @@
 use crate::bounding_area::BoundingArea;
-use crate::point2d::Point2D;
 use crate::polygon2d::Polygon2D;
 use crate::vector2d::Vector2D;
 
