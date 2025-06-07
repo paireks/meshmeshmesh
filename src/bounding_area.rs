@@ -45,7 +45,6 @@ impl BoundingArea {
     /// assert_eq!(result.min_y, -2.3);
     /// assert_eq!(result.max_y, 0.7);
     /// ```
-    /// ```
     pub fn new(min_x: f64, max_x: f64, min_y: f64, max_y: f64) -> BoundingArea {
         if min_x > max_x {
             panic!("Invalid BoundingArea (min x > max_x)");

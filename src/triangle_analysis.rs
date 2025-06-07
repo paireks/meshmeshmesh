@@ -455,8 +455,11 @@ impl Triangle {
         first_vector.get_angle(&second_vector)
     }
 
-    /// Gets local coordinate system, which is a local coordinate system of the very first face
-    /// of the given [Mesh].
+    /// Gets [LocalCoordinateSystem] of the given [Triangle].
+    /// 
+    /// It should be located on Triangle centroid and be planar to the Triangle.
+    /// 
+    /// Triangle normal and Z axis of the returned system should match.
     ///
     /// # Example
     ///
