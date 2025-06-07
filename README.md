@@ -39,6 +39,8 @@ cargo add meshmeshmesh
 ![Split by angle](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/split_by_angle.gif)
 - Normals flipping
 ![Normals flipping](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/normals_flipping.gif)
+- Mesh planar simplify
+![Planar simplify](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/simplify_planar.gif)
 
 ### Mesh creation tools
 - 3D Polygon triangulation with holes
