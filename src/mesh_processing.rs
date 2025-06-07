@@ -851,7 +851,7 @@ impl Mesh {
     /// Returns ([`Ok`]) or failure ([`Err`]) depending on the remesh result, if it succeeds or not.
     ///
     /// Even if it succeeds - it's good to additionally check if it looks correct.
-    pub fn get_planar_remesh(&self, tolerance: f64, angle_tolerance: f64) -> Result<Mesh, String> {
+    pub fn get_planar_simplify(&self, tolerance: f64, angle_tolerance: f64) -> Result<Mesh, String> {
         let original_aabb = self.get_bounding_box();
         let original_area = self.get_area();
 
@@ -2181,7 +2181,7 @@ mod tests {
     }
 
     #[test]
-    fn test_planar_remesh_pyramid() {
+    fn test_planar_simplify_pyramid() {
         let input = Mesh::new(
             vec![
                 99.862946, 31.553921, 0.0,
@@ -2655,7 +2655,7 @@ mod tests {
             ]
         );
 
-        let actual_result = input.get_planar_remesh(0.001, 0.001);
+        let actual_result = input.get_planar_simplify(0.001, 0.0175);
         let actual = actual_result.unwrap();
 
         let expected = Mesh::new(
@@ -2673,7 +2673,7 @@ mod tests {
     }
 
     #[test]
-    fn test_planar_remesh_beam() {
+    fn test_planar_simplify_beam() {
         let input = Mesh::new(
             vec![
                 -10.364054, -1.750129, 2.305292,
@@ -8640,7 +8640,7 @@ mod tests {
             ]
         );
 
-        let actual_result = input.get_planar_remesh(0.001, 0.001);
+        let actual_result = input.get_planar_simplify(0.001, 0.001);
         let actual = actual_result.unwrap();
 
         let expected = Mesh::new(
