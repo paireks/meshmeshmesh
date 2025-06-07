@@ -1,4 +1,7 @@
+use std::f64::consts::PI;
 use crate::face_neighbours::FaceNeighbours;
+use crate::local_coordinate_system::LocalCoordinateSystem;
+use crate::mesh::Mesh;
 use crate::point::Point;
 use crate::ray::Ray;
 use crate::triangle::Triangle;
@@ -453,6 +456,45 @@ impl Triangle {
         first_vector.get_angle(&second_vector)
     }
 
+    /// Gets local coordinate system, which is a local coordinate system of the very first face
+    /// of the given [Mesh].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::bounding_box::BoundingBox;
+    /// use meshmeshmesh::local_coordinate_system::LocalCoordinateSystem;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::triangle::Triangle;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Triangle::new(
+    /// Point::new(35.704653, 37.253023, -22.626602),
+    /// Point::new(-38.634947, 13.199458, 23.94433),
+    /// Point::new(-21.698671, -49.7235, -32.888206));
+    ///
+    /// let actual = input.get_local_coordinate_system();
+    ///
+    /// let expected_origin = Point::new(-8.209655,0.2429936666666658,-10.523492666666664);
+    /// let expected_x = Vector::new(-0.8172739620937887,-0.2644398459237134,0.5119910534094939);
+    /// let expected_y = Vector::new(-0.055337702630792816,-0.8483665643460013,-0.5265091748177878);
+    ///
+    /// let expected = LocalCoordinateSystem::new(expected_origin, expected_x, expected_y);
+    ///
+    /// assert_eq!(expected, actual);
+    ///
+    /// ```
+    pub fn get_local_coordinate_system(&self) -> LocalCoordinateSystem {
+        let origin = self.get_centroid();
+
+        let x_vector = self.get_first_side_as_vector();
+        let z_vector = self.get_normal_vector_unitized();
+        let y_vector = x_vector.get_rotated(&z_vector, PI / 2.0);
+
+        LocalCoordinateSystem::new(origin, x_vector, y_vector)
+    }
+
     /// Calculates angles between [Triangle]s' normals, but only for neighbouring [Triangle]s.
     ///
     /// You need to provide which one are neighbours by providing `all_face_neighbours` input.
@@ -816,6 +858,24 @@ mod tests {
         let actual = a.get_normals_angle(&b);
 
         assert!(actual < 0.00001);
+    }
+
+    #[test]
+    pub fn test_get_local_coordinate_system() {
+        let input = Triangle::new(
+        Point::new(35.704653, 37.253023, -22.626602),
+        Point::new(-38.634947, 13.199458, 23.94433),
+        Point::new(-21.698671, -49.7235, -32.888206));
+
+        let actual = input.get_local_coordinate_system();
+
+        let expected_origin = Point::new(-8.209655,0.2429936666666658,-10.523492666666664);
+        let expected_x = Vector::new(-0.8172739620937887,-0.2644398459237134,0.5119910534094939);
+        let expected_y = Vector::new(-0.055337702630792816,-0.8483665643460013,-0.5265091748177878);
+
+        let expected = LocalCoordinateSystem::new(expected_origin, expected_x, expected_y);
+
+        assert_eq!(expected, actual);
     }
     
     #[test]
