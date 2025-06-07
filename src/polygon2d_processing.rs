@@ -152,8 +152,9 @@ impl Polygon2D {
     pub fn get_with_removed_neighbour_parallel_segments_with_tolerance(&self, tolerance: f64) -> Polygon2D {
         let number_of_vertices = self.vertices.len();
         let mut cleaned_vertices = Vec::with_capacity(number_of_vertices);
+        let first_not_straight = self.get_first_not_straight_vertex_id(tolerance).unwrap();
         
-        let mut i = 1;
+        let mut i = first_not_straight + 1;
         while i < number_of_vertices {
             let previous = self.vertices[i-1];
             cleaned_vertices.push(previous);
@@ -375,7 +376,7 @@ mod tests {
     #[test]
     fn test_get_with_removed_neighbour_parallel_segments_with_tolerance_first_to_remove() {
         let input = Polygon2D::new(vec![
-            Point2D::new(52.5, 25.0), // This one is parallel to first one
+            Point2D::new(52.5, 25.0), // This one is parallel to second one, and last one
             Point2D::new(50.0, 25.0),
             Point2D::new(50.0, 50.0),
             Point2D::new(65.0, 50.0),

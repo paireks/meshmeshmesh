@@ -1,5 +1,7 @@
 use crate::bounding_area::BoundingArea;
+use crate::point2d::Point2D;
 use crate::polygon2d::Polygon2D;
+use crate::vector2d::Vector2D;
 
 impl Polygon2D {
     /// Checks if given [Polygon2D] is clockwise.
@@ -51,6 +53,66 @@ impl Polygon2D {
         sum += (x2-x1) * (y2+y1);
 
         sum >= 0.0
+    }
+
+    /// Tries to get the id of the very first vertex, which is actually concave or convex,
+    /// not the straight one.
+    /// 
+    /// Every [Polygon2D] should have every vertex concave or convex, not straight, but sometimes
+    /// not cleaned [Polygon2D]s can happen, then such check could be useful.
+    /// 
+    /// If the `None` is returned, then there is no such vertex, which also means that this
+    /// Polygon2D is not correct, and it is a some sort of the straight line.
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    ///
+    /// use meshmeshmesh::point2d::Point2D;
+    /// use meshmeshmesh::polygon2d::Polygon2D;
+    ///
+    /// let input = Polygon2D::new(vec![
+    ///     Point2D::new(54.5, 25.0),
+    ///     Point2D::new(53.5, 25.0),
+    ///     Point2D::new(52.5, 25.0),
+    ///     Point2D::new(50.0, 25.0), // This one is first one not straight, so 3 should be returned
+    ///     Point2D::new(50.0, 50.0),
+    ///     Point2D::new(65.0, 50.0),
+    ///     Point2D::new(65.0, 45.0),
+    ///     Point2D::new(55.0, 45.0),
+    ///     Point2D::new(55.0, 40.0),
+    ///     Point2D::new(65.0, 40.0),
+    ///     Point2D::new(65.0, 35.0),
+    ///     Point2D::new(55.0, 35.0),
+    ///     Point2D::new(55.0, 25.0),
+    /// ]);
+    /// 
+    /// let actual = input.get_first_not_straight_vertex_id(0.001);
+    /// 
+    /// assert_eq!(Some(3), actual);
+    ///
+    /// ```
+    pub fn get_first_not_straight_vertex_id(&self, tolerance: f64) -> Option<usize> {
+        let number_of_vertices = self.vertices.len();
+        let mut not_straight_id = None;
+
+        let previous_vector = Vector2D::from_2_points(&self.vertices[number_of_vertices-1], &self.vertices[0]);
+        let next_vector = Vector2D::from_2_points(&self.vertices[0], &self.vertices[1]);
+        if previous_vector.get_angle(&next_vector) > tolerance {
+            not_straight_id = Some(0);
+        }
+        else {
+            for i in 1..number_of_vertices-1 {
+                let previous_vector = Vector2D::from_2_points(&self.vertices[i-1], &self.vertices[i]);
+                let next_vector = Vector2D::from_2_points(&self.vertices[i], &self.vertices[i+1]);
+                if previous_vector.get_angle(&next_vector) > tolerance {
+                    not_straight_id = Some(i);
+                    break
+                }
+            }
+        }
+        
+        not_straight_id
     }
     
     /// Calculates the [BoundingArea] for this [Polygon2D].
@@ -133,6 +195,29 @@ mod tests {
         let input = Polygon2D::new(vec![Point2D::new(0.0, 0.0), Point2D::new(5.0, -10.0), Point2D::new(10.0, 0.0), Point2D::new(5.0, 10.0)]);
 
         assert!(!input.is_clockwise());
+    }
+    
+    #[test]
+    fn test_get_first_get_first_not_straight_vertex_id() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(54.5, 25.0),
+            Point2D::new(53.5, 25.0),
+            Point2D::new(52.5, 25.0),
+            Point2D::new(50.0, 25.0), // This one is first one not straight, so 3 should be returned
+            Point2D::new(50.0, 50.0),
+            Point2D::new(65.0, 50.0),
+            Point2D::new(65.0, 45.0),
+            Point2D::new(55.0, 45.0),
+            Point2D::new(55.0, 40.0),
+            Point2D::new(65.0, 40.0),
+            Point2D::new(65.0, 35.0),
+            Point2D::new(55.0, 35.0),
+            Point2D::new(55.0, 25.0),
+        ]);
+        
+        let actual = input.get_first_not_straight_vertex_id(0.001);
+        
+        assert_eq!(Some(3), actual);
     }
     
     #[test]
