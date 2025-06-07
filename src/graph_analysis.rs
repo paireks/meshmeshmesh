@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use crate::graph::Graph;
 
 /// Data structure helpful for keeping information related to breadth-first search.
@@ -104,14 +104,25 @@ impl Graph {
 
         for isolated_group in isolated_groups {
             if isolated_group.len() > 2 {
-                let mut path = Vec::with_capacity(isolated_group.len());
-
-                let start = isolated_group[isolated_group.len() - 2];
+                let mut forward_hashmap: HashMap<usize, usize> = HashMap::new();
+                let mut start = usize::MAX;
+                for i in isolated_group {
+                    let previous_option = bfs.previous_vertex[i];
+                    if previous_option.is_none() { 
+                        start = i;
+                    }
+                    else {
+                        let previous = previous_option.unwrap();
+                        forward_hashmap.insert(previous, i);
+                    }
+                }
+                
+                let mut path = Vec::new();
 
                 let mut current = start;
-                while bfs.previous_vertex[current].is_some() {
+                while forward_hashmap.contains_key(&current) {
                     path.push(current);
-                    current = bfs.previous_vertex[current].unwrap();
+                    current = forward_hashmap[&current];
                 }
                 path.push(current);
 
