@@ -373,6 +373,40 @@ mod tests {
     }
 
     #[test]
+    fn test_get_with_removed_neighbour_parallel_segments_with_tolerance_first_to_remove() {
+        let input = Polygon2D::new(vec![
+            Point2D::new(52.5, 25.0), // This one is parallel to first one
+            Point2D::new(50.0, 25.0),
+            Point2D::new(50.0, 50.0),
+            Point2D::new(65.0, 50.0),
+            Point2D::new(65.0, 45.0),
+            Point2D::new(55.0, 45.0),
+            Point2D::new(55.0, 40.0),
+            Point2D::new(65.0, 40.0),
+            Point2D::new(65.0, 35.0),
+            Point2D::new(55.0, 35.0),
+            Point2D::new(55.0, 25.0),
+        ]);
+
+        let actual = input.get_with_removed_neighbour_parallel_segments_with_tolerance(0.01);
+
+        let expected = Polygon2D::new(vec![
+            Point2D::new(50.0, 25.0),
+            Point2D::new(50.0, 50.0),
+            Point2D::new(65.0, 50.0),
+            Point2D::new(65.0, 45.0),
+            Point2D::new(55.0, 45.0),
+            Point2D::new(55.0, 40.0),
+            Point2D::new(65.0, 40.0),
+            Point2D::new(65.0, 35.0),
+            Point2D::new(55.0, 35.0),
+            Point2D::new(55.0, 25.0),
+        ]);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
     fn test_get_with_removed_neighbour_parallel_segments_with_tolerance_removing_last_segment_multiple() {
         let input = Polygon2D::new(vec![
             Point2D::new(50.0, 25.0),

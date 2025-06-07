@@ -68,7 +68,7 @@ impl Graph {
     }
 
 
-    pub(crate) fn split_disconnected_paths(&self) -> Vec<Vec<usize>> {
+    pub(crate) fn split_disconnected_loops(&self) -> Vec<Vec<usize>> {
         let mut isolated_groups: Vec<Vec<usize>> = Vec::new();
 
         let number_of_vertices: usize = self.get_number_of_vertices();
@@ -103,19 +103,18 @@ impl Graph {
         let mut paths = Vec::with_capacity(isolated_groups.len());
 
         for isolated_group in isolated_groups {
-            if isolated_group.len() > 1 {
+            if isolated_group.len() > 2 {
                 let mut path = Vec::with_capacity(isolated_group.len());
-                let end = isolated_group[isolated_group.len() - 1];
-                let start = isolated_group[0];
 
-                let mut current = end;
-                while current != start {
+                let start = isolated_group[isolated_group.len() - 2];
+
+                let mut current = start;
+                while bfs.previous_vertex[current].is_some() {
                     path.push(current);
                     current = bfs.previous_vertex[current].unwrap();
                 }
                 path.push(current);
 
-                path.reverse();
                 paths.push(path);
             }
         }
