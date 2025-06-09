@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use crate::bounding_box::BoundingBox;
 use crate::edge::Edge;
 use crate::graph::Graph;
@@ -10,6 +10,90 @@ use crate::triangle::Triangle;
 use crate::vector::Vector;
 
 impl Mesh {
+
+    /// Compares given [Mesh] to other one, but with a `f64` tolerance.
+    ///
+    /// If any coordinate absolute difference is > tolerance, then it should return `false`.
+    ///
+    /// It also compares indices: but only if they are exactly the same. This means, that if 
+    /// the indices are different, e.g. in different order, then even if they represent at the end
+    /// the same triangles: the `false` should be returned.
+    ///
+    /// # Examples
+    ///
+    /// In this example we can see the differences of coordinates are not > tolerance, so we expect `true`.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// 
+    /// let a = Mesh::new(vec![0.0, 0.0, 0.0002,
+    ///                        10.0, 0.0001, 0.0,
+    ///                        10.0, -15.0001, 0.0],
+    /// vec![0, 1, 2]);
+    /// let b = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    /// 
+    /// assert_eq!(a.eq_with_tolerance(&b,0.0002), true);
+    /// assert_eq!(b.eq_with_tolerance(&a, 0.0002), true);
+    /// ```
+    ///
+    /// In this example we can see the coordinates absolute difference is > tolerance, so we expect 'false'.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// 
+    /// let a = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                        10.0, 2.0, 0.0,
+    ///                        10.0, -15.0003, 0.0],
+    /// vec![0, 1, 2]);
+    /// let b = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    /// assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+    /// assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    /// ```
+    /// 
+    /// In this example we can see the difference in indices, so we expect 'false'.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// 
+    /// let a = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 2, 1]);
+    /// let b = Mesh::new(vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    /// assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+    /// assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    /// ```
+    pub fn eq_with_tolerance(&self, other:&Mesh, tolerance: f64) -> bool {
+
+        if self.indices.len() != other.indices.len() {
+            return false;
+        }
+        for i in 0..self.indices.len() {
+            if self.indices[i] != other.indices[i] {
+                return false;
+            }
+        }
+        
+        if self.coordinates.len() != other.coordinates.len() {
+            return false;
+        }
+        for i in 0..self.coordinates.len() {
+            if (self.coordinates[i] - other.coordinates[i]).abs() > tolerance {
+                return false;
+            }
+        }
+
+        true
+    }
     
     /// Checks if given [Mesh] is connected, meaning all vertices are connected together into
     /// single graph.
@@ -904,6 +988,34 @@ impl Mesh {
 
         edges_with_missing_neighbour
     }
+    
+/*    /// Creates a [HashMap] with key as unique [Mesh] located in Global Coordinate System,
+    /// and value as a `vec` of [LocalCoordinateSystem]s
+    /// where these instances are located.
+    ///
+    /// This way you can save a [Mesh] once and then locate them in different places, rather than
+    /// saving all the Meshes.
+    pub fn get_deduplicated(meshes: &Vec<Mesh>, tolerance: f64) -> HashMap<Mesh, Vec<LocalCoordinateSystem>> {
+        let unique_map: HashMap<Mesh, Vec<LocalCoordinateSystem>> = HashMap::new();
+        let aabb_map: HashMap<Mesh, BoundingBox> = HashMap::new();
+
+        for current_mesh in meshes {
+            let current_mesh_local_coordinate_system = current_mesh.get_local_coordinate_system_for_first_face();
+            let mesh_in_global = current_mesh.get_in_global_coordinate_system(&current_mesh_local_coordinate_system);
+            let current_aabb = mesh_in_global.get_bounding_box();
+            for i in &aabb_map {
+                let existing_aabb = i.1;
+                if current_aabb.eq_with_tolerance(existing_aabb, tolerance) { 
+                    let existing_candidate_mesh = i.0;
+                    if current_mesh.eq_with_tolerance(&existing_candidate_mesh, tolerance) { 
+                        unique_map[existing_candidate_mesh].push(current_mesh_local_coordinate_system);
+                    }
+                }
+            }
+        }
+
+        unique_map
+    }*/
 }
 
 #[cfg(test)]
@@ -1391,5 +1503,76 @@ mod tests {
         let actual = input.get_non_manifold_edges();
         assert_eq!(actual.len(), 0);
         
+    }
+
+    #[test]
+    fn test_partialeq_true() {
+        let a = Mesh::new(vec![0.0, 0.0, 0.0002,
+                               10.0, 0.0001, 0.0,
+                               10.0, -15.0001, 0.0],
+                          vec![0, 1, 2]);
+        let b = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), true);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), true);
+    }
+
+    #[test]
+    fn test_partialeq_coordinates_count_false() {
+        let a = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0,
+                               5.0, 1.0, 0.0],
+                          vec![0, 1, 2]);
+        let b = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    }
+
+    #[test]
+    fn test_partialeq_different_coordinates_false() {
+        let a = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 2.0, 0.0,
+                               10.0, -15.0003, 0.0],
+                          vec![0, 1, 2]);
+        let b = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    }
+
+    #[test]
+    fn test_partialeq_indices_count_false() {
+        let a = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2, 2, 1, 0]);
+        let b = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    }
+
+    #[test]
+    fn test_partialeq_different_indices_false() {
+        let a = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 2, 1]);
+        let b = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
     }
 }
