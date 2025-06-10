@@ -1,4 +1,3 @@
-use std::collections::{HashMap, HashSet};
 use crate::bounding_box::BoundingBox;
 use crate::edge::Edge;
 use crate::graph::Graph;
@@ -8,6 +7,7 @@ use crate::point::Point;
 use crate::three_edge_group::ThreeEdgeGroup;
 use crate::triangle::Triangle;
 use crate::vector::Vector;
+use std::collections::HashSet;
 
 impl Mesh {
 
@@ -988,40 +988,12 @@ impl Mesh {
 
         edges_with_missing_neighbour
     }
-    
-/*    /// Creates a [HashMap] with key as unique [Mesh] located in Global Coordinate System,
-    /// and value as a `vec` of [LocalCoordinateSystem]s
-    /// where these instances are located.
-    ///
-    /// This way you can save a [Mesh] once and then locate them in different places, rather than
-    /// saving all the Meshes.
-    pub fn get_deduplicated(meshes: &Vec<Mesh>, tolerance: f64) -> HashMap<Mesh, Vec<LocalCoordinateSystem>> {
-        let unique_map: HashMap<Mesh, Vec<LocalCoordinateSystem>> = HashMap::new();
-        let aabb_map: HashMap<Mesh, BoundingBox> = HashMap::new();
-
-        for current_mesh in meshes {
-            let current_mesh_local_coordinate_system = current_mesh.get_local_coordinate_system_for_first_face();
-            let mesh_in_global = current_mesh.get_in_global_coordinate_system(&current_mesh_local_coordinate_system);
-            let current_aabb = mesh_in_global.get_bounding_box();
-            for i in &aabb_map {
-                let existing_aabb = i.1;
-                if current_aabb.eq_with_tolerance(existing_aabb, tolerance) { 
-                    let existing_candidate_mesh = i.0;
-                    if current_mesh.eq_with_tolerance(&existing_candidate_mesh, tolerance) { 
-                        unique_map[existing_candidate_mesh].push(current_mesh_local_coordinate_system);
-                    }
-                }
-            }
-        }
-
-        unique_map
-    }*/
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_is_connected_false() {
         let input = Mesh::new(
