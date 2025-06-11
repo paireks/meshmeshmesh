@@ -852,7 +852,7 @@ impl Mesh {
     ///
     /// Returns ([`Ok`]) or failure ([`Err`]) depending on the remesh result, if it succeeds or not.
     ///
-    /// Even if it succeeds - it's good to additionally check if it looks correct.
+    /// Even if it succeeds - you should additionally check manually if it looks correct.
     ///
     /// # Example
     ///
@@ -1776,6 +1776,8 @@ impl Mesh {
     /// saving all the Meshes.
     ///
     /// `tolerance` input is used for [Mesh] comparison.
+    /// 
+    /// Please check manually the correctness of the deduplication output.
     ///
     /// # Example
     ///
