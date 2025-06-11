@@ -8,7 +8,6 @@ use crate::local_coordinate_system::LocalCoordinateSystem;
 use crate::point::Point;
 use crate::polygon2d::Polygon2D;
 use crate::polygon::Polygon;
-use crate::vector::Vector;
 
 impl Mesh {
 
@@ -1777,13 +1776,13 @@ impl Mesh {
     /// saving all the Meshes.
     ///
     /// `tolerance` input is used for [Mesh] comparison.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// Below is an example of a simple case with 3 Meshes, that are actually all duplicates of a
     /// box. That's why after the deduplication the result is a single Mesh located in the Global
     /// Coordinate System with 3 [LocalCoordinateSystem]s.
-    /// 
+    ///
     /// ```
     /// use meshmeshmesh::local_coordinate_system::LocalCoordinateSystem;
     /// use meshmeshmesh::mesh::Mesh;
