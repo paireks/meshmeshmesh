@@ -54,6 +54,10 @@ meshmeshmesh is using:
 
 - iTriangle (https://github.com/iShape-Rust/iTriangle) for triangulation / tesselation.
 
+## License
+
+meshmeshmesh is under the AGPL-3.0 license.
+
 ## Author
 
 Wojciech Radaczyński (https://radaczynski.pl/)
