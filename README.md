@@ -23,7 +23,7 @@ cargo add meshmeshmesh
 ### Mesh analysis tools
 - Triangle/Ray intersection
 - Mesh/Ray intersection
-- Normals calculation
+- Face normals calculation
 - Area
 - Finding non-manifold edges
 - Is connected
