@@ -95,7 +95,7 @@ impl Mesh {
             }
         }
 
-        Mesh::new(self.coordinates.clone(), new_indices)
+        Mesh::new_with_id(self.id, self.coordinates.clone(), new_indices)
     }
 
     /// Creates a new [Mesh], but with all faces flipped
@@ -172,7 +172,7 @@ impl Mesh {
             new_indices.push(start_indices[i]);
         }
 
-        Mesh::new(self.coordinates.clone(), new_indices)
+        Mesh::new_with_id(self.id, self.coordinates.clone(), new_indices)
     }
     
     /// Tries to flip the faces of the [Mesh] using offset. 
@@ -326,7 +326,7 @@ impl Mesh {
             new_coordinates.remove(offset); // z. Three times same offset, because after each removal position shifts to another coordinate to be removed (x => y => z)
         }
 
-        Mesh::new(new_coordinates, self.indices.clone())
+        Mesh::new_with_id(self.id, new_coordinates, self.indices.clone())
     }
 
     /// Allows to replace specific indices with new ones
@@ -408,7 +408,7 @@ impl Mesh {
             }
         }
 
-        Mesh::new(self.coordinates.clone(), new_indices)
+        Mesh::new_with_id(self.id, self.coordinates.clone(), new_indices)
     }
 
     /// Welds vertices of the given [Mesh].
@@ -527,7 +527,7 @@ impl Mesh {
             mesh_with_replaced_indices_and_removed_vertices
         }
         else { // No duplicates - no welding
-            Mesh::new(self.coordinates.clone(), self.indices.clone())
+            Mesh::new_with_id(self.id, self.coordinates.clone(), self.indices.clone())
         }
     }
 
@@ -674,7 +674,7 @@ impl Mesh {
     pub fn get_with_index_offset(&self, index_offset: usize) -> Mesh {
         let mut new_indices = Vec::from_iter(self.indices.clone());
         new_indices.iter_mut().for_each(|x| *x += index_offset);
-        Mesh::new(self.coordinates.clone(), new_indices)
+        Mesh::new_with_id(self.id, self.coordinates.clone(), new_indices)
     }
 
     /// Creates a new [Mesh] which is a result of joining it with another one.
@@ -718,6 +718,8 @@ impl Mesh {
     }
 
     /// Creates a new [Mesh] which is a result of joining it with another one.
+    /// 
+    /// Joined [Mesh] has an `id`: `None`.
     ///
     /// # Example
     ///
@@ -768,6 +770,8 @@ impl Mesh {
     /// Gets only specific part of the [Mesh] using specified face ids.
     ///
     /// The result Mesh is unwelded.
+    /// 
+    /// The new result Mesh has no `id` (`None`).
     ///
     /// # Example
     ///
@@ -1372,7 +1376,7 @@ impl Mesh {
         }
 
         let remeshed = Mesh::join(&planar_meshes_remeshed);
-        let remeshed_welded = remeshed.get_with_welded_vertices(tolerance);
+        let mut remeshed_welded = remeshed.get_with_welded_vertices(tolerance);
 
         let remeshed_aabb = remeshed_welded.get_bounding_box();
         if !remeshed_aabb.eq_with_tolerance(&original_aabb, tolerance) {
@@ -1383,6 +1387,8 @@ impl Mesh {
         if (remeshed_area - original_area).abs() > tolerance {
             return Err("The area of the remeshed Mesh seems to be different from the original one".to_string())
         }
+        
+        remeshed_welded.id = self.id;
 
         Ok(remeshed_welded)
     }
