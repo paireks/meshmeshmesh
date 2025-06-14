@@ -37,6 +37,8 @@ use crate::triangle::Triangle;
 ///
 #[derive(Debug)]
 pub struct Mesh {
+    /// Optional identifier
+    pub id: Option<usize>,
     /// The list of coordinates for the mesh vertices.
     pub coordinates: Vec<f64>,
     /// The list of indices for the mesh triangles.
@@ -46,6 +48,9 @@ pub struct Mesh {
 impl PartialEq for Mesh {
     fn eq(&self, other: &Self) -> bool {
 
+        if self.id != other.id {
+            return false;
+        }
         if self.coordinates.len() != other.coordinates.len() {
             return false;
         }
@@ -83,7 +88,25 @@ impl Mesh {
     ///                                    10.0, -15.0, 0.0]);
     /// assert_eq!(result.indices, vec![0, 1, 2]);
     /// ```
-    pub fn new(coordinates: Vec<f64>, indices: Vec<usize>) -> Mesh {Mesh {coordinates, indices}}
+    pub fn new(coordinates: Vec<f64>, indices: Vec<usize>) -> Mesh {Mesh {id: None, coordinates, indices}}
+
+    /// Creates a new [Mesh] with already set identifier
+    ///
+    /// # Example
+    ///
+    /// Here is an example with simple 1-triangle Mesh
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let result = Mesh::new_with_id(Some(5), vec![0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 10.0, -15.0, 0.0], vec![0, 1, 2]);
+    /// assert_eq!(result.id, Some(5));
+    /// assert_eq!(result.coordinates, vec![0.0, 0.0, 0.0,
+    ///                                    10.0, 0.0, 0.0,
+    ///                                    10.0, -15.0, 0.0]);
+    /// assert_eq!(result.indices, vec![0, 1, 2]);
+    /// ```
+    pub fn new_with_id(id: Option<usize>, coordinates: Vec<f64>, indices: Vec<usize>) -> Mesh {Mesh {id, coordinates, indices}}
 
     /// Converts [Mesh] into list of [Point]s
     ///
@@ -342,6 +365,16 @@ mod tests {
     }
 
     #[test]
+    fn test_new_with_id() {
+        let result = Mesh::new_with_id(Some(5), vec![0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 10.0, -15.0, 0.0], vec![0, 1, 2]);
+        assert_eq!(result.id, Some(5));
+        assert_eq!(result.coordinates, vec![0.0, 0.0, 0.0,
+                                           10.0, 0.0, 0.0,
+                                           10.0, -15.0, 0.0]);
+        assert_eq!(result.indices, vec![0, 1, 2]);
+    }
+
+    #[test]
     fn test_to_points() {
         let input = Mesh::new(vec![0.0, 0.0, 0.0,
                                    10.0, 0.0, 0.0,
@@ -591,6 +624,48 @@ mod tests {
                           vec![0, 1, 2]);
         assert_eq!(a.eq(&b), true);
         assert_eq!(b.eq(&a), true);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_true() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(7),vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq(&b), true);
+        assert_eq!(b.eq(&a), true);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_and_without_false() {
+        let a = Mesh::new(vec![0.0, 0.0, 0.0,
+                                                10.0, 0.0, 0.0,
+                                                10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(7),vec![0.0, 0.0, 0.0,
+                                               10.0, 0.0, 0.0,
+                                               10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        assert_eq!(a.eq(&b), false);
+        assert_eq!(b.eq(&a), false);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_false() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+                                                10.0, 0.0, 0.0,
+                                                10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(6),vec![0.0, 0.0, 0.0,
+                                               10.0, 0.0, 0.0,
+                                               10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        assert_eq!(a.eq(&b), false);
+        assert_eq!(b.eq(&a), false);
     }
 
     #[test]

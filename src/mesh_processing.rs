@@ -1935,7 +1935,7 @@ impl Mesh {
                 let existing_aabb = &aabbs_of_uniques[i];
                 if current_aabb.eq_with_tolerance(existing_aabb, tolerance) {
                     let existing_candidate_unique_mesh = &uniques[i].0;
-                    if current_mesh_in_global.eq_with_tolerance(existing_candidate_unique_mesh, tolerance) {
+                    if current_mesh_in_global.eq_with_tolerance_without_id(existing_candidate_unique_mesh, tolerance) {
                         uniques[i].1.push(current_mesh_local_coordinate_system);
                         found_duplicate = true;
                         break

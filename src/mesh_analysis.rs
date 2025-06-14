@@ -74,6 +74,72 @@ impl Mesh {
     /// ```
     pub fn eq_with_tolerance(&self, other:&Mesh, tolerance: f64) -> bool {
 
+        if self.id != other.id { 
+            return false;
+        }
+        
+        self.eq_with_tolerance_without_id(other, tolerance)
+    }
+
+    /// Compares given [Mesh] to other one, but with a `f64` tolerance.
+    ///
+    /// It is same as `eq_with_tolerance` method, but without the [Mesh] `id` comparison.
+    ///
+    /// # Examples
+    ///
+    /// In this example we can see the differences of coordinates are not > tolerance, so we expect `true`.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0002,
+    ///                        10.0, 0.0001, 0.0,
+    ///                        10.0, -15.0001, 0.0],
+    /// vec![0, 1, 2]);
+    /// let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    ///
+    /// assert_eq!(a.eq_with_tolerance_without_id(&b,0.0002), true);
+    /// assert_eq!(b.eq_with_tolerance_without_id(&a, 0.0002), true);
+    /// ```
+    ///
+    /// In this example we can see the coordinates absolute difference is > tolerance, so we expect 'false'.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+    ///                        10.0, 2.0, 0.0,
+    ///                        10.0, -15.0003, 0.0],
+    /// vec![0, 1, 2]);
+    /// let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    /// assert_eq!(a.eq_with_tolerance_without_id(&b,0.0002), false);
+    /// assert_eq!(b.eq_with_tolerance_without_id(&a, 0.0002), false);
+    /// ```
+    ///
+    /// In this example we can see the difference in indices, so we expect 'false'.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 2, 1]);
+    /// let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    /// assert_eq!(a.eq_with_tolerance_without_id(&b,0.0002), false);
+    /// assert_eq!(b.eq_with_tolerance_without_id(&a, 0.0002), false);
+    /// ```
+    pub fn eq_with_tolerance_without_id(&self, other:&Mesh, tolerance: f64) -> bool {
+
         if self.indices.len() != other.indices.len() {
             return false;
         }
@@ -82,7 +148,7 @@ impl Mesh {
                 return false;
             }
         }
-        
+
         if self.coordinates.len() != other.coordinates.len() {
             return false;
         }
@@ -1492,6 +1558,62 @@ mod tests {
     }
 
     #[test]
+    fn test_partialeq_with_id_true() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0002,
+                               10.0, 0.0001, 0.0,
+                               10.0, -15.0001, 0.0],
+                          vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), true);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), true);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_and_without_true() {
+        let a = Mesh::new(vec![0.0, 0.0, 0.0002,
+                                                10.0, 0.0001, 0.0,
+                                                10.0, -15.0001, 0.0],
+                                  vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+                                                10.0, 0.0, 0.0,
+                                                10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_false() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0002,
+                                                10.0, 0.0001, 0.0,
+                                                10.0, -15.0001, 0.0],
+                                  vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
+                                                10.0, 0.0, 0.0,
+                                                10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_without_id_check_true() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0002,
+                                                10.0, 0.0001, 0.0,
+                                                10.0, -15.0001, 0.0],
+                                  vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
+                                                10.0, 0.0, 0.0,
+                                                10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance_without_id(&b,0.0002), true);
+        assert_eq!(b.eq_with_tolerance_without_id(&a, 0.0002), true);
+    }
+
+    #[test]
     fn test_partialeq_coordinates_count_false() {
         let a = Mesh::new(vec![0.0, 0.0, 0.0,
                                10.0, 0.0, 0.0,
@@ -1513,6 +1635,20 @@ mod tests {
                                10.0, -15.0003, 0.0],
                           vec![0, 1, 2]);
         let b = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    }
+
+    #[test]
+    fn test_partialeq_different_coordinates_without_id_check_false() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+                               10.0, 2.0, 0.0,
+                               10.0, -15.0003, 0.0],
+                          vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
                                10.0, 0.0, 0.0,
                                10.0, -15.0, 0.0],
                           vec![0, 1, 2]);
