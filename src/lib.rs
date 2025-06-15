@@ -3,7 +3,6 @@ mod barycentric_coordinates_analysis;
 pub mod bounding_area;
 mod bounding_area_analysis;
 pub mod bounding_box;
-pub mod dotbim;
 pub mod edge;
 mod edge_analysis;
 mod edge_processing;
