@@ -12,7 +12,8 @@ keywords = ["mesh", "geometry"]
 exclude = [
     ".idea",
     "models",
-    "img"
+    "img",
+    "created_files"
 ]
 
 [dependencies]
