@@ -8,7 +8,7 @@ use crate::vector::Vector;
 #[derive(Deserialize, Serialize)]
 pub struct Element {
     /// The identifier of the mesh associated with the element.
-    pub mesh_id: i32,
+    pub mesh_id: usize,
     /// The position of the element.
     pub vector: Vector,
     /// The rotation of the element.
@@ -81,7 +81,7 @@ impl PartialEq for Element {
 
 impl Element {
     /// Returns a new Element
-    pub fn new(mesh_id: i32, vector: Vector, rotation: Rotation, guid: String, element_type: String,
+    pub fn new(mesh_id: usize, vector: Vector, rotation: Rotation, guid: String, element_type: String,
                color: Color, face_colors: Option<Vec<i32>>, info: HashMap<String, String>)
                -> Element { Element { mesh_id, vector, rotation, guid, element_type, color, face_colors, info } }
 }
