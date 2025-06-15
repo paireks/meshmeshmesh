@@ -8,9 +8,9 @@ use crate::mesh::Mesh;
 pub struct Scene {
     /// The schema version of the dotbim file.
     pub schema_version: String,
-    /// The list of meshes in the file.
+    /// The list of [Mesh]es inside the [Scene].
     pub meshes: Vec<Mesh>,
-    /// The list of elements in the file.
+    /// The list of [Element]s inside the [Scene].
     pub elements: Vec<Element>,
     /// Additional information about the file/scene.
     pub info: HashMap<String, String>
@@ -45,7 +45,7 @@ impl PartialEq for Scene {
 }
 
 impl Scene {
-    /// Returns a new File
+    /// Returns a new [Scene].
     pub fn new(schema_version:String, meshes:Vec<Mesh>, elements:Vec<Element>, info:HashMap<String, String>) -> Scene { Scene {schema_version, meshes, elements, info} }
 }
 
