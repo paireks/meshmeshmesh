@@ -35,6 +35,7 @@ mod polygon_transformations;
 mod polygon_triangulation;
 pub mod ray;
 mod ray_analysis;
+pub mod rotation;
 pub mod three_edge_group;
 mod three_edge_group_analysis;
 pub mod triangle;
