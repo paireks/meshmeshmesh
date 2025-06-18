@@ -1362,6 +1362,11 @@ impl Mesh {
 
         let welded_original = self.get_with_welded_vertices(tolerance);
 
+        let unaccepted_edges = welded_original.get_edges_with_more_than_2_neighbours();
+        if unaccepted_edges.len() > 0 {
+            return Err("This Mesh has edges with more than 2 neighbouring faces, so it cannot be simplified using this method".to_string())
+        }
+
         let planar_meshes: Vec<Mesh> = welded_original.split_by_face_angle(angle_tolerance, Some(tolerance));
         let mut planar_meshes_remeshed: Vec<Mesh> = Vec::with_capacity(planar_meshes.len());
 
@@ -10653,6 +10658,31 @@ mod tests {
         for i in 0..expected.len() {
             assert_eq!(actual[i], expected[i]);
         }
+    }
+
+    #[test]
+    fn test_planar_simplify_nonmanifold() {
+        let input = Mesh::new(
+            vec![0.0, 0.0, 0.0,
+                 2.5, 5.0, 0.0,
+                 5.0, 0.0, 0.0,
+                 7.5, 5.0, 0.0,
+                 10.0, 0.0, 0.0,
+                 5.0, 10.0, 0.0,
+                 5.0, 5.0, 3.0,
+            ],
+            vec![0, 2, 1, // first face
+                 1, 2, 3, // second face
+                 2, 4, 3, // third face
+                 1, 3, 5, // fourth face
+                 1, 3, 6, // fifth face
+            ]
+        );
+
+        let actual_result = input.get_planar_simplify(0.001, 0.0175);
+
+        assert!(actual_result.is_err());
+        assert_eq!(actual_result.err().unwrap().to_string(), "This Mesh has edges with more than 2 neighbouring faces, so it cannot be simplified using this method");
     }
 
     #[test]
