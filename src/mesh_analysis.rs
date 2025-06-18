@@ -1042,17 +1042,17 @@ impl Mesh {
         
         let three_edge_groups = self.to_three_edge_groups();
         let edge_hashmap = ThreeEdgeGroup::get_edge_with_face_ids_hashmap_with_reversed_edges_merged(&three_edge_groups);
-        let mut edges_with_missing_neighbour: Vec<Edge> = Vec::new();
+        let mut non_manifold_edges: Vec<Edge> = Vec::new();
 
         for (key, value) in edge_hashmap.into_iter() {
             let current_edge = key;
             let number_of_neighbour_faces = value.len();
             if number_of_neighbour_faces < 2 || number_of_neighbour_faces > 2 {
-                edges_with_missing_neighbour.push(current_edge);
+                non_manifold_edges.push(current_edge);
             }
         }
 
-        edges_with_missing_neighbour
+        non_manifold_edges
     }
 }
 
