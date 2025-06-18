@@ -953,6 +953,98 @@ impl Mesh {
         edges_with_missing_neighbour
     }
 
+    /// Gets edges with more than 2 face-neighbours.
+    /// 
+    /// Such edges can be problematic for some [Mesh] analyses.
+    ///
+    /// # Examples
+    ///
+    /// In the example below there is a [Mesh] with a 3-neighbour [Edge],
+    /// that's why this [Edge] should be returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    ///     vec![0.0, 0.0, 0.0,
+    ///          2.5, 5.0, 0.0,
+    ///          5.0, 0.0, 0.0,
+    ///          7.5, 5.0, 0.0,
+    ///          10.0, 0.0, 0.0,
+    ///          5.0, 10.0, 0.0,
+    ///          5.0, 5.0, 3.0,
+    ///          ],
+    ///     vec![0, 2, 1, // first face
+    ///          1, 2, 3, // second face
+    ///          2, 4, 3, // third face
+    ///          1, 3, 5, // fourth face
+    ///          1, 3, 6, // fifth face
+    ///          ]
+    /// );
+    ///
+    /// let mut actual = input.get_edges_with_more_than_2_neighbours();
+    /// let mut expected = vec![
+    ///     Edge::new(3, 1), // second face, third edge, 3 neighbours
+    /// ];
+    /// actual.sort();
+    /// expected.sort();
+    /// assert_eq!(actual, expected);
+    ///
+    /// ```
+    ///
+    /// In the example below there is a pyramid [Mesh] with a manifold edges, that's why
+    /// empty `vec` of [Edge]s should be returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2, //0
+    ///     0,2,3, //1
+    ///
+    ///     // Side faces
+    ///     0,1,4, //2
+    ///     1,2,4, //3
+    ///     2,3,4, //4
+    ///     3,0,4  //5
+    /// ]);
+    ///
+    /// let actual = input.get_edges_with_more_than_2_neighbours();
+    /// assert_eq!(actual.len(), 0);
+    ///
+    /// ```
+    pub fn get_edges_with_more_than_2_neighbours(&self) -> Vec<Edge> {
+
+        let three_edge_groups = self.to_three_edge_groups();
+        let edge_hashmap = ThreeEdgeGroup::get_edge_with_face_ids_hashmap_with_reversed_edges_merged(&three_edge_groups);
+        let mut edges: Vec<Edge> = Vec::new();
+
+        for (key, value) in edge_hashmap.into_iter() {
+            let current_edge = key;
+            let number_of_neighbour_faces = value.len();
+            if number_of_neighbour_faces > 2 {
+                edges.push(current_edge);
+            }
+        }
+
+        edges
+    }
+
     /// Gets edges with less or more than 2 face-neighbours.
     /// 
     /// Such edges are sometimes called non-manifold.
@@ -1473,6 +1565,63 @@ mod tests {
         ]);
         
         let actual = input.get_edges_with_missing_neighbour();
+        assert_eq!(actual.len(), 0);
+    }
+
+    #[test]
+    fn test_get_edges_with_more_than_2_neighbours() {
+        let input = Mesh::new(
+            vec![0.0, 0.0, 0.0,
+                 2.5, 5.0, 0.0,
+                 5.0, 0.0, 0.0,
+                 7.5, 5.0, 0.0,
+                 10.0, 0.0, 0.0,
+                 5.0, 10.0, 0.0,
+                 5.0, 5.0, 3.0,
+                 ],
+            vec![0, 2, 1, // first face
+                 1, 2, 3, // second face
+                 2, 4, 3, // third face
+                 1, 3, 5, // fourth face
+                 1, 3, 6, // fifth face
+                 ]
+        );
+        
+        let mut actual = input.get_edges_with_more_than_2_neighbours();
+        let mut expected = vec![
+            Edge::new(3, 1), // second face, third edge, 3 neighbours
+        ];
+        actual.sort();
+        expected.sort();
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_get_edges_with_more_than_2_neighbours_manifold() {
+        let input = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2, //0
+            0,2,3, //1
+        
+            // Side faces
+            0,1,4, //2
+            1,2,4, //3
+            2,3,4, //4
+            3,0,4  //5
+        ]);
+        
+        let actual = input.get_edges_with_more_than_2_neighbours();
         assert_eq!(actual.len(), 0);
     }
     
