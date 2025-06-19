@@ -4,7 +4,7 @@ use crate::color::Color;
 use crate::rotation::Rotation;
 use crate::vector::Vector;
 
-/// Represents an element represented by single [Mesh] in three-dimensional space + metadata.
+/// Represents an element represented by single Mesh in three-dimensional space + metadata.
 #[derive(Deserialize, Serialize)]
 pub struct Element {
     /// The identifier of the mesh associated with the element.
