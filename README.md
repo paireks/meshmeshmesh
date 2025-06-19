@@ -59,6 +59,7 @@ https://docs.rs/meshmeshmesh/latest/meshmeshmesh/
 meshmeshmesh is using:
 
 - iTriangle (https://github.com/iShape-Rust/iTriangle) for triangulation / tesselation.
+- serde & serde_json (https://github.com/serde-rs/json) for json serialization / deserialization.
 
 ## License
 
