@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use crate::edge::Edge;
 use crate::point::Point;
 use crate::three_edge_group::ThreeEdgeGroup;
@@ -35,8 +36,11 @@ use crate::triangle::Triangle;
 /// assert_eq!(result.indices, vec![0, 1, 2]); // We create 1 face there using point0, point1 and point2.
 /// ```
 ///
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Mesh {
+    /// Optional identifier
+    #[serde(rename(serialize = "mesh_id", deserialize = "mesh_id"))]
+    pub id: Option<usize>,
     /// The list of coordinates for the mesh vertices.
     pub coordinates: Vec<f64>,
     /// The list of indices for the mesh triangles.
@@ -46,6 +50,9 @@ pub struct Mesh {
 impl PartialEq for Mesh {
     fn eq(&self, other: &Self) -> bool {
 
+        if self.id != other.id {
+            return false;
+        }
         if self.coordinates.len() != other.coordinates.len() {
             return false;
         }
@@ -83,7 +90,25 @@ impl Mesh {
     ///                                    10.0, -15.0, 0.0]);
     /// assert_eq!(result.indices, vec![0, 1, 2]);
     /// ```
-    pub fn new(coordinates: Vec<f64>, indices: Vec<usize>) -> Mesh {Mesh {coordinates, indices}}
+    pub fn new(coordinates: Vec<f64>, indices: Vec<usize>) -> Mesh {Mesh {id: None, coordinates, indices}}
+
+    /// Creates a new [Mesh] with already set identifier
+    ///
+    /// # Example
+    ///
+    /// Here is an example with simple 1-triangle Mesh
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let result = Mesh::new_with_id(Some(5), vec![0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 10.0, -15.0, 0.0], vec![0, 1, 2]);
+    /// assert_eq!(result.id, Some(5));
+    /// assert_eq!(result.coordinates, vec![0.0, 0.0, 0.0,
+    ///                                    10.0, 0.0, 0.0,
+    ///                                    10.0, -15.0, 0.0]);
+    /// assert_eq!(result.indices, vec![0, 1, 2]);
+    /// ```
+    pub fn new_with_id(id: Option<usize>, coordinates: Vec<f64>, indices: Vec<usize>) -> Mesh {Mesh {id, coordinates, indices}}
 
     /// Converts [Mesh] into list of [Point]s
     ///
@@ -328,6 +353,8 @@ impl Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::from_str;
+    use serde_json::to_string;
 
     #[test]
     fn test_new() {
@@ -338,6 +365,16 @@ mod tests {
         assert_eq!(result.coordinates, vec![0.0, 0.0, 0.0,
                                             10.0, 0.0, 0.0,
                                             10.0, -15.0, 0.0]);
+        assert_eq!(result.indices, vec![0, 1, 2]);
+    }
+
+    #[test]
+    fn test_new_with_id() {
+        let result = Mesh::new_with_id(Some(5), vec![0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 10.0, -15.0, 0.0], vec![0, 1, 2]);
+        assert_eq!(result.id, Some(5));
+        assert_eq!(result.coordinates, vec![0.0, 0.0, 0.0,
+                                           10.0, 0.0, 0.0,
+                                           10.0, -15.0, 0.0]);
         assert_eq!(result.indices, vec![0, 1, 2]);
     }
 
@@ -594,6 +631,48 @@ mod tests {
     }
 
     #[test]
+    fn test_partialeq_with_id_true() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(7),vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq(&b), true);
+        assert_eq!(b.eq(&a), true);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_and_without_false() {
+        let a = Mesh::new(vec![0.0, 0.0, 0.0,
+                                                10.0, 0.0, 0.0,
+                                                10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(7),vec![0.0, 0.0, 0.0,
+                                               10.0, 0.0, 0.0,
+                                               10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        assert_eq!(a.eq(&b), false);
+        assert_eq!(b.eq(&a), false);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_false() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+                                                10.0, 0.0, 0.0,
+                                                10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(6),vec![0.0, 0.0, 0.0,
+                                               10.0, 0.0, 0.0,
+                                               10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        assert_eq!(a.eq(&b), false);
+        assert_eq!(b.eq(&a), false);
+    }
+
+    #[test]
     fn test_partialeq_coordinates_count_false() {
         let a = Mesh::new(vec![0.0, 0.0, 0.0,
                                10.0, 0.0, 0.0,
@@ -648,5 +727,32 @@ mod tests {
                           vec![0, 1, 2]);
         assert_eq!(a.eq(&b), false);
         assert_eq!(b.eq(&a), false);
+    }
+
+    #[test]
+    fn test_to_json() {
+        let input = Mesh::new_with_id(Some(12),
+                              vec![0.0, 0.0, 0.0,
+                                   10.0, 0.0, 0.0,
+                                   10.0, -15.0, 0.0],
+                              vec![0, 1, 2]);
+        let input_serialized = to_string(&input);
+        assert_eq!(input_serialized.is_ok(), true);
+        let input_serialized_string = input_serialized.ok().unwrap();
+        assert_eq!(input_serialized_string, "{\"mesh_id\":12,\"coordinates\":[0.0,0.0,0.0,10.0,0.0,0.0,10.0,-15.0,0.0],\"indices\":[0,1,2]}");
+    }
+
+    #[test]
+    fn test_from_json() {
+        let json = "{\"mesh_id\":12,\"coordinates\":[0.0,0.0,0.0,10.0,0.0,0.0,10.0,-15.0,0.0],\"indices\":[0,1,2]}";
+        let actual_result = from_str::<Mesh>(json);
+        assert_eq!(actual_result.is_ok(), true);
+        let actual = actual_result.ok().unwrap();
+        let expected = Mesh::new_with_id(Some(12),
+                                 vec![0.0, 0.0, 0.0,
+                                      10.0, 0.0, 0.0,
+                                      10.0, -15.0, 0.0],
+                                 vec![0, 1, 2]);
+        assert_eq!(expected.eq(&actual), true);
     }
 }

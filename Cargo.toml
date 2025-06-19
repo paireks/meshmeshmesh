@@ -1,6 +1,6 @@
 [package]
 name = "meshmeshmesh"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 authors = ["Wojciech Radaczyński"]
 description = "Open-source mesh processing library."
@@ -12,8 +12,11 @@ keywords = ["mesh", "geometry"]
 exclude = [
     ".idea",
     "models",
-    "img"
+    "img",
+    "created_files"
 ]
 
 [dependencies]
 i_triangle = "=0.35.0"
+serde = { version = "^1.0", features = ["derive"] }
+serde_json = "^1.0"

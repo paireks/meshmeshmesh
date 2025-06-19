@@ -49,7 +49,7 @@ impl Mesh {
             transformed_coordinates.push(point.z);
         }
         
-        Mesh::new(transformed_coordinates, self.indices.clone())
+        Mesh::new_with_id(self.id, transformed_coordinates, self.indices.clone())
     }
 
     /// Creates a new [Mesh], but with coordinates in the Global Coordinate System.
@@ -101,7 +101,7 @@ impl Mesh {
             transformed_coordinates.push(point.z);
         }
 
-        Mesh::new(transformed_coordinates, self.indices.clone())
+        Mesh::new_with_id(self.id, transformed_coordinates, self.indices.clone())
     }
 }
 

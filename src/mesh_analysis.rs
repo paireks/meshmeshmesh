@@ -74,6 +74,72 @@ impl Mesh {
     /// ```
     pub fn eq_with_tolerance(&self, other:&Mesh, tolerance: f64) -> bool {
 
+        if self.id != other.id { 
+            return false;
+        }
+        
+        self.eq_with_tolerance_without_id(other, tolerance)
+    }
+
+    /// Compares given [Mesh] to other one, but with a `f64` tolerance.
+    ///
+    /// It is same as `eq_with_tolerance` method, but without the [Mesh] `id` comparison.
+    ///
+    /// # Examples
+    ///
+    /// In this example we can see the differences of coordinates are not > tolerance, so we expect `true`.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0002,
+    ///                        10.0, 0.0001, 0.0,
+    ///                        10.0, -15.0001, 0.0],
+    /// vec![0, 1, 2]);
+    /// let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    ///
+    /// assert_eq!(a.eq_with_tolerance_without_id(&b,0.0002), true);
+    /// assert_eq!(b.eq_with_tolerance_without_id(&a, 0.0002), true);
+    /// ```
+    ///
+    /// In this example we can see the coordinates absolute difference is > tolerance, so we expect 'false'.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+    ///                        10.0, 2.0, 0.0,
+    ///                        10.0, -15.0003, 0.0],
+    /// vec![0, 1, 2]);
+    /// let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    /// assert_eq!(a.eq_with_tolerance_without_id(&b,0.0002), false);
+    /// assert_eq!(b.eq_with_tolerance_without_id(&a, 0.0002), false);
+    /// ```
+    ///
+    /// In this example we can see the difference in indices, so we expect 'false'.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    ///
+    /// let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 2, 1]);
+    /// let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
+    ///                        10.0, 0.0, 0.0,
+    ///                        10.0, -15.0, 0.0],
+    /// vec![0, 1, 2]);
+    /// assert_eq!(a.eq_with_tolerance_without_id(&b,0.0002), false);
+    /// assert_eq!(b.eq_with_tolerance_without_id(&a, 0.0002), false);
+    /// ```
+    pub fn eq_with_tolerance_without_id(&self, other:&Mesh, tolerance: f64) -> bool {
+
         if self.indices.len() != other.indices.len() {
             return false;
         }
@@ -82,7 +148,7 @@ impl Mesh {
                 return false;
             }
         }
-        
+
         if self.coordinates.len() != other.coordinates.len() {
             return false;
         }
@@ -887,6 +953,98 @@ impl Mesh {
         edges_with_missing_neighbour
     }
 
+    /// Gets edges with more than 2 face-neighbours.
+    /// 
+    /// Such edges can be problematic for some [Mesh] analyses.
+    ///
+    /// # Examples
+    ///
+    /// In the example below there is a [Mesh] with a 3-neighbour [Edge],
+    /// that's why this [Edge] should be returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::edge::Edge;
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    ///     vec![0.0, 0.0, 0.0,
+    ///          2.5, 5.0, 0.0,
+    ///          5.0, 0.0, 0.0,
+    ///          7.5, 5.0, 0.0,
+    ///          10.0, 0.0, 0.0,
+    ///          5.0, 10.0, 0.0,
+    ///          5.0, 5.0, 3.0,
+    ///          ],
+    ///     vec![0, 2, 1, // first face
+    ///          1, 2, 3, // second face
+    ///          2, 4, 3, // third face
+    ///          1, 3, 5, // fourth face
+    ///          1, 3, 6, // fifth face
+    ///          ]
+    /// );
+    ///
+    /// let mut actual = input.get_edges_with_more_than_2_neighbours();
+    /// let mut expected = vec![
+    ///     Edge::new(3, 1), // second face, third edge, 3 neighbours
+    /// ];
+    /// actual.sort();
+    /// expected.sort();
+    /// assert_eq!(actual, expected);
+    ///
+    /// ```
+    ///
+    /// In the example below there is a pyramid [Mesh] with a manifold edges, that's why
+    /// empty `vec` of [Edge]s should be returned.
+    ///
+    /// ```
+    /// use meshmeshmesh::mesh::Mesh;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Mesh::new(
+    /// vec![
+    ///     // Base
+    ///     -2.0,1.0,0.0,
+    ///     8.0,1.0,0.0,
+    ///     8.0,11.0,0.0,
+    ///     -2.0,11.0,0.0,
+    ///
+    ///     // Top
+    ///     3.0,6.0,4.0
+    /// ],
+    /// vec![
+    ///     // Base faces
+    ///     0,1,2, //0
+    ///     0,2,3, //1
+    ///
+    ///     // Side faces
+    ///     0,1,4, //2
+    ///     1,2,4, //3
+    ///     2,3,4, //4
+    ///     3,0,4  //5
+    /// ]);
+    ///
+    /// let actual = input.get_edges_with_more_than_2_neighbours();
+    /// assert_eq!(actual.len(), 0);
+    ///
+    /// ```
+    pub fn get_edges_with_more_than_2_neighbours(&self) -> Vec<Edge> {
+
+        let three_edge_groups = self.to_three_edge_groups();
+        let edge_hashmap = ThreeEdgeGroup::get_edge_with_face_ids_hashmap_with_reversed_edges_merged(&three_edge_groups);
+        let mut edges: Vec<Edge> = Vec::new();
+
+        for (key, value) in edge_hashmap.into_iter() {
+            let current_edge = key;
+            let number_of_neighbour_faces = value.len();
+            if number_of_neighbour_faces > 2 {
+                edges.push(current_edge);
+            }
+        }
+
+        edges
+    }
+
     /// Gets edges with less or more than 2 face-neighbours.
     /// 
     /// Such edges are sometimes called non-manifold.
@@ -976,17 +1134,17 @@ impl Mesh {
         
         let three_edge_groups = self.to_three_edge_groups();
         let edge_hashmap = ThreeEdgeGroup::get_edge_with_face_ids_hashmap_with_reversed_edges_merged(&three_edge_groups);
-        let mut edges_with_missing_neighbour: Vec<Edge> = Vec::new();
+        let mut non_manifold_edges: Vec<Edge> = Vec::new();
 
         for (key, value) in edge_hashmap.into_iter() {
             let current_edge = key;
             let number_of_neighbour_faces = value.len();
             if number_of_neighbour_faces < 2 || number_of_neighbour_faces > 2 {
-                edges_with_missing_neighbour.push(current_edge);
+                non_manifold_edges.push(current_edge);
             }
         }
 
-        edges_with_missing_neighbour
+        non_manifold_edges
     }
 }
 
@@ -1409,6 +1567,63 @@ mod tests {
         let actual = input.get_edges_with_missing_neighbour();
         assert_eq!(actual.len(), 0);
     }
+
+    #[test]
+    fn test_get_edges_with_more_than_2_neighbours() {
+        let input = Mesh::new(
+            vec![0.0, 0.0, 0.0,
+                 2.5, 5.0, 0.0,
+                 5.0, 0.0, 0.0,
+                 7.5, 5.0, 0.0,
+                 10.0, 0.0, 0.0,
+                 5.0, 10.0, 0.0,
+                 5.0, 5.0, 3.0,
+                 ],
+            vec![0, 2, 1, // first face
+                 1, 2, 3, // second face
+                 2, 4, 3, // third face
+                 1, 3, 5, // fourth face
+                 1, 3, 6, // fifth face
+                 ]
+        );
+        
+        let mut actual = input.get_edges_with_more_than_2_neighbours();
+        let mut expected = vec![
+            Edge::new(3, 1), // second face, third edge, 3 neighbours
+        ];
+        actual.sort();
+        expected.sort();
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_get_edges_with_more_than_2_neighbours_manifold() {
+        let input = Mesh::new(
+        vec![
+            // Base
+            -2.0,1.0,0.0,
+            8.0,1.0,0.0,
+            8.0,11.0,0.0,
+            -2.0,11.0,0.0,
+        
+            // Top
+            3.0,6.0,4.0
+        ],
+        vec![
+            // Base faces
+            0,1,2, //0
+            0,2,3, //1
+        
+            // Side faces
+            0,1,4, //2
+            1,2,4, //3
+            2,3,4, //4
+            3,0,4  //5
+        ]);
+        
+        let actual = input.get_edges_with_more_than_2_neighbours();
+        assert_eq!(actual.len(), 0);
+    }
     
     #[test]
     fn test_get_non_manifold_edges(){
@@ -1492,6 +1707,62 @@ mod tests {
     }
 
     #[test]
+    fn test_partialeq_with_id_true() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0002,
+                               10.0, 0.0001, 0.0,
+                               10.0, -15.0001, 0.0],
+                          vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), true);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), true);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_and_without_true() {
+        let a = Mesh::new(vec![0.0, 0.0, 0.0002,
+                                                10.0, 0.0001, 0.0,
+                                                10.0, -15.0001, 0.0],
+                                  vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+                                                10.0, 0.0, 0.0,
+                                                10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_false() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0002,
+                                                10.0, 0.0001, 0.0,
+                                                10.0, -15.0001, 0.0],
+                                  vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
+                                                10.0, 0.0, 0.0,
+                                                10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    }
+
+    #[test]
+    fn test_partialeq_with_id_without_id_check_true() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0002,
+                                                10.0, 0.0001, 0.0,
+                                                10.0, -15.0001, 0.0],
+                                  vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
+                                                10.0, 0.0, 0.0,
+                                                10.0, -15.0, 0.0],
+                                  vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance_without_id(&b,0.0002), true);
+        assert_eq!(b.eq_with_tolerance_without_id(&a, 0.0002), true);
+    }
+
+    #[test]
     fn test_partialeq_coordinates_count_false() {
         let a = Mesh::new(vec![0.0, 0.0, 0.0,
                                10.0, 0.0, 0.0,
@@ -1513,6 +1784,20 @@ mod tests {
                                10.0, -15.0003, 0.0],
                           vec![0, 1, 2]);
         let b = Mesh::new(vec![0.0, 0.0, 0.0,
+                               10.0, 0.0, 0.0,
+                               10.0, -15.0, 0.0],
+                          vec![0, 1, 2]);
+        assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
+        assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    }
+
+    #[test]
+    fn test_partialeq_different_coordinates_without_id_check_false() {
+        let a = Mesh::new_with_id(Some(7), vec![0.0, 0.0, 0.0,
+                               10.0, 2.0, 0.0,
+                               10.0, -15.0003, 0.0],
+                          vec![0, 1, 2]);
+        let b = Mesh::new_with_id(Some(6), vec![0.0, 0.0, 0.0,
                                10.0, 0.0, 0.0,
                                10.0, -15.0, 0.0],
                           vec![0, 1, 2]);
