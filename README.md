@@ -44,6 +44,12 @@ cargo add meshmeshmesh
 - 3D Polygon triangulation with holes
 ![Polygon triangulation](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/polygon_triangulation.gif)
 
+### File formats
+
+This library works natively on .bim file format, which is open minimalist text mesh format described here: https://github.com/paireks/dotbim 
+
+There are many ways to export or convert into this file format using tools described here: https://github.com/paireks/dotbim?tab=readme-ov-file#apps-supporting-bim
+
 ## Documentation & Examples
 
 https://docs.rs/meshmeshmesh/latest/meshmeshmesh/
