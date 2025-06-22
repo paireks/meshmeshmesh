@@ -39,6 +39,7 @@ mod polygon_triangulation;
 pub mod ray;
 mod ray_analysis;
 pub mod rotation;
+mod rotation_analysis;
 pub mod scene;
 mod scene_analysis;
 pub mod three_edge_group;
