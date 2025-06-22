@@ -10,6 +10,7 @@ mod edge_analysis;
 mod edge_processing;
 mod edge_transformations;
 pub mod element;
+mod element_analysis;
 pub mod face_neighbours;
 mod face_neighbours_analysis;
 pub mod face_neighbours_angle;
