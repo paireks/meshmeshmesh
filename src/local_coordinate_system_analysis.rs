@@ -76,6 +76,30 @@ impl LocalCoordinateSystem {
     pub fn get_z_ray(&self) -> Ray {
         Ray::new(self.origin, self.get_z())
     }
+
+    /// Gets [Vector] which goes from this `self` [LocalCoordinateSystem] to the `other` one.
+    ///
+    /// Can be useful in cases when you try to move one coordinate system in the same place as
+    /// another one.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::local_coordinate_system::LocalCoordinateSystem;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let a = LocalCoordinateSystem::new(Point::new(0.0, 5.0, -1.2), Vector::new(0.0, 0.0, 1.0), Vector::new(0.0, -1.0, 0.0));
+    /// let b = LocalCoordinateSystem::new(Point::new(10.0, -4.0, -1.0), Vector::new(0.0, 0.0, 1.0), Vector::new(0.0, -1.0, 0.0));
+    ///
+    /// let actual = a.get_vector_to(&b);
+    /// let expected = Vector::new(10.0 - 0.0, -4.0 - 5.0, -1.0 - (-1.2));
+    ///
+    /// assert!(expected.eq_with_tolerance(&actual, 0.00001));
+    /// ```
+    pub fn get_vector_to(&self, other: &LocalCoordinateSystem) -> Vector {
+        Vector::from_2_points(&self.origin, &other.origin)
+    }
 }
 
 #[cfg(test)]
@@ -126,5 +150,16 @@ mod tests {
 
         assert_eq!(a.eq_with_tolerance(&b,0.0002), false);
         assert_eq!(b.eq_with_tolerance(&a, 0.0002), false);
+    }
+
+    #[test]
+    fn test_get_vector_to() {
+        let a = LocalCoordinateSystem::new(Point::new(0.0, 5.0, -1.2), Vector::new(0.0, 0.0, 1.0), Vector::new(0.0, -1.0, 0.0));
+        let b = LocalCoordinateSystem::new(Point::new(10.0, -4.0, -1.0), Vector::new(0.0, 0.0, 1.0), Vector::new(0.0, -1.0, 0.0));
+
+        let actual = a.get_vector_to(&b);
+        let expected = Vector::new(10.0 - 0.0, -4.0 - 5.0, -1.0 - (-1.2));
+
+        assert!(expected.eq_with_tolerance(&actual, 0.00001));
     }
 }
