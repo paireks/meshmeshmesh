@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::vector::Vector;
 
 /// Represents a rotation in three-dimensional space using a quaternion.
 #[derive(Deserialize, Serialize)]
@@ -22,6 +23,18 @@ impl PartialEq for Rotation {
 impl Rotation {
     /// Returns a new Rotation
     pub fn new(qx: f64, qy: f64, qz: f64, qw: f64) -> Rotation { Rotation { qx, qy, qz, qw } }
+
+    /// Returns a new Rotation, but from Axis-Angle rotation.
+    pub fn new_from_axis_angle(axis: &Vector, angle: f64) -> Rotation {
+        let axis = axis.get_unitized();
+
+        let qx = axis.x * f64::sin(angle/2.0);
+        let qy = axis.y * f64::sin(angle/2.0);
+        let qz = axis.z * f64::sin(angle/2.0);
+        let qw = f64::cos(angle/2.0);
+
+        Rotation::new(qx, qy, qz, qw)
+    }
 }
 
 #[cfg(test)]
@@ -37,6 +50,14 @@ mod tests {
         assert_eq!(result.qy, -2.3);
         assert_eq!(result.qz, 3.9);
         assert_eq!(result.qw, 5.5);
+    }
+
+    #[test]
+    fn test_new_from_axis_angle() {
+        let actual = Rotation::new_from_axis_angle(&Vector::new(1.0, 0.0, 0.0), std::f64::consts::PI / 2.0);
+        let expected = Rotation::new(std::f64::consts::FRAC_1_SQRT_2, 0.0, 0.0, std::f64::consts::FRAC_1_SQRT_2);
+        
+        assert!(expected.eq_with_tolerance(&actual, 0.0001))
     }
 
     #[test]
