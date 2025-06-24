@@ -1,3 +1,4 @@
+use crate::rotation::Rotation;
 use crate::vector::Vector;
 
 impl Vector {
@@ -191,6 +192,31 @@ impl Vector {
     pub fn get_dot_product(&self, second_vector: &Vector) -> f64 {
         self.x * second_vector.x + self.y * second_vector.y + self.z * second_vector.z
     }
+
+    /// Gets the [Rotation] needed to align this [Vector] into other one.
+    ///
+    /// It can be useful for operations which requires aligning one Vector into another one.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::rotation::Rotation;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let first_vector = Vector::new(1.0, 2.0, 3.0);
+    /// let second_vector = Vector::new(4.0, -5.0, 6.0);
+    ///
+    /// let actual = first_vector.get_rotation_to(&second_vector);
+    /// let expected = Rotation::new_from_axis_angle(&Vector::new(27.0,6.0,-13.0), 1.19664);
+    ///
+    /// assert!(actual.eq_with_tolerance(&expected, 0.0001));
+    /// ```
+    pub fn get_rotation_to(&self, other: &Vector) -> Rotation {
+        let axis = self.get_cross_product(other);
+        let angle = self.get_angle(other);
+
+        Rotation::new_from_axis_angle(&axis, angle)
+    }
 }
 
 
@@ -328,5 +354,16 @@ mod tests {
         let actual = first_vector.get_dot_product(&second_vector);
 
         assert_eq!(actual, 12.0);
+    }
+    
+    #[test]
+    fn test_get_rotation_to() {
+        let first_vector = Vector::new(1.0, 2.0, 3.0);
+        let second_vector = Vector::new(4.0, -5.0, 6.0);
+        
+        let actual = first_vector.get_rotation_to(&second_vector);
+        let expected = Rotation::new_from_axis_angle(&Vector::new(27.0,6.0,-13.0), 1.19664);
+        
+        assert!(actual.eq_with_tolerance(&expected, 0.0001));
     }
 }
