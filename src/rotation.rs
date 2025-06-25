@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use crate::vector::Vector;
 
 /// Represents a rotation in three-dimensional space using a quaternion.
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub struct Rotation {
     /// The x-coordinate of the quaternion.
     pub qx: f64,

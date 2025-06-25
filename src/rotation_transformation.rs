@@ -37,6 +37,26 @@ impl ops::Mul<Rotation> for Rotation {
     }
 }
 
+impl Rotation {
+    /// Gets inverted version of quaternion which defines [Rotation].
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use meshmeshmesh::rotation::Rotation;
+    /// 
+    /// let input = Rotation::new(-0.16408259600363556,  -0.62745925514862166, 0.7364020684484639, 0.1925714890680042);
+    /// let actual = input.get_inverted();
+    /// let expected = Rotation::new(0.16408259600363556,  0.62745925514862166, -0.7364020684484639, 0.1925714890680042);
+    /// 
+    /// assert_eq!(expected, actual);
+    /// 
+    /// ```
+    pub fn get_inverted(&self) -> Rotation {
+        Rotation::new(-self.qx, -self.qy, -self.qz, self.qw)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -50,5 +70,14 @@ mod tests {
         let expected = Rotation::new(0.04636,0.1773,0.22009,-0.95811);
         
         assert!(expected.eq_with_tolerance(&actual, 0.0001));
+    }
+    
+    #[test]
+    fn test_get_inverted() {
+        let input = Rotation::new(-0.16408259600363556,  -0.62745925514862166, 0.7364020684484639, 0.1925714890680042);
+        let actual = input.get_inverted();
+        let expected = Rotation::new(0.16408259600363556,  0.62745925514862166, -0.7364020684484639, 0.1925714890680042);
+        
+        assert_eq!(expected, actual);
     }
 }
