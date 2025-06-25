@@ -56,7 +56,7 @@ mod tests {
     use crate::color::Color;
     use crate::element::Element;
     use crate::mesh::Mesh;
-    use crate::rotation::Rotation;
+    use crate::quaternion::Quaternion;
     use crate::vector::Vector;
     use super::*;
 
@@ -86,7 +86,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -135,7 +135,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.000001,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -179,7 +179,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -234,7 +234,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -278,7 +278,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -322,7 +322,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -332,7 +332,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(100.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("882ccb70-9925-4a10-82af-07c6fa2be5e7"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -376,7 +376,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Something else"), // Different
                     Color::new(0,120,120,255),
@@ -420,7 +420,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),

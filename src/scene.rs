@@ -55,7 +55,7 @@ mod tests {
     use serde_json::{from_str, from_value};
     use serde_json::to_string;
     use crate::color::Color;
-    use crate::rotation::Rotation;
+    use crate::quaternion::Quaternion;
     use crate::vector::Vector;
     use super::*;
 
@@ -85,7 +85,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -121,7 +121,7 @@ mod tests {
         let expected_element= Element::new(
             0,
             Vector::new(0.,0.,0.),
-            Rotation::new(0.,0.,0.,1.0),
+            Quaternion::new(0.,0.,0.,1.0),
             String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
             String::from("Plate"),
             Color::new(0,120,120,255),
@@ -173,7 +173,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -228,7 +228,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -272,7 +272,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -316,7 +316,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -326,7 +326,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(100.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("882ccb70-9925-4a10-82af-07c6fa2be5e7"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -370,7 +370,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Something else"), // Different
                     Color::new(0,120,120,255),
@@ -414,7 +414,7 @@ mod tests {
                 Element::new(
                     0,
                     Vector::new(0.,0.,0.),
-                    Rotation::new(0.,0.,0.,1.0),
+                    Quaternion::new(0.,0.,0.,1.0),
                     String::from("d4f28792-e1e9-4e31-bcee-740dbda61e20"),
                     String::from("Plate"),
                     Color::new(0,120,120,255),
@@ -485,7 +485,7 @@ mod tests {
         let element = Element::new(
             0,
             Vector::new(0.,0.,0.),
-            Rotation::new(0., 0., 0., 1.),
+            Quaternion::new(0., 0., 0., 1.),
             String::from("76e051c1-1bd7-44fc-8e2e-db2b64055068"),
             String::from("Structure"),
             Color::new(255,255,0,255),
@@ -572,7 +572,7 @@ mod tests {
         let element1 = Element::new(
             0,
             Vector::new(-100.,-100.,-100.),
-            Rotation::new(0., 0., 0., 1.),
+            Quaternion::new(0., 0., 0., 1.),
             String::from("9f61b565-06a2-4bef-8b72-f37091ab54d6"),
             String::from("Brick"),
             Color::new(255,0,0,255),
@@ -583,7 +583,7 @@ mod tests {
         let element2 = Element::new(
             0,
             Vector::new(0.,0.,0.),
-            Rotation::new(0., 0., 0., 1.),
+            Quaternion::new(0., 0., 0., 1.),
             String::from("4d00c967-791a-42a6-a5e8-cf05831bc11d"),
             String::from("Brick"),
             Color::new(0,255,0,126),
@@ -594,7 +594,7 @@ mod tests {
         let element3 = Element::new(
             0,
             Vector::new(100.,100.,100.),
-            Rotation::new(0., 0., 0., 1.),
+            Quaternion::new(0., 0., 0., 1.),
             String::from("8501a5e3-4709-47d8-bd5d-33d745a435d5"),
             String::from("Brick"),
             Color::new(0,0,255,10),
@@ -681,7 +681,7 @@ mod tests {
         let element1 = Element::new(
             0,
             Vector::new(-100.,-100.,-100.),
-            Rotation::new(0., 0., 0., 1.),
+            Quaternion::new(0., 0., 0., 1.),
             String::from("9f61b565-06a2-4bef-8b72-f37091ab54d6"),
             String::from("Brick"),
             Color::new(255,0,0,255),
@@ -692,7 +692,7 @@ mod tests {
         let element2 = Element::new(
             0,
             Vector::new(0.,0.,0.),
-            Rotation::new(0., 0., 0., 1.),
+            Quaternion::new(0., 0., 0., 1.),
             String::from("4d00c967-791a-42a6-a5e8-cf05831bc11d"),
             String::from("Brick"),
             Color::new(0,255,0,126),
@@ -727,7 +727,7 @@ mod tests {
         let element3 = Element::new(
             0,
             Vector::new(100.,100.,100.),
-            Rotation::new(0., 0., 0., 1.),
+            Quaternion::new(0., 0., 0., 1.),
             String::from("8501a5e3-4709-47d8-bd5d-33d745a435d5"),
             String::from("Brick"),
             Color::new(0,0,255,10),

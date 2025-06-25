@@ -57,7 +57,7 @@ impl Element {
 mod tests {
     use std::collections::HashMap;
     use crate::color::Color;
-    use crate::rotation::Rotation;
+    use crate::quaternion::Quaternion;
     use crate::vector::Vector;
     use super::*;
 
@@ -68,7 +68,7 @@ mod tests {
         Element::new(
             4,
             Vector::new(0.2, 0.3, 0.4),
-            Rotation::new(1.0, 1.5, 2.0, 2.5),
+            Quaternion::new(1.0, 1.5, 2.0, 2.5),
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Plate"),
             Color::new(0,0,255,0),
@@ -84,7 +84,7 @@ mod tests {
         Element::new(
             0,
             Vector::new(0.0, 0.0, 0.0),
-            Rotation::new(0.0, 0.0, 0.0, 1.0),
+            Quaternion::new(0.0, 0.0, 0.0, 1.0),
             String::from("3028896f-cd51-4b3a-be54-08841b4e9081"),
             String::from("Cube"),
             Color::new(0,0,255,0),
@@ -136,7 +136,7 @@ mod tests {
         let b = Element::new(
             4,
             Vector::new(0.2, 0.3, 0.4-0.0005),
-            Rotation::new(1.0+0.0005, 1.5, 2.0, 2.5-0.000001),
+            Quaternion::new(1.0+0.0005, 1.5, 2.0, 2.5-0.000001),
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Plate"),
             Color::new(0,0,255,0),
@@ -158,7 +158,7 @@ mod tests {
         let b = Element::new(
             3, // different
             Vector::new(0.2, 0.3, 0.4),
-            Rotation::new(1.0, 1.5, 2.0, 2.5),
+            Quaternion::new(1.0, 1.5, 2.0, 2.5),
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Plate"),
             Color::new(0,0,255,0),
@@ -180,7 +180,7 @@ mod tests {
         let b = Element::new(
             4,
             Vector::new(0.1, 0.3, 0.4), // different
-            Rotation::new(1.0, 1.5, 2.0, 2.5),
+            Quaternion::new(1.0, 1.5, 2.0, 2.5),
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Plate"),
             Color::new(0,0,255,0),
@@ -202,7 +202,7 @@ mod tests {
         let b = Element::new(
             4,
             Vector::new(0.2, 0.3, 0.4),
-            Rotation::new(1.0, -0.5, 2.0, 2.5), // different
+            Quaternion::new(1.0, -0.5, 2.0, 2.5), // different
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Plate"),
             Color::new(0,0,255,0),
@@ -224,7 +224,7 @@ mod tests {
         let b = Element::new(
             4,
             Vector::new(0.2, 0.3, 0.4),
-            Rotation::new(1.0, 1.5, 2.0, 2.5),
+            Quaternion::new(1.0, 1.5, 2.0, 2.5),
             String::from("b34a1674-e680-40f2-baa9-0e9b017bea14"), // different
             String::from("Plate"),
             Color::new(0,0,255,0),
@@ -246,7 +246,7 @@ mod tests {
         let b = Element::new(
             4,
             Vector::new(0.2, 0.3, 0.4),
-            Rotation::new(1.0, 1.5, 2.0, 2.5),
+            Quaternion::new(1.0, 1.5, 2.0, 2.5),
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Another one"), // different
             Color::new(0,0,255,0),
@@ -268,7 +268,7 @@ mod tests {
         let b = Element::new(
             4,
             Vector::new(0.2, 0.3, 0.4),
-            Rotation::new(1.0, 1.5, 2.0, 2.5),
+            Quaternion::new(1.0, 1.5, 2.0, 2.5),
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Plate"),
             Color::new(55,0,255,0), // different
@@ -290,7 +290,7 @@ mod tests {
         let b = Element::new(
             4,
             Vector::new(0.2, 0.3, 0.4),
-            Rotation::new(1.0, 1.5, 2.0, 2.5),
+            Quaternion::new(1.0, 1.5, 2.0, 2.5),
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Plate"),
             Color::new(0,0,255,0),
@@ -312,7 +312,7 @@ mod tests {
         let b = Element::new(
             0,
             Vector::new(0.0, 0.0, 0.0),
-            Rotation::new(0.0, 0.0, 0.0, 1.0),
+            Quaternion::new(0.0, 0.0, 0.0, 1.0),
             String::from("3028896f-cd51-4b3a-be54-08841b4e9081"),
             String::from("Cube"),
             Color::new(0,0,255,0),
@@ -358,7 +358,7 @@ mod tests {
         let b = Element::new(
             0,
             Vector::new(0.0, 0.0, 0.0),
-            Rotation::new(0.0, 0.0, 0.0, 1.0),
+            Quaternion::new(0.0, 0.0, 0.0, 1.0),
             String::from("3028896f-cd51-4b3a-be54-08841b4e9081"),
             String::from("Cube"),
             Color::new(0,0,255,0),
@@ -404,7 +404,7 @@ mod tests {
         let b = Element::new(
             4,
             Vector::new(0.2, 0.3, 0.4),
-            Rotation::new(1.0, 1.5, 2.0, 2.5),
+            Quaternion::new(1.0, 1.5, 2.0, 2.5),
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Plate"),
             Color::new(0,0,255,0),
@@ -426,7 +426,7 @@ mod tests {
         let b = Element::new(
             4,
             Vector::new(0.2, 0.3, 0.4),
-            Rotation::new(1.0, 1.5, 2.0, 2.5),
+            Quaternion::new(1.0, 1.5, 2.0, 2.5),
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Plate"),
             Color::new(0,0,255,0),
@@ -449,7 +449,7 @@ mod tests {
         let b = Element::new(
             4,
             Vector::new(0.2, 0.3, 0.4),
-            Rotation::new(1.0, 1.5, 2.0, 2.5),
+            Quaternion::new(1.0, 1.5, 2.0, 2.5),
             String::from("b8a7a2ed-0c30-4c20-867e-baa1ef7b8353"),
             String::from("Plate"),
             Color::new(0,0,255,0),
