@@ -41,6 +41,7 @@ pub mod ray;
 mod ray_analysis;
 pub mod rotation;
 mod rotation_analysis;
+mod rotation_transformation;
 pub mod scene;
 mod scene_analysis;
 pub mod three_edge_group;
