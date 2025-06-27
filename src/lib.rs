@@ -44,6 +44,7 @@ pub mod ray;
 mod ray_analysis;
 pub mod scene;
 mod scene_analysis;
+mod scene_processing;
 pub mod three_edge_group;
 mod three_edge_group_analysis;
 pub mod triangle;

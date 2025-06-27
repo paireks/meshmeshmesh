@@ -1,4 +1,5 @@
 use std::ops;
+use crate::quaternion::Quaternion;
 use crate::vector::Vector;
 
 impl Vector {

@@ -63,6 +63,25 @@ impl Point {
         Point::new(point2d.x, point2d.y, 0.0)
     }
 
+    /// Creates [Point] from [Quaternion] representation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::quaternion::Quaternion;
+    ///
+    /// let input = Quaternion::new(1.5, -2.3, 3.9, 0.0);
+    /// let actual = Point::from_quaternion(input);
+    /// let expected = Point::new(1.5, -2.3, 3.9);
+    ///
+    /// assert_eq!(expected, actual);
+    ///
+    /// ```
+    pub fn from_quaternion(quaternion: Quaternion) -> Point {
+        Point::new(quaternion.qx, quaternion.qy, quaternion.qz)
+    }
+
     /// Converts this [Point] to [Quaternion] representation.
     ///
     /// # Example
@@ -103,6 +122,16 @@ mod tests {
         
         assert_eq!(expected, actual);
     }
+
+    #[test]
+    fn test_from_quaternion(){
+        let input = Quaternion::new(1.5, -2.3, 3.9, 0.0);
+        let actual = Point::from_quaternion(input);
+        let expected = Point::new(1.5, -2.3, 3.9);
+        
+        assert_eq!(expected, actual);
+    }
+    
     #[test]
     fn test_to_quaternion(){
         let input = Point::new(1.5, -2.3, 3.9);
@@ -111,7 +140,6 @@ mod tests {
 
         assert_eq!(expected, actual);
     }
-    
 
     #[test]
     fn test_partialeq_true() {
