@@ -193,6 +193,39 @@ impl Vector {
         self.x * second_vector.x + self.y * second_vector.y + self.z * second_vector.z
     }
 
+
+    /// Gets any perpendicular [Vector] to given one.
+    ///
+    /// The output [Vector] should be already unitized.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let vector = Vector::new(1.0, 2.0, 3.0);
+    /// let actual = vector.get_any_perpendicular();
+    ///
+    /// let expected = Vector::new(0.8944271909999159, -0.4472135954999579,  0.0);
+    ///
+    /// assert_eq!(expected, actual);
+    ///
+    /// ```
+    pub fn get_any_perpendicular(&self) -> Vector {
+        let input_unitized = self.get_unitized();
+
+        if input_unitized.z == 1.0 { // corner case for Z-unit Vector
+            return Vector::new(std::f64::consts::FRAC_1_SQRT_2, -std::f64::consts::FRAC_1_SQRT_2, 0.0);
+        }
+        if input_unitized.z == -1.0 { // corner case for Z-unit Vector reversed
+            return Vector::new(-std::f64::consts::FRAC_1_SQRT_2, std::f64::consts::FRAC_1_SQRT_2, 0.0);
+        }
+
+        let helper = Vector::new(0.0, 0.0, 1.0); // normal case
+
+        self.get_cross_product(&helper).get_unitized()
+    }
+
     /// Gets the rotation described by [Quaternion] needed to align this [Vector] into other one.
     ///
     /// It can be useful for operations which requires aligning one Vector into another one.
@@ -212,8 +245,22 @@ impl Vector {
     /// assert!(actual.eq_with_tolerance(&expected, 0.0001));
     /// ```
     pub fn get_rotation_to(&self, other: &Vector) -> Quaternion {
-        let axis = self.get_cross_product(other);
-        let angle = self.get_angle(other);
+        let self_unitized = self.get_unitized();
+        let other_unitized = other.get_unitized();
+        if self_unitized == other_unitized { // corner case for no rotation for 2 identical direction Vectors
+            return Quaternion::identity();
+        }
+
+        let axis: Vector;
+        let angle: f64;
+        if self_unitized.get_reversed() == other_unitized { // corner case 180 degrees rotation for 2 identical but reversed direction Vectors, around any perpendicular axis
+            axis = self.get_any_perpendicular();
+            angle = std::f64::consts::PI;
+        }
+        else { // normal case
+            axis = self_unitized.get_cross_product(&other_unitized);
+            angle = self_unitized.get_angle(&other_unitized);
+        }
 
         Quaternion::new_from_axis_angle(&axis, angle)
     }
@@ -355,6 +402,42 @@ mod tests {
 
         assert_eq!(actual, 12.0);
     }
+
+    #[test]
+    fn test_get_any_perpendicular() {
+        let vector = Vector::new(1.0, 2.0, 3.0);
+        let actual = vector.get_any_perpendicular();
+
+        let expected = Vector::new(0.8944271909999159, -0.4472135954999579,  0.0);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_get_any_perpendicular_z_unit() {
+        let vector = Vector::new(0.0, 0.0, 1.0);
+        let actual = vector.get_any_perpendicular();
+
+        let expected = Vector::new(std::f64::consts::FRAC_1_SQRT_2, -std::f64::consts::FRAC_1_SQRT_2, 0.0);
+
+        let actual_close_for_reference = Vector::new(0.05, 0.05, 0.9).get_any_perpendicular();
+        println!("{0:?}", actual_close_for_reference);
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_get_any_perpendicular_z_unit_reversed() {
+        let vector = Vector::new(0.0, 0.0, -1.0);
+        let actual = vector.get_any_perpendicular();
+
+        let expected = Vector::new(-std::f64::consts::FRAC_1_SQRT_2, std::f64::consts::FRAC_1_SQRT_2, 0.0);
+
+        let actual_close_for_reference = Vector::new(-0.05, -0.05, -0.9).get_any_perpendicular();
+        println!("{0:?}", actual_close_for_reference);
+
+        assert_eq!(expected, actual);
+    }
     
     #[test]
     fn test_get_rotation_to() {
@@ -364,6 +447,30 @@ mod tests {
         let actual = first_vector.get_rotation_to(&second_vector);
         let expected = Quaternion::new_from_axis_angle(&Vector::new(27.0,6.0,-13.0), 1.19664);
         
+        assert!(actual.eq_with_tolerance(&expected, 0.0001));
+    }
+
+    #[test]
+    fn test_get_rotation_to_same() {
+        let first_vector = Vector::new(1.0, 2.0, 3.0);
+        let second_vector = Vector::new(1.0, 2.0, 3.0);
+
+        let actual = first_vector.get_rotation_to(&second_vector);
+        let expected = Quaternion::new(0.0,0.0,0.0, 1.0);
+
+        assert!(actual.eq_with_tolerance(&expected, 0.0001));
+    }
+
+    #[test]
+    fn test_get_rotation_to_same_but_reversed() {
+        let first_vector = Vector::new(1.0, 2.0, 3.0);
+        let second_vector = Vector::new(-1.0, -2.0, -3.0);
+
+        let actual = first_vector.get_rotation_to(&second_vector);
+        let expected = Quaternion::new(0.894427190999916,-0.447213595499958, 0.0, 6.123031769111886e-17);
+
+        println!("{0:?}", actual);
+
         assert!(actual.eq_with_tolerance(&expected, 0.0001));
     }
 }

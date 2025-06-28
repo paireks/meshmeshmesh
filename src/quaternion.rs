@@ -24,6 +24,11 @@ impl Quaternion {
     /// Returns a new Quaternion
     pub fn new(qx: f64, qy: f64, qz: f64, qw: f64) -> Quaternion { Quaternion { qx, qy, qz, qw } }
 
+    /// Returns a new identity Quaternion
+    pub fn identity() -> Quaternion {
+        Quaternion { qx: 0.0, qy: 0.0, qz: 0.0, qw: 1.0 }
+    }
+
     /// Returns a new Quaternion, but from Axis-Angle rotation.
     pub fn new_from_axis_angle(axis: &Vector, angle: f64) -> Quaternion {
         let axis = axis.get_unitized();
@@ -51,6 +56,16 @@ mod tests {
         assert_eq!(result.qz, 3.9);
         assert_eq!(result.qw, 5.5);
     }
+
+    #[test]
+    fn test_identity() {
+        let result = Quaternion::identity();
+        assert_eq!(result.qx, 0.0);
+        assert_eq!(result.qy, 0.0);
+        assert_eq!(result.qz, 0.0);
+        assert_eq!(result.qw, 1.0);
+    }
+
 
     #[test]
     fn test_new_from_axis_angle() {
