@@ -1,6 +1,7 @@
 use std::ops;
 use crate::local_coordinate_system::LocalCoordinateSystem;
 use crate::point::Point;
+use crate::quaternion::Quaternion;
 use crate::vector::Vector;
 
 impl ops::Add<Vector> for LocalCoordinateSystem {
@@ -66,6 +67,13 @@ impl ops::Sub<Vector> for LocalCoordinateSystem {
 }
 
 impl LocalCoordinateSystem {
+
+/*    /// Returns the rotated [LocalCoordinateSystem] using given [Quaternion].
+    /// 
+    /// 
+    pub fn get_rotated_by_quaternion(&self, quaternion: Quaternion) -> LocalCoordinateSystem {
+        
+    }*/
     
     /// Creates the new [LocalCoordinateSystem] but flipped, meaning the z-axis and x-axis are
     /// reversed, but the y_axis stays the same.

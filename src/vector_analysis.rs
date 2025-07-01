@@ -144,6 +144,43 @@ impl Vector {
         f64::acos((self.get_dot_product(second_vector) / (self.get_length() * second_vector.get_length())).clamp(-1.0, 1.0))
     }
 
+    /// Calculates an angle between [Vector]s but in range of -PI to PI. Because of that normal
+    /// Vector has to be provided, to determine the orientation.
+    ///
+    /// # Examples
+    ///
+    /// This is first example:
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let first_vector = Vector::new(3.0, -3.0, 1.0);
+    /// let second_vector = Vector::new(4.0, 9.0, 2.0);
+    /// let normal_vector = Vector::new(-15.0, -2.0, 39.0);
+    ///
+    /// let actual = first_vector.get_signed_angle(&second_vector, &normal_vector);
+    ///
+    /// assert!((actual - 1.8720947029995874).abs() < 0.00001);
+    /// ```
+    ///
+    /// This second example with reversed normal from the first example:
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let first_vector = Vector::new(3.0, -3.0, 1.0);
+    /// let second_vector = Vector::new(4.0, 9.0, 2.0);
+    /// let normal_vector = Vector::new(15.0, 2.0, -39.0);
+    ///
+    /// let actual = first_vector.get_signed_angle(&second_vector, &normal_vector);
+    ///
+    /// assert!((actual + 1.8720947029995874).abs() < 0.00001);
+    /// ```
+    pub fn get_signed_angle(&self, second_vector: &Vector, normal_vector: &Vector) -> f64 {
+        let normal_vector_unitized = normal_vector.get_unitized();
+        f64::atan2(self.get_cross_product(second_vector).get_dot_product(&normal_vector_unitized), self.get_dot_product(second_vector))
+    }
+
     /// Calculates a cross product.
     ///
     /// Self [Vector] is the first one (a), and another one is the second one (b).
@@ -380,6 +417,28 @@ mod tests {
         let actual = first_vector.get_angle(&second_vector);
 
         assert!((actual - std::f64::consts::PI).abs() < 0.00001);
+    }
+
+    #[test]
+    fn test_get_signed_angle() {
+        let first_vector = Vector::new(3.0, -3.0, 1.0);
+        let second_vector = Vector::new(4.0, 9.0, 2.0);
+        let normal_vector = Vector::new(-15.0, -2.0, 39.0);
+
+        let actual = first_vector.get_signed_angle(&second_vector, &normal_vector);
+
+        assert!((actual - 1.8720947029995874).abs() < 0.00001);
+    }
+
+    #[test]
+    fn test_get_signed_angle_reversed_normal() {
+        let first_vector = Vector::new(3.0, -3.0, 1.0);
+        let second_vector = Vector::new(4.0, 9.0, 2.0);
+        let normal_vector = Vector::new(15.0, 2.0, -39.0);
+
+        let actual = first_vector.get_signed_angle(&second_vector, &normal_vector);
+
+        assert!((actual + 1.8720947029995874).abs() < 0.00001);
     }
 
     #[test]

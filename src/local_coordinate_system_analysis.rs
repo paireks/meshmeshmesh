@@ -1,4 +1,5 @@
 use crate::local_coordinate_system::LocalCoordinateSystem;
+use crate::quaternion::Quaternion;
 use crate::ray::Ray;
 use crate::vector::Vector;
 
@@ -100,6 +101,31 @@ impl LocalCoordinateSystem {
     pub fn get_vector_to(&self, other: &LocalCoordinateSystem) -> Vector {
         Vector::from_2_points(&self.origin, &other.origin)
     }
+
+/*    /// Gets [Rotation] which aligns from this `self` [LocalCoordinateSystem] to the `other` one.
+    ///
+    /// Can be useful in cases when you try to rotate one coordinate system in the same way as
+    /// another one.
+    ///
+    /// # Example
+    ///
+    /// ```
+    ///
+    /// ```
+    pub fn get_rotation_to(&self, other: &LocalCoordinateSystem) -> Quaternion {
+        let first_quaternion = self.x.get_rotation_to(&other.x);
+        let self_after_first_rotation = self.get_rotated_by_quaternion(first_quaternion);
+        let second_quaternion = self_after_first_rotation.get_rotation_to_when_x_aligned(&other);
+        second_quaternion * first_quaternion
+    }*/
+
+/*    /// Gets [Rotation] which aligns from this `self` [LocalCoordinateSystem] to the `other` one.
+    ///
+    /// This one works only once the X-axes are already aligned.
+    fn get_rotation_to_when_x_aligned(&self, other: &LocalCoordinateSystem) -> Quaternion {
+        let signed_angle = self.y.get_signed_angle(&other.y, &self.x);
+        Quaternion::new_from_axis_angle(&self.x, signed_angle)
+    }*/
 }
 
 #[cfg(test)]
