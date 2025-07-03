@@ -1,5 +1,6 @@
 use crate::point2d::Point2D;
 use crate::quaternion::Quaternion;
+use crate::vector::Vector;
 
 /// Represents a three-dimensional point with double-precision floating-point coordinates.
 ///
@@ -100,6 +101,22 @@ impl Point {
     pub fn to_quaternion(&self) -> Quaternion {
         Quaternion::new(self.x, self.y, self.z, 0.0)
     }
+
+    /// Converts [Point] to [Vector].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Point::new(0.541, 4.051, -8.031);
+    /// let expected = Vector::new(0.541, 4.051, -8.031);
+    /// let actual = input.to_vector();
+    /// assert_eq!(expected, actual);
+    ///
+    /// ```
+    pub fn to_vector(&self) -> Vector { Vector::new(self.x, self.y, self.z) }
 }
 
 #[cfg(test)]
@@ -138,6 +155,14 @@ mod tests {
         let actual = input.to_quaternion();
         let expected = Quaternion::new(1.5, -2.3, 3.9, 0.0);
 
+        assert_eq!(expected, actual);
+    }
+    
+    #[test]
+    fn test_to_vector() {
+        let input = Point::new(0.541, 4.051, -8.031);
+        let expected = Vector::new(0.541, 4.051, -8.031);
+        let actual = input.to_vector();
         assert_eq!(expected, actual);
     }
 

@@ -1,4 +1,5 @@
 use std::ops;
+use crate::point::Point;
 use crate::quaternion::Quaternion;
 use crate::vector::Vector;
 
@@ -87,6 +88,28 @@ impl Vector {
         let v = self.clone();
 
         v * f64::cos(angle) + (k.get_cross_product(&v)) * f64::sin(angle) + k * (k.get_dot_product(&v)) * (1.0 - f64::cos(angle))
+    }
+
+    /// Returns the rotated [Vector] using given [Quaternion].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::vector::Vector;
+    /// use meshmeshmesh::quaternion::Quaternion;
+    ///
+    /// let input = Vector::new(-3.8086671829223633, 5.3729696273803711, 0.0);
+    /// let quaternion = Quaternion::new(0.54418103763310099, -0.16946900809404691, -0.24431282685273129, 0.78451162911164585);
+    ///
+    /// let actual = input.get_rotated_by_quaternion(quaternion);
+    /// let expected = Vector::new(-2.066606, 3.711801, 5.032536);
+    ///
+    /// assert!(expected.eq_with_tolerance(&actual, 0.001));
+    /// ```
+    pub fn get_rotated_by_quaternion(&self, quaternion: Quaternion) -> Vector {
+        let point = self.to_point();
+        let point_rotated = point.get_rotated_by_quaternion(quaternion);
+        point_rotated.to_vector()
     }
 }
 
@@ -242,6 +265,17 @@ mod tests {
         
         let actual = input.get_rotated(&rotation_axis, 0.797);
         let expected = Vector::new(-22.722373, -4.58531, 46.517321);
+        
+        assert!(expected.eq_with_tolerance(&actual, 0.001));
+    }
+    
+    #[test]
+    fn test_get_rotated_by_quaternion() {
+        let input = Vector::new(-3.8086671829223633, 5.3729696273803711, 0.0);
+        let quaternion = Quaternion::new(0.54418103763310099, -0.16946900809404691, -0.24431282685273129, 0.78451162911164585);
+        
+        let actual = input.get_rotated_by_quaternion(quaternion);
+        let expected = Vector::new(-2.066606, 3.711801, 5.032536);
         
         assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
