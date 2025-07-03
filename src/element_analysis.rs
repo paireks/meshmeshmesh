@@ -1,4 +1,5 @@
 use crate::element::Element;
+use crate::local_coordinate_system::LocalCoordinateSystem;
 
 impl Element {
     /// Compares given [Element] to other one, but with a `f64` tolerance for fields
@@ -51,15 +52,84 @@ impl Element {
 
         true
     }
+
+    /// Gets [LocalCoordinateSystem] of this specific [Element].
+    ///
+    /// In other words, it turns the `vector` and `rotation` of the Element into the
+    /// LocalCoordinateSystem.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::collections::HashMap;
+    /// use meshmeshmesh::color::Color;
+    /// use meshmeshmesh::element::Element;
+    /// use meshmeshmesh::local_coordinate_system::LocalCoordinateSystem;
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::quaternion::Quaternion;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Element::new(
+    ///     2,
+    ///     Vector::new(7.5186233686734392, 7.3149022009468743, 105.9714472336252),
+    ///     Quaternion::new(0.6008800094747585, 0.24407245125781549, -0.28644964837820225, -0.70520809105867444),
+    ///     String::from("45255b3c-e672-4467-a891-c329c95fe35d"),
+    ///     String::from("Brick"),
+    ///     Color::new(174,166,129,255),
+    ///     None,
+    ///     HashMap::new(),
+    /// );
+    ///
+    /// let actual = input.get_local_coordinate_system();
+    /// let expected = LocalCoordinateSystem::new(
+    ///     Point::new(7.518623368673439,7.314902200946874, 105.9714472336252),
+    ///     Vector::new(0.7167504749620112,0.6973297330830885,5.551115123125783e-17),
+    ///     Vector::new(-0.11069670578579367,0.11377962631523676, -0.9873198245572398)
+    /// );
+    ///
+    /// assert!(expected.eq_with_tolerance(&actual, 0.0001));
+    ///
+    /// ```
+    pub fn get_local_coordinate_system(&self) -> LocalCoordinateSystem {
+        let mut local_coordinate_system = LocalCoordinateSystem::global().get_rotated_by_quaternion_around_its_origin(self.rotation);
+        local_coordinate_system.origin = self.vector.to_point();
+        local_coordinate_system
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
     use crate::color::Color;
+    use crate::point::Point;
     use crate::quaternion::Quaternion;
     use crate::vector::Vector;
     use super::*;
+
+    #[test]
+    fn test_get_local_coordinate_system() {
+        let input = Element::new(
+            2,
+            Vector::new(7.5186233686734392, 7.3149022009468743, 105.9714472336252),
+            Quaternion::new(0.6008800094747585, 0.24407245125781549, -0.28644964837820225, -0.70520809105867444),
+            String::from("45255b3c-e672-4467-a891-c329c95fe35d"),
+            String::from("Brick"),
+            Color::new(174,166,129,255),
+            None,
+            HashMap::new(),
+        );
+
+        let actual = input.get_local_coordinate_system();
+        let expected = LocalCoordinateSystem::new(
+            Point::new(7.518623368673439,7.314902200946874, 105.9714472336252),
+            Vector::new(0.7167504749620112,0.6973297330830885,5.551115123125783e-17),
+            Vector::new(-0.11069670578579367,0.11377962631523676, -0.9873198245572398)
+        );
+
+        println!("{0:?}", actual);
+
+        assert!(expected.eq_with_tolerance(&actual, 0.0001));
+    }
 
     fn get_blue_test_element() -> Element {
         let mut info: HashMap<String, String> = HashMap::new();
