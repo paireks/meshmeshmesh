@@ -1,4 +1,4 @@
-/*use std::collections::HashMap;
+use std::collections::HashMap;
 use crate::local_coordinate_system::LocalCoordinateSystem;
 use crate::mesh::Mesh;
 use crate::quaternion::Quaternion;
@@ -35,7 +35,7 @@ impl Scene {
             let new_mesh_id = new_id_and_local_coordinate_system.0;
             let new_quaternion = LocalCoordinateSystem::global().get_rotation_to(&new_local_coordinate_system);
             let new_vector = new_local_coordinate_system.origin.to_vector();
-            
+
             self.elements[i].mesh_id = new_mesh_id;
             self.elements[i].vector = new_vector;
             self.elements[i].rotation = new_quaternion;
@@ -51,19 +51,19 @@ impl Scene {
     /// This process should also remove unused Meshes as a side effect.
     fn duplicate_meshes(&mut self) {
         let number_of_elements = self.elements.len();
-        
+
         let mut duplicated_meshes: Vec<Mesh> = Vec::with_capacity(number_of_elements);
 
         for i in 0..number_of_elements {
             let mut mesh = self.get_transformed_mesh_for_element(&self.elements[i]);
             mesh.id = Some(i);
             duplicated_meshes.push(mesh);
-            
+
             self.elements[i].vector = Vector::zero();
             self.elements[i].rotation = Quaternion::identity();
             self.elements[i].mesh_id = i;
         }
-        
+
         self.meshes = duplicated_meshes;
     }
 
@@ -83,7 +83,7 @@ impl Scene {
     }
 }
 
-#[cfg(test)]
+/*#[cfg(test)]
 mod tests {
     use std::fs;
     use serde_json::{from_value, to_string};
@@ -127,6 +127,36 @@ mod tests {
         let file_serialized = to_string(&scene);
         let file_serialized_string = file_serialized.ok().unwrap();
         let path_after = "created_files/TestStructureDeduplication.bim";
+        fs::write(path_after, file_serialized_string).expect("Unable to write the file");
+    }
+
+    #[test]
+    pub fn test_deduplicate_meshes_beambridge() {
+        let path = "models/BeamBridgeExample.bim";
+        let read_file = fs::File::open(path).expect("Cannot read the file");
+        let json: serde_json::Value = serde_json::from_reader(read_file).expect("File has to be a proper JSON file");
+        let mut scene: Scene = from_value(json).unwrap();
+        println!("{0}", scene.meshes.len());
+        scene.deduplicate_meshes(0.001);
+        println!("{0}", scene.meshes.len());
+        let file_serialized = to_string(&scene);
+        let file_serialized_string = file_serialized.ok().unwrap();
+        let path_after = "created_files/BeamBridgeExampleDeduplication.bim";
+        fs::write(path_after, file_serialized_string).expect("Unable to write the file");
+    }
+
+    #[test]
+    pub fn test_deduplicate_meshes_samplehouse() {
+        let path = "models/SampleHouse.bim";
+        let read_file = fs::File::open(path).expect("Cannot read the file");
+        let json: serde_json::Value = serde_json::from_reader(read_file).expect("File has to be a proper JSON file");
+        let mut scene: Scene = from_value(json).unwrap();
+        println!("{0}", scene.meshes.len());
+        scene.deduplicate_meshes(0.001);
+        println!("{0}", scene.meshes.len());
+        let file_serialized = to_string(&scene);
+        let file_serialized_string = file_serialized.ok().unwrap();
+        let path_after = "created_files/SampleHouseDeduplication.bim";
         fs::write(path_after, file_serialized_string).expect("Unable to write the file");
     }
 }*/
