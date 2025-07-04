@@ -36,7 +36,7 @@ use crate::triangle::Triangle;
 /// assert_eq!(result.indices, vec![0, 1, 2]); // We create 1 face there using point0, point1 and point2.
 /// ```
 ///
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Mesh {
     /// Optional identifier
     #[serde(rename(serialize = "mesh_id", deserialize = "mesh_id"))]

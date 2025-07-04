@@ -1,4 +1,6 @@
 use std::collections::HashSet;
+use crate::element::Element;
+use crate::mesh::Mesh;
 use crate::scene::Scene;
 
 impl Scene {
@@ -32,6 +34,14 @@ impl Scene {
             return false;
         }
         true
+    }
+    
+    /// Gets [Mesh] for given [Element] which should be already transformed using Element's
+    /// `vector` & `rotation`.
+    pub (crate) fn get_transformed_mesh_for_element(&self, element: &Element) -> Mesh {
+        let mesh = self.meshes.iter().find(|&x| x.id == Some(element.mesh_id)).unwrap();
+        let mesh_rotated = mesh.get_rotated_by_quaternion(element.rotation);
+        mesh_rotated + element.vector
     }
     
     /// Gets all `id`s of the [Mesh]es for which any [Element] applied `face_colors`.
