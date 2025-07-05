@@ -65,7 +65,7 @@ impl Scene {
     /// (no rotating).
     ///
     /// This process should also remove unused Meshes as a side effect.
-    fn duplicate_meshes(&mut self) {
+    pub fn duplicate_meshes(&mut self) {
         let number_of_elements = self.elements.len();
 
         let mut duplicated_meshes: Vec<Mesh> = Vec::with_capacity(number_of_elements);
@@ -285,6 +285,58 @@ mod tests {
         let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
         let expected: Scene = from_value(json).unwrap();
 
+        assert!(expected.eq_with_tolerance(&actual, 0.001));
+    }
+    
+    #[test]
+    pub fn test_deduplicate_meshes_multiple_meshes() {
+/*        let path = "models/expected/MultipleMeshesDuplication.bim";
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
+        let mut scene: Scene = from_value(json).unwrap();
+        scene.deduplicate_meshes(0.001);
+        let file_serialized = to_string(&scene);
+        let file_serialized_string = file_serialized.ok().unwrap();
+        let path_after = "created_files/MultipleMeshesDeduplication.bim";
+        fs::write(path_after, file_serialized_string).expect("Unable to write the file");*/
+
+        let path = "models/input/MultipleMeshesDuplication.bim";
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
+        let mut actual: Scene = from_value(json).unwrap();
+        actual.deduplicate_meshes(0.001);
+
+        let path = "models/expected/MultipleMeshesDeduplication.bim";
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
+        let expected: Scene = from_value(json).unwrap();
+
+        assert!(expected.eq_with_tolerance(&actual, 0.001));
+    }
+    
+    #[test]
+    pub fn test_duplicate_meshes_multiple_meshes() {
+/*        let path = "models/MultipleMeshes.bim";
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
+        let mut scene: Scene = from_value(json).unwrap();
+        scene.duplicate_meshes();
+        let file_serialized = to_string(&scene);
+        let file_serialized_string = file_serialized.ok().unwrap();
+        let path_after = "created_files/MultipleMeshesDuplication.bim";
+        fs::write(path_after, file_serialized_string).expect("Unable to write the file");*/
+
+        let path = "models/input/MultipleMeshes.bim";
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
+        let mut actual: Scene = from_value(json).unwrap();
+        actual.duplicate_meshes();
+
+        let path = "models/expected/MultipleMeshesDuplication.bim";
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
+        let expected: Scene = from_value(json).unwrap();
+        
         assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
 }
