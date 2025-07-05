@@ -7,13 +7,13 @@ use crate::vector::Vector;
 
 impl Scene {
     /// Modifies [Scene] to have deduplicated [Mesh]es.
-    /// 
+    ///
     /// The correctness after deduplication should be checked also manually.
-    /// 
+    ///
     /// This method can more or less deform the scene, because of the transformations and other
     /// operations made on the geometries (Meshes). That's one of the reasons to check model
     /// manually to see if these deformations look acceptable.
-    fn deduplicate_meshes(&mut self, tolerance: f64) {
+    pub fn deduplicate_meshes(&mut self, tolerance: f64) {
         self.duplicate_meshes();
 
         let duplicated_meshes_transformed = self.meshes.clone(); // Used later for correctness check. These Meshes order is aligned with Elements order.
@@ -103,11 +103,13 @@ impl Scene {
 mod tests {
     use std::fs;
     use serde_json::{from_value, to_string};
+    use crate::color::Color;
+    use crate::element::Element;
     use super::*;
 
     #[test]
     pub fn test_deduplicate_meshes_pyramid() {
-        let path = "created_files/Pyramid.bim";
+/*        let path = "created_files/Pyramid.bim";
         let read_file = fs::read_to_string(path).unwrap();
         let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
         let mut scene: Scene = from_value(json).unwrap();
@@ -115,12 +117,69 @@ mod tests {
         let file_serialized = to_string(&scene);
         let file_serialized_string = file_serialized.ok().unwrap();
         let path_after = "created_files/PyramidDeduplication.bim";
-        fs::write(path_after, file_serialized_string).expect("Unable to write the file");
+        fs::write(path_after, file_serialized_string).expect("Unable to write the file");*/
+
+        let mesh = Mesh::new_with_id(
+            Some(0),
+            vec![
+                // Base
+                0.0,0.0,0.0,
+                10.0,0.0,0.0,
+                10.0,10.0,0.0,
+                0.0,10.0,0.0,
+
+                // Top
+                5.0,5.0,4.0
+            ],
+            vec![
+                // Base faces
+                0,1,2,
+                0,2,3,
+
+                // Side faces
+                0,1,4,
+                1,2,4,
+                2,3,4,
+                3,0,4
+            ]
+        );
+
+        let mut info: HashMap<String, String> = HashMap::new();
+        info.insert(String::from("Name"), String::from("Pyramid"));
+
+        let mut file_info: HashMap<String, String> = HashMap::new();
+        file_info.insert(String::from("Author"), String::from("John Doe"));
+        file_info.insert(String::from("Date"), String::from("28.09.1999"));
+
+        let element = Element::new(
+            0,
+            Vector::new(0.,0.,0.),
+            Quaternion::new(0., 0., 0., 1.),
+            String::from("76e051c1-1bd7-44fc-8e2e-db2b64055068"),
+            String::from("Structure"),
+            Color::new(255,255,0,255),
+            None,
+            info,
+        );
+
+        let mut actual: Scene = Scene::new(String::from("1.0.0"),
+                                     vec![mesh],
+                                     vec![element],
+                                     file_info);
+        
+        actual.deduplicate_meshes(0.001);
+        
+        let path = "models/expected/PyramidDeduplication.bim";
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
+        let expected: Scene = from_value(json).unwrap();
+        
+        assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
 
     #[test]
     pub fn test_deduplicate_meshes_cubes() {
-        let path = "created_files/Cubes.bim";
+/*        let path = "created_files/Cubes.bim";
         let read_file = fs::read_to_string(path).unwrap();
         let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
         let mut scene: Scene = from_value(json).unwrap();
@@ -128,51 +187,104 @@ mod tests {
         let file_serialized = to_string(&scene);
         let file_serialized_string = file_serialized.ok().unwrap();
         let path_after = "created_files/CubesDeduplication.bim";
-        fs::write(path_after, file_serialized_string).expect("Unable to write the file");
-    }
+        fs::write(path_after, file_serialized_string).expect("Unable to write the file");*/
 
-    #[test]
-    pub fn test_deduplicate_meshes_structure() {
-        let path = "models/TestStructure.bim";
+        let mesh = Mesh::new_with_id(
+            Some(0),
+            vec![
+                0.0, 0.0, 0.0,
+                10.0, 0.0, 0.0,
+                10.0, 0.0, 20.0,
+                0.0, 0.0, 20.0,
+                0.0, 30.0, 0.0,
+                10.0, 30.0, 0.0,
+                10.0, 30.0, 20.0,
+                0.0, 30.0, 20.0
+            ],
+            vec![
+                // Front side
+                0, 1, 2,
+                0, 2, 3,
+
+                // Bottom side
+                0, 1, 4,
+                1, 4, 5,
+
+                // Left side
+                0, 4, 3,
+                4, 3, 7,
+
+                // Right side
+                1, 2, 5,
+                2, 5, 6,
+
+                // Top side
+                2, 3, 7,
+                2, 6, 7,
+
+                // Back side
+                4, 5, 7,
+                5, 6, 7
+            ]
+        );
+
+        let mut info1: HashMap<String, String> = HashMap::new();
+        info1.insert(String::from("Name"), String::from("Red Cube"));
+
+        let mut info2: HashMap<String, String> = HashMap::new();
+        info2.insert(String::from("Name"), String::from("Green Cube"));
+
+        let mut info3: HashMap<String, String> = HashMap::new();
+        info3.insert(String::from("Name"), String::from("Blue Cube"));
+
+        let mut file_info: HashMap<String, String> = HashMap::new();
+        file_info.insert(String::from("Author"), String::from("John Doe"));
+
+        let element1 = Element::new(
+            0,
+            Vector::new(-100.,-100.,-100.),
+            Quaternion::new(0., 0., 0., 1.),
+            String::from("9f61b565-06a2-4bef-8b72-f37091ab54d6"),
+            String::from("Brick"),
+            Color::new(255,0,0,255),
+            None,
+            info1,
+        );
+
+        let element2 = Element::new(
+            0,
+            Vector::new(0.,0.,0.),
+            Quaternion::new(0., 0., 0., 1.),
+            String::from("4d00c967-791a-42a6-a5e8-cf05831bc11d"),
+            String::from("Brick"),
+            Color::new(0,255,0,126),
+            None,
+            info2,
+        );
+
+        let element3 = Element::new(
+            0,
+            Vector::new(100.,100.,100.),
+            Quaternion::new(0., 0., 0., 1.),
+            String::from("8501a5e3-4709-47d8-bd5d-33d745a435d5"),
+            String::from("Brick"),
+            Color::new(0,0,255,10),
+            None,
+            info3,
+        );
+
+        let mut actual: Scene = Scene::new(String::from("1.0.0"),
+                                     vec![mesh],
+                                     vec![element1, element2, element3],
+                                     file_info);
+
+        actual.deduplicate_meshes(0.001);
+
+        let path = "models/expected/CubesDeduplication.bim";
         let read_file = fs::read_to_string(path).unwrap();
         let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
-        let mut scene: Scene = from_value(json).unwrap();
-        println!("{0}", scene.meshes.len());
-        scene.deduplicate_meshes(0.001);
-        println!("{0}", scene.meshes.len());
-        let file_serialized = to_string(&scene);
-        let file_serialized_string = file_serialized.ok().unwrap();
-        let path_after = "created_files/TestStructureDeduplication.bim";
-        fs::write(path_after, file_serialized_string).expect("Unable to write the file");
-    }
+        let expected: Scene = from_value(json).unwrap();
 
-    #[test]
-    pub fn test_deduplicate_meshes_beambridge() {
-        let path = "models/BeamBridgeExample.bim";
-        let read_file = fs::read_to_string(path).unwrap();
-        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
-        let mut scene: Scene = from_value(json).unwrap();
-        println!("{0}", scene.meshes.len());
-        scene.deduplicate_meshes(0.001);
-        println!("{0}", scene.meshes.len());
-        let file_serialized = to_string(&scene);
-        let file_serialized_string = file_serialized.ok().unwrap();
-        let path_after = "created_files/BeamBridgeExampleDeduplication.bim";
-        fs::write(path_after, file_serialized_string).expect("Unable to write the file");
-    }
-
-    #[test]
-    pub fn test_deduplicate_meshes_samplehouse() {
-        let path = "models/SampleHouse.bim";
-        let read_file = fs::read_to_string(path).unwrap();
-        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
-        let mut scene: Scene = from_value(json).unwrap();
-        println!("{0}", scene.meshes.len());
-        scene.deduplicate_meshes(0.002);
-        println!("{0}", scene.meshes.len());
-        let file_serialized = to_string(&scene);
-        let file_serialized_string = file_serialized.ok().unwrap();
-        let path_after = "created_files/SampleHouseDeduplication.bim";
-        fs::write(path_after, file_serialized_string).expect("Unable to write the file");
+        assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
 }
