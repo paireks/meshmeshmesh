@@ -13,7 +13,7 @@ impl Scene {
     /// This method can more or less deform the scene, because of the transformations and other
     /// operations made on the geometries (Meshes). That's one of the reasons to check model
     /// manually to see if these deformations look acceptable.
-    pub fn deduplicate_meshes(&mut self, tolerance: f64) {
+    pub (crate) fn deduplicate_meshes(&mut self, tolerance: f64) {
         self.duplicate_meshes();
 
         let duplicated_meshes_transformed = self.meshes.clone(); // Used later for correctness check. These Meshes order is aligned with Elements order.
@@ -65,7 +65,7 @@ impl Scene {
     /// (no rotating).
     ///
     /// This process should also remove unused Meshes as a side effect.
-    pub fn duplicate_meshes(&mut self) {
+    pub (crate) fn duplicate_meshes(&mut self) {
         let number_of_elements = self.elements.len();
 
         let mut duplicated_meshes: Vec<Mesh> = Vec::with_capacity(number_of_elements);
@@ -166,14 +166,14 @@ mod tests {
                                      vec![mesh],
                                      vec![element],
                                      file_info);
-        
+
         actual.deduplicate_meshes(0.001);
-        
+
         let path = "models/expected/PyramidDeduplication.bim";
         let read_file = fs::read_to_string(path).unwrap();
         let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
         let expected: Scene = from_value(json).unwrap();
-        
+
         assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
 
@@ -287,7 +287,7 @@ mod tests {
 
         assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
-    
+
     #[test]
     pub fn test_deduplicate_meshes_multiple_meshes() {
 /*        let path = "models/expected/MultipleMeshesDuplication.bim";
@@ -313,7 +313,7 @@ mod tests {
 
         assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
-    
+
     #[test]
     pub fn test_duplicate_meshes_multiple_meshes() {
 /*        let path = "models/MultipleMeshes.bim";
@@ -336,7 +336,7 @@ mod tests {
         let read_file = fs::read_to_string(path).unwrap();
         let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
         let expected: Scene = from_value(json).unwrap();
-        
+
         assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
 }
