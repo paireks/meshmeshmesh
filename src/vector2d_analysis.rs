@@ -88,6 +88,8 @@ impl Vector2D {
     ///
     /// Self [Vector2D] is the first one (a), and another one is the second one (b).
     ///
+    /// This angle should be in range 0.0 <-> Pi, so it always returns smallest angle.
+    ///
     /// # Example
     ///
     /// ```
@@ -102,6 +104,25 @@ impl Vector2D {
     /// ```
     pub fn get_angle(&self, second_vector: &Vector2D) -> f64 {
         f64::acos((self.get_dot_product(second_vector) / (self.get_length() * second_vector.get_length())).clamp(-1.0, 1.0))
+    }
+
+    /// Gets the signed angle in radians between the given [Vector2D] & X-axis of Global Coordinate System.
+    ///
+    /// This angle should be in range -Pi <-> Pi.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::vector2d::Vector2D;
+    ///
+    /// let input = Vector2D::new(-6.028681, -14.381407);
+    ///
+    /// let actual = input.get_signed_angle_to_x();
+    ///
+    /// assert!((actual - (-1.967744)).abs() < 0.00001);
+    /// ```
+    pub fn get_signed_angle_to_x(&self) -> f64 {
+        f64::atan2(self.y, self.x)
     }
 
     /// Calculates a dot product.
@@ -130,6 +151,7 @@ impl Vector2D {
 
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::PI;
     use super::*;
     #[test]
     fn test_is_absolute_zero_length_true() {
@@ -217,6 +239,39 @@ mod tests {
         let actual = first_vector.get_angle(&second_vector);
 
         assert!((actual - std::f64::consts::PI).abs() < 0.00001);
+    }
+    
+    #[test]
+    fn test_get_signed_angle_to_x() {
+        let input = Vector2D::new(-6.028681, -14.381407);
+        
+        let actual = input.get_signed_angle_to_x();
+        
+        println!("{0:?}", actual);
+        
+        assert!((actual - (-1.967744)).abs() < 0.00001);
+    }
+
+    #[test]
+    fn test_get_signed_angle_to_x_x_axis() {
+        let input = Vector2D::new(1.0, 0.0);
+
+        let actual = input.get_signed_angle_to_x();
+
+        println!("{0:?}", actual);
+
+        assert!(actual < 0.00001);
+    }
+
+    #[test]
+    fn test_get_signed_angle_to_x_x_axis_reversed() {
+        let input = Vector2D::new(-1.0, 0.0);
+
+        let actual = input.get_signed_angle_to_x();
+
+        println!("{0:?}", actual);
+
+        assert!((actual - PI).abs() < 0.00001);
     }
 
     #[test]

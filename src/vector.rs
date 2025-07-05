@@ -103,6 +103,7 @@ impl Vector {
     /// Returns a new [Vector] created from 2 [Point]s
     ///
     /// # Example
+    /// 
     /// ```
     /// use meshmeshmesh::point::Point;
     /// use meshmeshmesh::vector::Vector;
@@ -117,6 +118,22 @@ impl Vector {
     pub fn from_2_points(start: &Point, end: &Point) -> Vector {
         Vector::new(end.x - start.x, end.y - start.y, end.z - start.z)
     }
+    
+    /// Converts [Vector] to [Point].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Vector::new(0.541, 4.051, -8.031);
+    /// let expected = Point::new(0.541, 4.051, -8.031);
+    /// let actual = input.to_point();
+    /// assert_eq!(expected, actual);
+    /// 
+    /// ```
+    pub fn to_point(&self) -> Point { Point::new(self.x, self.y, self.z) }
 }
 
 #[cfg(test)]
@@ -212,6 +229,14 @@ mod tests {
         assert_eq!(result.x, -3.093-0.541);
         assert_eq!(result.y, 11.391-4.051);
         assert_eq!(result.z, 15.0341--8.031);
+    }
+    
+    #[test]
+    fn test_to_point() {
+        let input = Vector::new(0.541, 4.051, -8.031);
+        let expected = Point::new(0.541, 4.051, -8.031);
+        let actual = input.to_point();
+        assert_eq!(expected, actual);
     }
 
     #[test]

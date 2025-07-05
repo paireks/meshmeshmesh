@@ -1,6 +1,7 @@
 use std::ops;
 use crate::local_coordinate_system::LocalCoordinateSystem;
 use crate::point::Point;
+use crate::quaternion::Quaternion;
 use crate::vector::Vector;
 
 impl ops::Add<Vector> for Point {
@@ -60,6 +61,30 @@ impl ops::Sub<Vector> for Point {
 }
 
 impl Point {
+    /// Returns the rotated [Point] using given [Quaternion].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::quaternion::Quaternion;
+    ///
+    /// let input = Point::new(-3.8086671829223633, 5.3729696273803711, 0.0);
+    /// let quaternion = Quaternion::new(0.54418103763310099, -0.16946900809404691, -0.24431282685273129, 0.78451162911164585);
+    ///
+    /// let actual = input.get_rotated_by_quaternion(quaternion);
+    /// let expected = Point::new(-2.066606, 3.711801, 5.032536);
+    ///
+    /// assert!(expected.eq_with_tolerance(&actual, 0.001));
+    /// ```
+    pub fn get_rotated_by_quaternion(&self, quaternion: Quaternion) -> Point {
+        let point = self.to_quaternion();
+        let quaternion_inverted = quaternion.get_inverted();
+        let point_prim = quaternion * point * quaternion_inverted;
+
+        Point::from_quaternion(point_prim)
+    }
+
     /// Creates a new [Point], but with coordinates in the given [LocalCoordinateSystem].
     ///
     /// # Example
@@ -242,6 +267,19 @@ mod tests {
         let result = a - b;
         let expected = Point::new(5.231-(-12.564), -0.341-5.642, 11.034-7.731);
         assert_eq!(result.eq(&expected), true);
+    }
+
+    #[test]
+    fn test_get_rotated_by_quaternion() {
+        let input = Point::new(-3.8086671829223633, 5.3729696273803711, 0.0);
+        let quaternion = Quaternion::new(0.54418103763310099, -0.16946900809404691, -0.24431282685273129, 0.78451162911164585);
+
+        let actual = input.get_rotated_by_quaternion(quaternion);
+        let expected = Point::new(-2.066606, 3.711801, 5.032536);
+
+        println!("{0:?}", actual);
+
+        assert!(expected.eq_with_tolerance(&actual, 0.001));
     }
     
     #[test]

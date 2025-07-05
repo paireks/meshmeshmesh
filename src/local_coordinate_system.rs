@@ -79,6 +79,11 @@ impl LocalCoordinateSystem {
 
         LocalCoordinateSystem {origin, x: x_unitized, y: y_unitized}
     }
+    
+    /// Creates a [LocalCoordinateSystem] same as GlobalCoordinateSystem.
+    pub fn global() -> LocalCoordinateSystem {
+        LocalCoordinateSystem::new(Point::new(0.0,0.0,0.0), Vector::x_unit(), Vector::y_unit())
+    }
 }
 
 #[cfg(test)]

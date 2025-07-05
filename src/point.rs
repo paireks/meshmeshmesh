@@ -1,4 +1,6 @@
 use crate::point2d::Point2D;
+use crate::quaternion::Quaternion;
+use crate::vector::Vector;
 
 /// Represents a three-dimensional point with double-precision floating-point coordinates.
 ///
@@ -61,6 +63,60 @@ impl Point {
     pub fn from_point2d(point2d: Point2D) -> Point {
         Point::new(point2d.x, point2d.y, 0.0)
     }
+
+    /// Creates [Point] from [Quaternion] representation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::quaternion::Quaternion;
+    ///
+    /// let input = Quaternion::new(1.5, -2.3, 3.9, 0.0);
+    /// let actual = Point::from_quaternion(input);
+    /// let expected = Point::new(1.5, -2.3, 3.9);
+    ///
+    /// assert_eq!(expected, actual);
+    ///
+    /// ```
+    pub fn from_quaternion(quaternion: Quaternion) -> Point {
+        Point::new(quaternion.qx, quaternion.qy, quaternion.qz)
+    }
+
+    /// Converts this [Point] to [Quaternion] representation.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::quaternion::Quaternion;
+    ///
+    /// let input = Point::new(1.5, -2.3, 3.9);
+    /// let actual = input.to_quaternion();
+    /// let expected = Quaternion::new(1.5, -2.3, 3.9, 0.0);
+    ///
+    /// assert_eq!(expected, actual);
+    ///
+    /// ```
+    pub fn to_quaternion(&self) -> Quaternion {
+        Quaternion::new(self.x, self.y, self.z, 0.0)
+    }
+
+    /// Converts [Point] to [Vector].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use meshmeshmesh::point::Point;
+    /// use meshmeshmesh::vector::Vector;
+    ///
+    /// let input = Point::new(0.541, 4.051, -8.031);
+    /// let expected = Vector::new(0.541, 4.051, -8.031);
+    /// let actual = input.to_vector();
+    /// assert_eq!(expected, actual);
+    ///
+    /// ```
+    pub fn to_vector(&self) -> Vector { Vector::new(self.x, self.y, self.z) }
 }
 
 #[cfg(test)]
@@ -81,6 +137,32 @@ mod tests {
         let actual = Point::from_point2d(input);
         let expected = Point::new(1.5, -2.3, 0.0);
         
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_from_quaternion(){
+        let input = Quaternion::new(1.5, -2.3, 3.9, 0.0);
+        let actual = Point::from_quaternion(input);
+        let expected = Point::new(1.5, -2.3, 3.9);
+        
+        assert_eq!(expected, actual);
+    }
+    
+    #[test]
+    fn test_to_quaternion(){
+        let input = Point::new(1.5, -2.3, 3.9);
+        let actual = input.to_quaternion();
+        let expected = Quaternion::new(1.5, -2.3, 3.9, 0.0);
+
+        assert_eq!(expected, actual);
+    }
+    
+    #[test]
+    fn test_to_vector() {
+        let input = Point::new(0.541, 4.051, -8.031);
+        let expected = Vector::new(0.541, 4.051, -8.031);
+        let actual = input.to_vector();
         assert_eq!(expected, actual);
     }
 
