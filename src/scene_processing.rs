@@ -7,8 +7,16 @@ use crate::vector::Vector;
 
 impl Scene {
     /// Modifies [Scene] to have deduplicated [Mesh]es.
+    /// 
+    /// The correctness after deduplication should be checked also manually.
+    /// 
+    /// This method can more or less deform the scene, because of the transformations and other
+    /// operations made on the geometries (Meshes). That's one of the reasons to check model
+    /// manually to see if these deformations look acceptable.
     fn deduplicate_meshes(&mut self, tolerance: f64) {
         self.duplicate_meshes();
+
+        let duplicated_meshes_transformed = self.meshes.clone(); // Used later for correctness check. These Meshes order is aligned with Elements order.
 
         let deduplication_result = Mesh::deduplicate_with_id_info(self.meshes.clone(), tolerance);
 
@@ -39,6 +47,14 @@ impl Scene {
             self.elements[i].mesh_id = new_mesh_id;
             self.elements[i].vector = new_vector;
             self.elements[i].rotation = new_quaternion;
+        }
+
+        // From this moment there is only a correctness check.
+        for i in 0..number_of_elements {
+            let new_mesh = self.get_transformed_mesh_for_element(&self.elements[i]);
+            let old_mesh = &duplicated_meshes_transformed[i];
+            assert_eq!(Some(i), old_mesh.id); // Makes sure old meshes duplicated were sorted and were properly cloned
+            assert!(new_mesh.eq_with_tolerance_without_id(old_mesh, tolerance));
         }
     }
 
@@ -83,7 +99,7 @@ impl Scene {
     }
 }
 
-/*#[cfg(test)]
+#[cfg(test)]
 mod tests {
     use std::fs;
     use serde_json::{from_value, to_string};
@@ -92,8 +108,8 @@ mod tests {
     #[test]
     pub fn test_deduplicate_meshes_pyramid() {
         let path = "created_files/Pyramid.bim";
-        let read_file = fs::File::open(path).expect("Cannot read the file");
-        let json: serde_json::Value = serde_json::from_reader(read_file).expect("File has to be a proper JSON file");
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
         let mut scene: Scene = from_value(json).unwrap();
         scene.deduplicate_meshes(0.001);
         let file_serialized = to_string(&scene);
@@ -105,8 +121,8 @@ mod tests {
     #[test]
     pub fn test_deduplicate_meshes_cubes() {
         let path = "created_files/Cubes.bim";
-        let read_file = fs::File::open(path).expect("Cannot read the file");
-        let json: serde_json::Value = serde_json::from_reader(read_file).expect("File has to be a proper JSON file");
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
         let mut scene: Scene = from_value(json).unwrap();
         scene.deduplicate_meshes(0.001);
         let file_serialized = to_string(&scene);
@@ -118,8 +134,8 @@ mod tests {
     #[test]
     pub fn test_deduplicate_meshes_structure() {
         let path = "models/TestStructure.bim";
-        let read_file = fs::File::open(path).expect("Cannot read the file");
-        let json: serde_json::Value = serde_json::from_reader(read_file).expect("File has to be a proper JSON file");
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
         let mut scene: Scene = from_value(json).unwrap();
         println!("{0}", scene.meshes.len());
         scene.deduplicate_meshes(0.001);
@@ -133,8 +149,8 @@ mod tests {
     #[test]
     pub fn test_deduplicate_meshes_beambridge() {
         let path = "models/BeamBridgeExample.bim";
-        let read_file = fs::File::open(path).expect("Cannot read the file");
-        let json: serde_json::Value = serde_json::from_reader(read_file).expect("File has to be a proper JSON file");
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
         let mut scene: Scene = from_value(json).unwrap();
         println!("{0}", scene.meshes.len());
         scene.deduplicate_meshes(0.001);
@@ -148,15 +164,15 @@ mod tests {
     #[test]
     pub fn test_deduplicate_meshes_samplehouse() {
         let path = "models/SampleHouse.bim";
-        let read_file = fs::File::open(path).expect("Cannot read the file");
-        let json: serde_json::Value = serde_json::from_reader(read_file).expect("File has to be a proper JSON file");
+        let read_file = fs::read_to_string(path).unwrap();
+        let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
         let mut scene: Scene = from_value(json).unwrap();
         println!("{0}", scene.meshes.len());
-        scene.deduplicate_meshes(0.001);
+        scene.deduplicate_meshes(0.002);
         println!("{0}", scene.meshes.len());
         let file_serialized = to_string(&scene);
         let file_serialized_string = file_serialized.ok().unwrap();
         let path_after = "created_files/SampleHouseDeduplication.bim";
         fs::write(path_after, file_serialized_string).expect("Unable to write the file");
     }
-}*/
+}
