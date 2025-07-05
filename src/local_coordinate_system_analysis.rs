@@ -102,7 +102,7 @@ impl LocalCoordinateSystem {
         Vector::from_2_points(&self.origin, &other.origin)
     }
 
-    /// Gets [Rotation] which aligns from this `self` [LocalCoordinateSystem] to the `other` one.
+    /// Gets Rotation which aligns from this `self` [LocalCoordinateSystem] to the `other` one.
     ///
     /// Can be useful in cases when you try to rotate one coordinate system in the same way as
     /// another one.
