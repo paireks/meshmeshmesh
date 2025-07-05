@@ -1,5 +1,4 @@
 use std::ops;
-use crate::point::Point;
 use crate::quaternion::Quaternion;
 use crate::vector::Vector;
 
