@@ -38,7 +38,7 @@ cargo add meshmeshmesh
 - Mesh planar simplify
 ![Planar simplify](https://raw.githubusercontent.com/paireks/meshmeshmesh/refs/heads/master/img/simplify_planar.gif)
 - Mesh deduplication
-![Deduplication](/img/deduplication.png)
+![Deduplication](/img/deduplication.gif)
 
 ### Mesh creation tools
 - 3D Polygon triangulation with holes
