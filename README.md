@@ -52,7 +52,7 @@ Example for loading dotbim scene:
 
 ```rust
 use std::fs;
-use serde_json::{from_value, to_string};
+use serde_json::from_value;
 use meshmeshmesh::*;
 
 fn import_scene() {
