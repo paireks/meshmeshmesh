@@ -55,11 +55,12 @@ use std::fs;
 use serde_json::from_value;
 use meshmeshmesh::*;
 
-fn import_scene() {
+fn import_scene_example() {
     let path = "File.bim";
     let read_file = fs::read_to_string(path).unwrap();
     let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
     let input_scene: scene::Scene = from_value(json).unwrap();
+    //...
 }
 ```
 
