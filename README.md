@@ -59,7 +59,7 @@ fn import_scene() {
     let path = "File.bim";
     let read_file = fs::read_to_string(path).unwrap();
     let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
-    let mut input_scene: scene::Scene = from_value(json).unwrap();
+    let input_scene: scene::Scene = from_value(json).unwrap();
 }
 ```
 
