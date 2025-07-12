@@ -48,7 +48,7 @@ cargo add meshmeshmesh
 
 This library works natively on .bim file format, which is open minimalist text mesh format described here: https://github.com/paireks/dotbim 
 
-To load dotbim scene example:
+Example for loading dotbim scene:
 
 ```rust
 use std::fs;
@@ -60,21 +60,6 @@ fn import_scene() {
     let read_file = fs::read_to_string(path).unwrap();
     let json: serde_json::Value = serde_json::from_str(&*read_file).unwrap();
     let mut input_scene: scene::Scene = from_value(json).unwrap();
-}
-```
-
-To save dotbim scene example:
-
-```rust
-use std::fs;
-use serde_json::{from_value, to_string};
-use meshmeshmesh::*;
-
-fn export_scene() {
-    let file_serialized = to_string(&input_scene);
-    let file_serialized_string = file_serialized.ok().unwrap();
-    let path_after = "FileExported.bim";
-    fs::write(path_after, file_serialized_string).expect("Unable to write the file");
 }
 ```
 
